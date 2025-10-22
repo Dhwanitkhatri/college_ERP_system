@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Attendance = sequelize.define("Attendance", {
+export const Attendance = sequelize.define("Attendance", {
     id: {
         primaryKey: true,
         autoIncrement: true,
@@ -29,4 +29,3 @@ const Attendance = sequelize.define("Attendance", {
         allowNull: false
     }
 });
-module.exports = Attendance;

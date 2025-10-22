@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const SessionPlanning = sequelize.define("SessionPlanning", {
+export const SessionPlanning = sequelize.define("SessionPlanning", {
     id: {
         primaryKey: true,   
         autoIncrement: true,
@@ -33,4 +33,3 @@ const SessionPlanning = sequelize.define("SessionPlanning", {
         allowNull: false
     }
 });
-module.exports = SessionPlanning;

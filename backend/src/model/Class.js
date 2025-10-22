@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Class = sequelize.define("Class",{
+export const Class = sequelize.define("Class",{
     id:{
         primaryKey:true,
         autoIncrement:true,
@@ -26,4 +26,3 @@ const Class = sequelize.define("Class",{
         allowNull:false
     }
 });
-module.exports=Class;

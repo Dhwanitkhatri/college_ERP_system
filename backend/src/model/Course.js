@@ -1,10 +1,11 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Course = sequelize.define("Course",{
+export const Course = sequelize.define("Course",{
     id:{
         primaryKey:true,
-        type:DataTypes.STRING
+        type:DataTypes.INTEGER,
+        autoIncrement:true
     },
     course_id:{
         unique:true,
@@ -21,8 +22,7 @@ const Course = sequelize.define("Course",{
         unique:true
     },
     duration:{
-        type:DataTypes.ENUM(2,3,4,5),
+        type:DataTypes.ENUM("2","3","4","5"),
         allowNull:false
     }
 });
-module.exports=Course;

@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Admin = sequelize.define("Admin", {
+export const Admin = sequelize.define("Admin", {
     id: {
         primaryKey: true,   
         autoIncrement: true,
@@ -38,4 +38,3 @@ const Admin = sequelize.define("Admin", {
         }       
     }
 });
-module.exports = Admin;

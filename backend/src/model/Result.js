@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Result = sequelize.define("Result", {
+export const Result = sequelize.define("Result", {
     id: {
         primaryKey: true,
         autoIncrement: true,
@@ -33,4 +33,3 @@ const Result = sequelize.define("Result", {
         allowNull: false
     }
 });
-module.exports = Result;

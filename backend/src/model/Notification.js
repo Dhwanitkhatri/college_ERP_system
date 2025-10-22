@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Notification = sequelize.define("Notification", {
+export const Notification = sequelize.define("Notification", {
     id: {
         primaryKey: true,
         autoIncrement: true,    
@@ -34,4 +34,3 @@ const Notification = sequelize.define("Notification", {
         defaultValue: false
     }
 });
-module.exports = Notification;

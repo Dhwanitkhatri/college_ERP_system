@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from '../config/db.js';
 import { DataTypes } from "sequelize";
 
-const Timetable = sequelize.define("Timetable",{
+export const Timetable = sequelize.define("Timetable",{
     id:{
         primaryKey:true,
         autoIncrement:true,
@@ -37,4 +37,3 @@ const Timetable = sequelize.define("Timetable",{
         allowNull:false     
     }
 });
-module.exports=Timetable;

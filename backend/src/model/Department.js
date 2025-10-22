@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Department = sequelize.define("Department",{
+export const Department = sequelize.define("Department",{
     id:{
         type:DataTypes.INTEGER,
         primaryKey:true,
@@ -18,4 +18,3 @@ const Department = sequelize.define("Department",{
     }
 }) 
 
-module.exports=Department;

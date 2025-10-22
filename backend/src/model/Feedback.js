@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Feedback = sequelize.define("Feedback", {
+export const Feedback = sequelize.define("Feedback", {
     id: {
         primaryKey: true,
         autoIncrement: true,
@@ -34,4 +34,4 @@ const Feedback = sequelize.define("Feedback", {
         allowNull: false
     }
 });
-module.exports = Feedback;
+

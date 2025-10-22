@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const EmployeePersonalDetails = sequelize.define("EmployeePersonalDetails", {
+export const EmployeePersonalDetails = sequelize.define("EmployeePersonalDetails", {
     id: {
         primaryKey: true,
         autoIncrement: true,    
@@ -46,4 +46,3 @@ const EmployeePersonalDetails = sequelize.define("EmployeePersonalDetails", {
         validate:{isEmail:true}
     }
 });
-module.exports = EmployeePersonalDetails;

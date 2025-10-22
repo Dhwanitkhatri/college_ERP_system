@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const StudentPersonalDetails = sequelize.define("StudentPersonalDetails", {
+export const StudentPersonalDetails = sequelize.define("StudentPersonalDetails", {
     id: {
         primaryKey: true,
         autoIncrement: true,
@@ -44,4 +44,3 @@ const StudentPersonalDetails = sequelize.define("StudentPersonalDetails", {
         unique: true
     }
 });
-module.exports = StudentPersonalDetails;

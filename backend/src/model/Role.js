@@ -1,7 +1,7 @@
-import  sequelize  from "../config/db";
+import  {sequelize}  from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Role = sequelize.define("Role",{
+export const Role = sequelize.define("Role",{
     id:{
         type:DataTypes.INTEGER,
         primaryKey:true
@@ -17,4 +17,3 @@ const Role = sequelize.define("Role",{
 }
 )
 
-module.exports=Role

@@ -1,5 +1,9 @@
+// Import Sequelize instance
+import { sequelize } from '../config/db.js';
+
+// Import all models
 import { Role } from './Role.js';
-import { User } from './user.js';
+import { User } from './User.js';
 import { Department } from './Department.js';
 import { Faculty } from './Faculty.js';
 import { Student } from './Student.js';
@@ -8,122 +12,152 @@ import { Subject } from './Subject.js';
 import { Class } from './Class.js';
 import { Timetable } from './Timetable.js';
 import { Attendance } from './Attendance.js';
-import { Result } from './Result.js'; 
+import { Result } from './Result.js';
 import { SessionPlanning } from './SessionPlanning.js';
 import { Notification } from './Notification.js';
 import { Feedback } from './Feedback.js';
 import { StudentPersonalDetails } from './StudentPersonalDetails.js';
-import { EmployeePersonalDetails } from './EmpolyeePersonalDetails.js';
+import { EmployeePersonalDetails } from './EmployeePersonalDetails.js'; // fixed typo
 import { Admin } from './Admin.js';
-import sequelize from '../config/db.js';
 
-// Initialize all models    
-// Define associations here 
-Role.hasMany(User, { foreignKey: 'role_id' });//one role can have multiple users
+/* -------------------------------------------------
+   INITIALIZE ALL MODELS
+   (assumes models are defined via sequelize.define)
+--------------------------------------------------*/
+
+
+
+// If you are using `sequelize.define` in each model file, this is enough
+// If your models are classes, call initModel(sequelize) on each
+
+/* -------------------------------------------------
+   DEFINE RELATIONSHIPS
+--------------------------------------------------*/
+
+// Role ↔ User
+Role.hasMany(User, { foreignKey: 'role_id' });
 User.belongsTo(Role, { foreignKey: 'role_id' });
 
-User.hasMany(Faculty, { foreignKey: 'user_id' });//one user can have multiple faculties
+// User ↔ Faculty
+User.hasMany(Faculty, { foreignKey: 'user_id' });
 Faculty.belongsTo(User, { foreignKey: 'user_id' });
 
-Department.hasMany(Faculty, { foreignKey: 'department_id' });//one department can have multiple faculties
+// Department ↔ Faculty
+Department.hasMany(Faculty, { foreignKey: 'department_id' });
 Faculty.belongsTo(Department, { foreignKey: 'department_id' });
 
-User.hasMany(Student, { foreignKey: 'user_id' });//one user can have multiple students
+// User ↔ Student
+User.hasMany(Student, { foreignKey: 'user_id' });
 Student.belongsTo(User, { foreignKey: 'user_id' });
 
-Course.hasMany(Student, { foreignKey: 'course_id' });//one course can have multiple students
+// Course ↔ Student
+Course.hasMany(Student, { foreignKey: 'course_id' });
 Student.belongsTo(Course, { foreignKey: 'course_id' });
 
-Class.hasMany(Student, { foreignKey: 'class_id' });//one class can have multiple students
+// Class ↔ Student
+Class.hasMany(Student, { foreignKey: 'class_id' });
 Student.belongsTo(Class, { foreignKey: 'class_id' });
 
-Department.hasMany(Course, { foreignKey: 'department_id' }); //one department can have multiple courses   
+// Department ↔ Course
+Department.hasMany(Course, { foreignKey: 'department_id' });
 Course.belongsTo(Department, { foreignKey: 'department_id' });
 
-Faculty.hasMany(Subject, { foreignKey: 'faculty_id' }); //one faculty can teach multiple subjects
+// Faculty ↔ Subject
+Faculty.hasMany(Subject, { foreignKey: 'faculty_id' });
 Subject.belongsTo(Faculty, { foreignKey: 'faculty_id' });
 
-Course.hasMany(Subject, { foreignKey: 'course_id' });//one course can have multiple subjects
+// Course ↔ Subject
+Course.hasMany(Subject, { foreignKey: 'course_id' });
 Subject.belongsTo(Course, { foreignKey: 'course_id' });
 
-Course.hasMany(Class, { foreignKey: 'course_id' });//one course can have multiple classes
+// Course ↔ Class
+Course.hasMany(Class, { foreignKey: 'course_id' });
 Class.belongsTo(Course, { foreignKey: 'course_id' });
 
-Class.hasMany(Timetable, { foreignKey: 'class_id' });//one class can have multiple timetables
+// Class ↔ Timetable
+Class.hasMany(Timetable, { foreignKey: 'class_id' });
 Timetable.belongsTo(Class, { foreignKey: 'class_id' });
 
-Subject.hasMany(Timetable, { foreignKey: 'subject_id' });//one subject can have multiple timetables
+// Subject ↔ Timetable
+Subject.hasMany(Timetable, { foreignKey: 'subject_id' });
 Timetable.belongsTo(Subject, { foreignKey: 'subject_id' });
 
-Faculty.hasMany(Timetable, { foreignKey: 'faculty_id' });//one faculty can have multiple timetables
+// Faculty ↔ Timetable
+Faculty.hasMany(Timetable, { foreignKey: 'faculty_id' });
 Timetable.belongsTo(Faculty, { foreignKey: 'faculty_id' });
 
-Student.hasMany(Attendance, { foreignKey: 'student_id' });//one student can have multiple attendances
+// Student ↔ Attendance
+Student.hasMany(Attendance, { foreignKey: 'student_id' });
 Attendance.belongsTo(Student, { foreignKey: 'student_id' });
 
-Subject.hasMany(Attendance, { foreignKey: 'subject_id' });//one subject can have multiple attendances
+// Subject ↔ Attendance
+Subject.hasMany(Attendance, { foreignKey: 'subject_id' });
 Attendance.belongsTo(Subject, { foreignKey: 'subject_id' });
 
-Student.hasMany(Result, { foreignKey: 'student_id' });//one student can have multiple results
+// Student ↔ Result
+Student.hasMany(Result, { foreignKey: 'student_id' });
 Result.belongsTo(Student, { foreignKey: 'student_id' });
 
-Subject.hasMany(Result, { foreignKey: 'subject_id' });//one subject can have multiple results
+// Subject ↔ Result
+Subject.hasMany(Result, { foreignKey: 'subject_id' });
 Result.belongsTo(Subject, { foreignKey: 'subject_id' });
 
-Faculty.hasMany(SessionPlanning, { foreignKey: 'faculty_id' });//one faculty can have multiple session plannings
+// Faculty ↔ SessionPlanning
+Faculty.hasMany(SessionPlanning, { foreignKey: 'faculty_id' });
 SessionPlanning.belongsTo(Faculty, { foreignKey: 'faculty_id' });
 
-Subject.hasMany(SessionPlanning, { foreignKey: 'subject_id' }); //one subject can have multiple session plannings
+// Subject ↔ SessionPlanning
+Subject.hasMany(SessionPlanning, { foreignKey: 'subject_id' });
 SessionPlanning.belongsTo(Subject, { foreignKey: 'subject_id' });
 
-User.hasMany(Notification, { foreignKey: 'user_id' });//one user can have multiple notifications
+// User ↔ Notification
+User.hasMany(Notification, { foreignKey: 'user_id' });
 Notification.belongsTo(User, { foreignKey: 'user_id' });
 
-Student.hasMany(Feedback, { foreignKey: 'student_id' });//one student can have multiple feedbacks
+// Student ↔ Feedback
+Student.hasMany(Feedback, { foreignKey: 'student_id' });
 Feedback.belongsTo(Student, { foreignKey: 'student_id' });
 
-Faculty.hasMany(Feedback, { foreignKey: 'faculty_id' });//one faculty can have multiple feedbacks
+// Faculty ↔ Feedback
+Faculty.hasMany(Feedback, { foreignKey: 'faculty_id' });
 Feedback.belongsTo(Faculty, { foreignKey: 'faculty_id' });
 
-Student.hasOne(StudentPersonalDetails, { foreignKey: 'student_id' });//one student has one personal detail
+// Student ↔ StudentPersonalDetails
+Student.hasOne(StudentPersonalDetails, { foreignKey: 'student_id' });
 StudentPersonalDetails.belongsTo(Student, { foreignKey: 'student_id' });
 
-Faculty.hasOne(EmployeePersonalDetails, { foreignKey: 'faculty_id' });//one faculty has one personal detail
+// Faculty ↔ EmployeePersonalDetails
+Faculty.hasOne(EmployeePersonalDetails, { foreignKey: 'faculty_id' });
 EmployeePersonalDetails.belongsTo(Faculty, { foreignKey: 'faculty_id' });
 
-User.hasOne(Admin, { foreignKey: 'user_id' });//one user has one admin
+// User ↔ Admin
+User.hasOne(Admin, { foreignKey: 'user_id' });
 Admin.belongsTo(User, { foreignKey: 'user_id' });
 
-Department.hasOne(Admin, { foreignKey: 'department_id' });//one department has one admin
+// Department ↔ Admin
+Department.hasOne(Admin, { foreignKey: 'department_id' });
 Admin.belongsTo(Department, { foreignKey: 'department_id' });
 
+/* -------------------------------------------------
+   EXPORT MODELS & SEQUELIZE
+--------------------------------------------------*/
 export {
-    Role,
-    User,
-    Department,
-    Faculty,
-    Student,
-    Course,
-    Subject,
-    Class,
-    Timetable,
-    Attendance,
-    Result,
-    SessionPlanning,
-    Notification,
-    Feedback,
-    StudentPersonalDetails,
-    EmployeePersonalDetails,
-    Admin
+  sequelize,
+  Role,
+  User,
+  Department,
+  Faculty,
+  Student,
+  Course,
+  Subject,
+  Class,
+  Timetable,
+  Attendance,
+  Result,
+  SessionPlanning,
+  Notification,
+  Feedback,
+  StudentPersonalDetails,
+  EmployeePersonalDetails,
+  Admin  
 };
-
-
-
-
-
-
-
-
-
-
-

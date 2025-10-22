@@ -1,10 +1,11 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Faculty = sequelize.define("Faculty",{
+export const Faculty = sequelize.define("Faculty",{
     id:{
         type:DataTypes.INTEGER,
-        autoIncrement:true
+        autoIncrement:true,
+        primaryKey:true
     },
     faculty_id:{
         type:DataTypes.STRING,
@@ -36,4 +37,3 @@ const Faculty = sequelize.define("Faculty",{
     }
 
 })
-module.exports=Faculty;

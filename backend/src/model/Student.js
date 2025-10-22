@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
-const Student = sequelize.define("Student",{
+export const Student = sequelize.define("Student",{
     id:{
         primaryKey:true,
         autoIncrement:true,
@@ -47,4 +47,3 @@ const Student = sequelize.define("Student",{
         validate:{min:2000 , max:2040}
     }
 });
-module.exports=Student;

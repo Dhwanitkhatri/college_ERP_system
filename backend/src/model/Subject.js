@@ -1,7 +1,7 @@
-import sequelize from "../config/db";
+import {sequelize} from '../config/db.js';
 import { DataTypes } from "sequelize";
 
-const Subject = sequelize.define("Subject",{
+export const Subject = sequelize.define("Subject",{
     id:{
         autoIncrement:true,
         primaryKey:true,
@@ -31,4 +31,3 @@ const Subject = sequelize.define("Subject",{
     }
 });
 
-module.exports=Subject;

@@ -8,7 +8,7 @@ dotenv.config();
 
 
 
-const sequelize = new Sequelize(
+export const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
   process.env.DB_PASSWORD,
@@ -26,4 +26,4 @@ try {
   console.error(" Database connection failed:", error);
 }
 
-export default sequelize;
+
