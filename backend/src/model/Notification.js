@@ -25,7 +25,7 @@ export const Notification = sequelize.define("Notification", {
         allowNull: false
     },
     user_id: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     read_status: {

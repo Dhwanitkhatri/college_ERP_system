@@ -7,7 +7,7 @@ export const Subject = sequelize.define("Subject",{
         primaryKey:true,
         type:DataTypes.INTEGER
     },
-    Subject_id:{
+    subject_id:{
         type:DataTypes.STRING,
         unique:true,
         allowNull:false

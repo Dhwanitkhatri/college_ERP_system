@@ -13,7 +13,7 @@ export const Faculty = sequelize.define("Faculty",{
         unique:true
     },
     user_id:{
-        type:DataTypes.STRING,
+        type:DataTypes.INTEGER,
         allowNull:false
     },
     course_id:{

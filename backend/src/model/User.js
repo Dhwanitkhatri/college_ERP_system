@@ -1,6 +1,6 @@
 
 import {sequelize} from '../config/db.js';
-import { DataTypes } from "sequelize";
+import { DataTypes } from "sequelize";  
 
 export const User = sequelize.define("User",{
     user_id:{
@@ -19,7 +19,8 @@ export const User = sequelize.define("User",{
     },
     role_id:{
         type:DataTypes.STRING,
-        allowNull:false
+        allowNull:false,
+        
     },
     status:{
         type:DataTypes.ENUM('active' ,'inactive'),

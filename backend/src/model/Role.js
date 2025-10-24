@@ -8,7 +8,8 @@ export const Role = sequelize.define("Role",{
     },
     role_id:{
         type:DataTypes.STRING,
-        unique:true
+        unique:true,
+        allowNull:false
     },
     role_name:{
         type:DataTypes.STRING,

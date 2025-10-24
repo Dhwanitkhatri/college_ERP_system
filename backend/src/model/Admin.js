@@ -13,7 +13,7 @@ export const Admin = sequelize.define("Admin", {
         unique: true
     },
     user_id: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     department_id: {

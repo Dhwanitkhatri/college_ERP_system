@@ -35,108 +35,108 @@ import { Admin } from './Admin.js';
 --------------------------------------------------*/
 
 // Role ↔ User
-Role.hasMany(User, { foreignKey: 'role_id' });
-User.belongsTo(Role, { foreignKey: 'role_id' });
+Role.hasMany(User, { foreignKey: 'role_id' ,sourceKey:'role_id'});
+User.belongsTo(Role, { foreignKey: 'role_id',targetKey:'role_id' });
 
 // User ↔ Faculty
-User.hasMany(Faculty, { foreignKey: 'user_id' });
-Faculty.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Faculty, { foreignKey: 'user_id' , sourceKey:'user_id' });
+Faculty.belongsTo(User, { foreignKey: 'user_id' ,targetKey:'user_id'});
 
 // Department ↔ Faculty
-Department.hasMany(Faculty, { foreignKey: 'department_id' });
-Faculty.belongsTo(Department, { foreignKey: 'department_id' });
+Department.hasMany(Faculty, { foreignKey: 'department_id',sourceKey:'department_id' });
+Faculty.belongsTo(Department, { foreignKey: 'department_id',targetKey:'department_id' });
 
 // User ↔ Student
-User.hasMany(Student, { foreignKey: 'user_id' });
-Student.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Student, { foreignKey: 'user_id' ,sourceKey:'user_id'});
+Student.belongsTo(User, { foreignKey: 'user_id',targetKey:'user_id' });
 
 // Course ↔ Student
-Course.hasMany(Student, { foreignKey: 'course_id' });
-Student.belongsTo(Course, { foreignKey: 'course_id' });
+Course.hasMany(Student, { foreignKey: 'course_id' ,sourceKey:'course_id'});
+Student.belongsTo(Course, { foreignKey: 'course_id',targetKey:'course_id' });
 
 // Class ↔ Student
-Class.hasMany(Student, { foreignKey: 'class_id' });
-Student.belongsTo(Class, { foreignKey: 'class_id' });
+Class.hasMany(Student, { foreignKey: 'class_id' ,sourceKey:'class_id'});
+Student.belongsTo(Class, { foreignKey: 'class_id',targetKey:'class_id' });
 
 // Department ↔ Course
-Department.hasMany(Course, { foreignKey: 'department_id' });
-Course.belongsTo(Department, { foreignKey: 'department_id' });
+Department.hasMany(Course, { foreignKey: 'department_id',sourceKey:'department_id' });
+Course.belongsTo(Department, { foreignKey: 'department_id',targetKey:'department_id' });
 
 // Faculty ↔ Subject
-Faculty.hasMany(Subject, { foreignKey: 'faculty_id' });
-Subject.belongsTo(Faculty, { foreignKey: 'faculty_id' });
+Faculty.hasMany(Subject, { foreignKey: 'faculty_id' ,sourceKey:'faculty_id'});
+Subject.belongsTo(Faculty, { foreignKey: 'faculty_id',targetKey:'faculty_id' });
 
 // Course ↔ Subject
-Course.hasMany(Subject, { foreignKey: 'course_id' });
-Subject.belongsTo(Course, { foreignKey: 'course_id' });
+Course.hasMany(Subject, { foreignKey: 'course_id' ,sourceKey:'course_id'});
+Subject.belongsTo(Course, { foreignKey: 'course_id',targetKey:'course_id' });
 
 // Course ↔ Class
-Course.hasMany(Class, { foreignKey: 'course_id' });
-Class.belongsTo(Course, { foreignKey: 'course_id' });
+Course.hasMany(Class, { foreignKey: 'course_id',sourceKey:'course_id' });
+Class.belongsTo(Course, { foreignKey: 'course_id',targetKey:'course_id' });
 
 // Class ↔ Timetable
-Class.hasMany(Timetable, { foreignKey: 'class_id' });
-Timetable.belongsTo(Class, { foreignKey: 'class_id' });
+Class.hasMany(Timetable, { foreignKey: 'class_id' , sourceKey:'class_id'});
+Timetable.belongsTo(Class, { foreignKey: 'class_id', targetKey:'class_id' });
 
 // Subject ↔ Timetable
-Subject.hasMany(Timetable, { foreignKey: 'subject_id' });
-Timetable.belongsTo(Subject, { foreignKey: 'subject_id' });
+Subject.hasMany(Timetable, { foreignKey: 'subject_id' , sourceKey:'subject_id'});
+Timetable.belongsTo(Subject, { foreignKey: 'subject_id' , targetKey:'subject_id'});
 
-// Faculty ↔ Timetable
-Faculty.hasMany(Timetable, { foreignKey: 'faculty_id' });
-Timetable.belongsTo(Faculty, { foreignKey: 'faculty_id' });
+// Faculty ↔ Timetable 
+Faculty.hasMany(Timetable, { foreignKey: 'faculty_id' , sourceKey:'faculty_id' });
+Timetable.belongsTo(Faculty, { foreignKey: 'faculty_id', targetKey:'faculty_id' });
 
 // Student ↔ Attendance
-Student.hasMany(Attendance, { foreignKey: 'student_id' });
-Attendance.belongsTo(Student, { foreignKey: 'student_id' });
+Student.hasMany(Attendance, { foreignKey: 'student_id' , sourceKey:'student_id'});
+Attendance.belongsTo(Student, { foreignKey: 'student_id',targetKey:'student_id' });
 
 // Subject ↔ Attendance
-Subject.hasMany(Attendance, { foreignKey: 'subject_id' });
-Attendance.belongsTo(Subject, { foreignKey: 'subject_id' });
+Subject.hasMany(Attendance, { foreignKey: 'subject_id',sourceKey:'subject_id' });
+Attendance.belongsTo(Subject, { foreignKey: 'subject_id',targetKey:'subject_id' });
 
 // Student ↔ Result
-Student.hasMany(Result, { foreignKey: 'student_id' });
-Result.belongsTo(Student, { foreignKey: 'student_id' });
+Student.hasMany(Result, { foreignKey: 'student_id', sourceKey:'student_id' });
+Result.belongsTo(Student, { foreignKey: 'student_id' , targetKey:'student_id'});
 
 // Subject ↔ Result
-Subject.hasMany(Result, { foreignKey: 'subject_id' });
-Result.belongsTo(Subject, { foreignKey: 'subject_id' });
+Subject.hasMany(Result, { foreignKey: 'subject_id', sourceKey:'subject_id', });
+Result.belongsTo(Subject, { foreignKey: 'subject_id' ,targetKey:'subject_id'});
 
 // Faculty ↔ SessionPlanning
-Faculty.hasMany(SessionPlanning, { foreignKey: 'faculty_id' });
-SessionPlanning.belongsTo(Faculty, { foreignKey: 'faculty_id' });
+Faculty.hasMany(SessionPlanning, { foreignKey: 'faculty_id',sourceKey:'faculty_id' });
+SessionPlanning.belongsTo(Faculty, { foreignKey: 'faculty_id' ,targetKey:'faculty_id'});
 
 // Subject ↔ SessionPlanning
-Subject.hasMany(SessionPlanning, { foreignKey: 'subject_id' });
-SessionPlanning.belongsTo(Subject, { foreignKey: 'subject_id' });
+Subject.hasMany(SessionPlanning, { foreignKey: 'subject_id' , sourceKey:'subject_id' });
+SessionPlanning.belongsTo(Subject, { foreignKey: 'subject_id', targetKey:'subject_id' });
 
 // User ↔ Notification
-User.hasMany(Notification, { foreignKey: 'user_id' });
-Notification.belongsTo(User, { foreignKey: 'user_id' });
+User.hasMany(Notification, { foreignKey: 'user_id', sourceKey:'user_id' });
+Notification.belongsTo(User, { foreignKey: 'user_id' ,targetKey:'user_id'});
 
 // Student ↔ Feedback
-Student.hasMany(Feedback, { foreignKey: 'student_id' });
-Feedback.belongsTo(Student, { foreignKey: 'student_id' });
+Student.hasMany(Feedback, { foreignKey: 'student_id', sourceKey:'student_id' });
+Feedback.belongsTo(Student, { foreignKey: 'student_id', targetKey:'student_id' });
 
 // Faculty ↔ Feedback
-Faculty.hasMany(Feedback, { foreignKey: 'faculty_id' });
-Feedback.belongsTo(Faculty, { foreignKey: 'faculty_id' });
+Faculty.hasMany(Feedback, { foreignKey: 'faculty_id' , sourceKey:'faculty_id'});
+Feedback.belongsTo(Faculty, { foreignKey: 'faculty_id' ,targetKey:'faculty_id'});
 
 // Student ↔ StudentPersonalDetails
-Student.hasOne(StudentPersonalDetails, { foreignKey: 'student_id' });
-StudentPersonalDetails.belongsTo(Student, { foreignKey: 'student_id' });
+Student.hasOne(StudentPersonalDetails, { foreignKey: 'student_id', sourceKey:'student_id' });
+StudentPersonalDetails.belongsTo(Student, { foreignKey: 'student_id',targetKey:'student_id' });
 
 // Faculty ↔ EmployeePersonalDetails
-Faculty.hasOne(EmployeePersonalDetails, { foreignKey: 'faculty_id' });
-EmployeePersonalDetails.belongsTo(Faculty, { foreignKey: 'faculty_id' });
+Faculty.hasOne(EmployeePersonalDetails, { foreignKey: 'faculty_id' , sourceKey:'faculty_id' });
+EmployeePersonalDetails.belongsTo(Faculty, { foreignKey: 'faculty_id' , targetKey:'faculty_id'});
 
 // User ↔ Admin
-User.hasOne(Admin, { foreignKey: 'user_id' });
-Admin.belongsTo(User, { foreignKey: 'user_id' });
+User.hasOne(Admin, { foreignKey: 'user_id' , sourceKey:'user_id'});
+Admin.belongsTo(User, { foreignKey: 'user_id' , targetKey:'user_id'});
 
 // Department ↔ Admin
-Department.hasOne(Admin, { foreignKey: 'department_id' });
-Admin.belongsTo(Department, { foreignKey: 'department_id' });
+Department.hasOne(Admin, { foreignKey: 'department_id' , sourceKey:'department_id'});
+Admin.belongsTo(Department, { foreignKey: 'department_id' , targetKey:'department_id' });
 
 /* -------------------------------------------------
    EXPORT MODELS & SEQUELIZE
