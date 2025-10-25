@@ -45,5 +45,9 @@ export const Student = sequelize.define("Student",{
         type:DataTypes.INTEGER,
         allowNull:false,
         validate:{min:2000 , max:2040}
+    },
+    year_of_study: {
+        type: DataTypes.ENUM("FY", "SY", "TY", "LY"),
+        allowNull: false,
     }
 });
