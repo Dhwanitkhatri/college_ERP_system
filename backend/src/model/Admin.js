@@ -16,7 +16,7 @@ export const Admin = sequelize.define("Admin", {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    department_id: {
+    course_id: {
         type: DataTypes.STRING,
         allowNull: false
     },

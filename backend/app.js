@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import {sequelize} from  './src/config/db.js';
 import * as models from "./src/model/index.js";
+import authRoutes from './src/routes/authRoutes.js'
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -21,6 +22,7 @@ try {
   console.error('Database connection failed:', error);
 } 
 
+app.use("/api/auth",authRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');

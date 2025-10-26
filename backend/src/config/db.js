@@ -27,4 +27,3 @@ try {
   console.error(" Database connection failed:", error);
 }
 
-
