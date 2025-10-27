@@ -1,16 +1,39 @@
 import { useState } from "react";
+import api from '../src/api/axios.js';
 
 function LoginPage() {
     const [username, setUsername] = useState("");           /*variable for username*/
     const [password, setPassword] = useState("");           /*variable for password*/
     const [errors, setErrors] = useState({username:"", password:"", general:""});            /*variable to store errors*/
-    const usernamePattern = /^[a-zA-Z0-9]+$/;           /*aplhanumeric username pattern */
-    const validUser = {username:"25BCA001",password:"password123"};             /*temporary variable for valid user details */
+  //  const usernamePattern = /^[a-zA-Z0-9]+$/;           /*aplhanumeric username pattern */
+           
 
-    const handleSubmit = (e) =>{                    /*function to handle errors on submit */
+    const handleSubmit = async(e) =>{                    /*function to handle errors on submit */
         e.preventDefault();             /*Will stop page from reloading on submit */
         let isValid = true;
         const newErrors = {username:"", password:"", general:""}
+
+        try{
+            const res = await api.post("/api/auth/login",{username,password});
+            console.log("response ",res.data);
+            
+           
+            
+                alert("login successful");
+                localStorage.setItem("token",res.data.token);
+                console.log("res.data.token",res.data.token)
+                console.log("res.data.data.token",res.data.data.token)
+                console.log("token",token);
+            
+            
+           
+        }catch(err){
+            console.log(err);
+            setErrors(err.response?.data?.message||"login failed");
+        }
+
+
+
 
         /*=================Validations for Empty Fields============================= */
         if(username.trim()==="" && password.trim()===""){
@@ -27,10 +50,10 @@ function LoginPage() {
         }
 
         /*=================Validation for Alphanumeric Pattern Check============================= */
-        if(username && !usernamePattern.test(username)){
-            newErrors.username = "Username should only Contain Alphabets and Numbers.";
-            isValid=false;
-        }
+        // if(username && !usernamePattern.test(username)){
+        //     newErrors.username = "Username should only Contain Alphabets and Numbers.";
+        //     isValid=false;
+        // }
 
         /*=================Validation for Password Length Check============================= */
         if(password && password.length<8){
@@ -47,11 +70,7 @@ function LoginPage() {
         /*Backend Validations to match correct username and password */
         //calling API from backend (later)
 
-        if(username!==validUser.username || password!==validUser.password){     /*temporarily match username and pass with valid user */
-            newErrors.general = "Invalid Username or Password.";
-            setErrors(newErrors);
-            return;
-        }
+        
 
         /*if all validations pass then: */
         setErrors({username: "", password: "", general: ""})
