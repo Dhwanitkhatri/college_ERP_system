@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import {sequelize} from  './src/config/db.js';
 import * as models from "./src/model/index.js";
 import authRoutes from './src/routes/authRoutes.js'
+import studentRoutes from './src/routes/studentRoutes.js';
 dotenv.config();
 const app = express();
 app.use(cors());
@@ -23,6 +24,7 @@ try {
 } 
 
 app.use("/api/auth",authRoutes);
+app.use("/api/students",studentRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');
