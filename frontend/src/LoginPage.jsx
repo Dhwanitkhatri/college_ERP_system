@@ -10,6 +10,8 @@ function LoginPage() {
 
     const handleSubmit = async(e) =>{                    /*function to handle errors on submit */
         e.preventDefault();             /*Will stop page from reloading on submit */
+        
+        const start = performance.now(); // ⏱️ Start time
         let isValid = true;
         const newErrors = {username:"", password:"", general:""}
 
@@ -18,12 +20,10 @@ function LoginPage() {
             console.log("response ",res.data);
             
            
-            
-                alert("login successful");
-                localStorage.setItem("token",res.data.token);
-                console.log("res.data.token",res.data.token)
-                console.log("res.data.data.token",res.data.data.token)
-                console.log("token",token);
+            const end = performance.now(); // ⏱️ End time
+            console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
+
+            console.log("Response:", res.data);
             
             
            
