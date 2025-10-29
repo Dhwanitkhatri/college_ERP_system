@@ -57,20 +57,31 @@ function LoginPage() {
             console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
 
             console.log("Response:", res.data);
-            
-            
-           
-        }catch(err){
+        }
+        catch(err){
+            const statusCode = err.response?.status;
             console.log(err);
-            console.log(res.data);
-            setErrors(err.response?.data?.message||"login failed");
+            const newErrors = { username: "", password: "", general: "" };
+            if(statusCode===404){
+                newErrors.username = "Username does not exist";
+            }
+            else if(statusCode===401){
+                newErrors.password = "Incorrect Password";
+            }
+            else {
+                newErrors.general = err.response?.data?.message || "Login failed";
+            }
             isValid=false;
+            setErrors(newErrors);
         }
         
 
         /*if all validations pass then: */
-        setErrors({username: "", password: "", general: ""})
-        alert("Login Succesful!");
+        
+        if(isValid){
+            setErrors({username: "", password: "", general: ""})
+            alert("Login Succesful!");
+        }
     };
 
     return (
