@@ -11,29 +11,9 @@ function LoginPage() {
     const handleSubmit = async(e) =>{                    /*function to handle errors on submit */
         e.preventDefault();             /*Will stop page from reloading on submit */
         
-        const start = performance.now(); // ⏱️ Start time
+        const start = performance.now(); //  Start time
         let isValid = true;
         const newErrors = {username:"", password:"", general:""}
-
-        try{
-            const res = await api.post("/api/auth/login",{username,password});
-            console.log("response ",res.data);
-            
-           
-            const end = performance.now(); // ⏱️ End time
-            console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
-
-            console.log("Response:", res.data);
-            
-            
-           
-        }catch(err){
-            console.log(err);
-            setErrors(err.response?.data?.message||"login failed");
-        }
-
-
-
 
         /*=================Validations for Empty Fields============================= */
         if(username.trim()==="" && password.trim()===""){
@@ -56,10 +36,10 @@ function LoginPage() {
         // }
 
         /*=================Validation for Password Length Check============================= */
-        if(password && password.length<8){
-            newErrors.password = "Password must have at least 8 characters.";
-            isValid=false;
-        }
+        // if(password && password.length<8){
+        //     newErrors.password = "Password must have at least 8 characters.";
+        //     isValid=false;
+        // }
 
         /*============if any validation fails from front-end side then it will return=====*/
         if(!isValid){
@@ -69,7 +49,23 @@ function LoginPage() {
 
         /*Backend Validations to match correct username and password */
         //calling API from backend (later)
+        try{
+            const res = await api.post("/api/auth/login",{username,password});
+            console.log("response ",res.data);
+            
+            const end = performance.now(); //  End time
+            console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
 
+            console.log("Response:", res.data);
+            
+            
+           
+        }catch(err){
+            console.log(err);
+            console.log(res.data);
+            setErrors(err.response?.data?.message||"login failed");
+            isValid=false;
+        }
         
 
         /*if all validations pass then: */

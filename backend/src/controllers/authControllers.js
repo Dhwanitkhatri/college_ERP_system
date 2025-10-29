@@ -13,7 +13,7 @@ export const login = async (req, res) => {
       include: [{ model: Role }],
     });
 
-    console.log(user.Role?.role_name);
+    // console.log(user.Role?.role_name);
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
