@@ -75,8 +75,8 @@ export const createStudent = async (req, res) => {
             {
                 username: student_id,
                 password: hashedPassword,
-                role_id: studentRole.id,
-                status: "Active",
+                role_id: studentRole.role_id,
+                status: "active",
             },
             { transaction: t }
         );
@@ -85,7 +85,7 @@ export const createStudent = async (req, res) => {
         const newStudent = await Student.create(
             {
                 student_id,
-                user_id: newUser.id,
+                user_id: newUser.user_id,
                 course_id,
                 class_id,
                 name,
@@ -213,12 +213,14 @@ export const deleteStudentById = async (req, res) => {
             return res.status(404).json({ message: "Student not found" });
         }
 
+        await student.destroy({ transaction: t });
+
         // Also delete the associated user
         const user = await User.findByPk(student.user_id);
         if (user) {
             await user.destroy({ transaction: t });
         }
-        await student.destroy({ transaction: t });
+        
         await t.commit();
         res.json({ message: "Student and associated user deleted successfully" });
     } catch (error) {
