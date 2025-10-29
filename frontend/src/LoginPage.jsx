@@ -29,17 +29,6 @@ function LoginPage() {
             isValid=false;
         }
 
-        /*=================Validation for Alphanumeric Pattern Check============================= */
-        // if(username && !usernamePattern.test(username)){
-        //     newErrors.username = "Username should only Contain Alphabets and Numbers.";
-        //     isValid=false;
-        // }
-
-        /*=================Validation for Password Length Check============================= */
-        // if(password && password.length<8){
-        //     newErrors.password = "Password must have at least 8 characters.";
-        //     isValid=false;
-        // }
 
         /*============if any validation fails from front-end side then it will return=====*/
         if(!isValid){
