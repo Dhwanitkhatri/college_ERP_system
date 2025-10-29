@@ -5,7 +5,7 @@ export const responseTimeLogger = (req, res, next) => {
   // res is a valid Express Response object, so this works:
   res.on("finish", () => {
     const time = Date.now() - start;
-    console.log(`⏱️ ${req.method} ${req.originalUrl} → ${time} ms`);
+    console.log(`${req.method} ${req.originalUrl} → ${time} ms`);
   });
 
   next();
