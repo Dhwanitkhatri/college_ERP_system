@@ -4,15 +4,17 @@ import { User } from "../model/User.js";
 import { Role } from "../model/Role.js";
 import bcrypt from "bcrypt";
 import { sequelize } from "../config/db.js";
+import { generateEnrollmentId } from "../services/generateEnrollmentId.js";
 
 // Create a new student(admins only)
 export const createStudent = async (req, res) => {
     const t = await sequelize.transaction(); //start transaction
+    const student_id = await generateEnrollmentId(req.user.course_id);
     try {
         const {
-            student_id,
+           // student_id,
             course_id,
-            class_id,
+            //class_id,
             name,
             dob,
             gender,
@@ -30,9 +32,9 @@ export const createStudent = async (req, res) => {
 
         //validation to require fields
         if (
-            !student_id ||
+           !student_id ||
             !course_id ||
-            !class_id ||
+          //  !class_id ||
             !name ||
             !dob ||
             !gender ||
@@ -87,7 +89,7 @@ export const createStudent = async (req, res) => {
                 student_id,
                 user_id: newUser.user_id,
                 course_id,
-                class_id,
+                //class_id,
                 name,
                 dob,
                 gender,
