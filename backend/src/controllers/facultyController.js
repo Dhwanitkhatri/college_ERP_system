@@ -1,0 +1,176 @@
+//Faculty Controller
+
+import { Faculty } from "../model/Faculty.js";
+import { User } from "../model/User.js";
+import { Role } from "../model/Role.js";
+import bcrypt from "bcrypt";
+import { sequelize } from "../config/db.js";
+
+// Create a new faculty (admins only)
+export const createFaculty = async (req, res) => {
+    const t = await sequelize.transaction(); //start transaction
+    try {
+        const {
+            faculty_id,
+            course_id,
+            name,
+            phone,
+            email,
+        } = req.body;
+
+        // Get the role_id for 'Faculty'
+        const facultyRole = await Role.findOne({ where: { role_name: "Faculty" } });
+        if (!facultyRole) {
+            await t.rollback();
+            return res.status(400).json({ message: "Faculty role not found" });
+        }
+
+        //validation to require fields
+        if (
+            !faculty_id ||
+            !course_id ||
+            !name ||
+            !phone ||
+            !email
+        ) {
+            await t.rollback();
+            return res.status(400).json({ message: "All fields are required" });
+        }
+        //validation to check if faculty_id & email already exists
+        const existingFaculty = await Faculty.findOne({ where: { faculty_id } });
+        if (existingFaculty) {
+            return res.status(400).json({ message: "Faculty ID already exists" });
+        }
+        const existingEmail = await Faculty.findOne({ where: { email } });
+        if (existingEmail) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+
+        // Create a new user for the faculty
+        const tempPassword = "password";
+        const hashedPassword = await bcrypt.hash(tempPassword, 10);
+        const newUser = await User.create({
+            username: faculty_id,
+            password: hashedPassword,
+            role_id: facultyRole.role_id,
+            status: "active",
+        }, { transaction: t });
+
+        // Create the faculty record
+        const newFaculty = await Faculty.create({
+            faculty_id,
+            user_id: newUser.user_id,
+            course_id,
+            name,
+            phone,
+            email,
+        }, { transaction: t });
+        await t.commit(); //commit transaction
+        res.status(201).json({ message: "Faculty created successfully", faculty: newFaculty });
+    } catch (error) {
+        await t.rollback(); //rollback transaction
+        console.error("Error creating faculty:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+//get all faculties
+export const getAllFaculties = async (req, res) => {
+    try {
+        const faculties = await Faculty.findAll();
+        res.json(faculties);
+    } catch (error) {
+        console.error("Error fetching faculties:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+//get faculty by id
+export const getFacultyById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const faculty = await Faculty.findByPk(id);
+        if (!faculty) {
+            return res.status(404).json({ message: "Faculty not found" });
+        }
+        res.json(faculty);
+    } catch (error) {
+        console.error("Error fetching faculty:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+//update faculty by id
+export const updateFacultyById = async (req, res) => {
+    try {
+        const t = await sequelize.transaction(); //start transaction
+        const { id } = req.params;
+        const { course_id, name, phone, email } = req.body;
+
+        //validation to require fields
+        if (
+            !course_id &&
+            !name &&
+            !phone &&
+            !email
+        ) {
+            await t.rollback();
+            return res.status(400).json({ message: "At least one field is required to update" });
+        }
+        
+
+
+        const faculty = await Faculty.findByPk(id);
+        if (!faculty) {
+            await t.rollback();
+            return res.status(404).json({ message: "Faculty not found" });
+        }
+
+        // Update only provided fields
+        const updatedData = {};
+        const allowedFields = ['course_id', 'name', 'phone', 'email'];
+
+        //loop through fields and add to updatedData if present in req.body
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updatedData[field] = req.body[field];
+            }
+        }
+        await faculty.update(updatedData , { transaction: t });
+        await t.commit();
+        res.json({ message: "Faculty updated successfully", faculty });
+    }
+    catch (error) {
+        await t.rollback();
+        console.error("Error updating faculty:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+//delete faculty by id
+export const deleteFacultyById = async (req, res) => {
+    const t = await sequelize.transaction(); //start transaction
+    try {
+        const { id } = req.params;
+        const faculty = await Faculty.findByPk(id);
+        if (!faculty) {
+            await t.rollback();
+            return res.status(404).json({ message: "Faculty not found" });
+        }
+
+        await faculty.destroy({ transaction: t });
+
+        // Also delete the associated user
+        const user = await User.findByPk(faculty.user_id);
+        if (user) {
+            await user.destroy({ transaction: t });
+        }
+        await t.commit();
+        res.json({ message: "Faculty and associated user deleted successfully" });
+    } catch (error) {
+        await t.rollback();
+        console.error("Error deleting faculty:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+

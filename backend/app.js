@@ -6,6 +6,7 @@ import {sequelize} from  './src/config/db.js';
 import * as models from "./src/model/index.js";
 import authRoutes from './src/routes/authRoutes.js'
 import studentRoutes from './src/routes/studentRoutes.js';
+import facultyRoutes from './src/routes/facultyRoutes.js';
 import { responseTimeLogger } from './src/middleware/responseTimeLogger.js';
 dotenv.config();
 const app = express();
@@ -27,6 +28,7 @@ try {
 app.use(responseTimeLogger);
 app.use("/api/auth",authRoutes);
 app.use("/api/students",studentRoutes);
+app.use("/api/faculties",facultyRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');
