@@ -16,11 +16,6 @@ export const Class = sequelize.define("Class",{
         type:DataTypes.STRING,
         allowNull:false
     },
-    year:{
-        type:DataTypes.INTEGER,
-        validate:{min:2000 , max:2050},
-        allowNull:false
-    },
     section:{
         type:DataTypes.STRING,
         allowNull:false
