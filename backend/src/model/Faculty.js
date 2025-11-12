@@ -25,7 +25,7 @@ export const Faculty = sequelize.define("Faculty",{
         allowNull:false
     },
     phone:{
-        type:DataTypes.INTEGER,
+        type:DataTypes.STRING,
         allowNull:false,
         validate:{
             is: /^(\+91)?\d{10}$/ 

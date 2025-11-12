@@ -5,19 +5,22 @@ import { User } from "../model/User.js";
 import { Role } from "../model/Role.js";
 import bcrypt from "bcrypt";
 import { sequelize } from "../config/db.js";
+import { generateFacultyId } from "../services/generateFacultyId.js";
 
 // Create a new faculty (admins only)
 export const createFaculty = async (req, res) => {
     const t = await sequelize.transaction(); //start transaction
+    const course_id = req.user.course_id;
+    const faculty_id = await generateFacultyId(req.user.course_id);
     try {
         const {
-            faculty_id,
-            course_id,
             name,
             phone,
             email,
         } = req.body;
 
+        
+        
         // Get the role_id for 'Faculty'
         const facultyRole = await Role.findOne({ where: { role_name: "Faculty" } });
         if (!facultyRole) {
