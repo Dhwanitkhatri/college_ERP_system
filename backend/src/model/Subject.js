@@ -28,6 +28,20 @@ export const Subject = sequelize.define("Subject",{
     credit:{
         type:DataTypes.INTEGER,
         allowNull:false
+    },
+    semester:{
+        type:DataTypes.INTEGER,
+        allowNull:true,
+        validate:{
+            min:1 ,max:6
+        }
+    },
+    lecture_per_week:{
+        type:DataTypes.INTEGER,
+        allowNull:true,
+        validate:{
+            min:1 ,max:6
+        }
     }
 });
 
