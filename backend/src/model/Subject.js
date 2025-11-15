@@ -9,7 +9,7 @@ export const Subject = sequelize.define("Subject",{
     },
     subject_id:{
         type:DataTypes.STRING,
-        unique:true,
+        unique:false,
         allowNull:false
     },
     faculty_id:{
@@ -23,7 +23,7 @@ export const Subject = sequelize.define("Subject",{
     subject_name:{
         type:DataTypes.STRING,
         allowNull:false,
-        unique:true
+        unique:false
     },
     credit:{
         type:DataTypes.INTEGER,
@@ -43,5 +43,9 @@ export const Subject = sequelize.define("Subject",{
             min:1 ,max:6
         }
     }
+},{
+    indexes: [
+        { fields: ['subject_id'] }   // ✔ makes FK work
+    ]
 });
 
