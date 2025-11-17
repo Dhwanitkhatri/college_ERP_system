@@ -1,10 +1,10 @@
-import React from 'react'
+import React from "react";
 import { Moon } from "lucide-react";
-
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 relative">
+    <div className="mainDiv w-screen min-h-screen bg-white flex items-center justify-center p-4 relative">
       <div className="absolute top-8 right-8 bg-white border border-gray-300 rounded-full p-3 shadow-sm">
         <Moon className="w-5 h-5 text-gray-800" />
       </div>
@@ -36,16 +36,18 @@ const HomePage = () => {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button className="px-10 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors">
-            Login
-          </button>
+          <Link to="/LoginPage">
+            <button className="px-10 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors">
+              Login
+            </button>
+          </Link>
           <button className="px-10 py-3 bg-white text-black font-medium rounded-lg border-2 border-black hover:bg-gray-50 transition-colors">
             About Us
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;
