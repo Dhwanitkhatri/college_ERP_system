@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import LoginPage from './LoginPage'
+import LoginPage from './Pages/LoginPage'
+import HomePage from './Pages/HomePage';
+import { Routes, Route } from "react-router-dom";
+
 import './App.css'
 
 function App() {
 
   return (
     <>
-      <LoginPage />
+      <HomePage />
     </>
   );
 }
