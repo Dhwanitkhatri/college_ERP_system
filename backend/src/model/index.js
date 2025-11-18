@@ -42,9 +42,6 @@ User.belongsTo(Role, { foreignKey: 'role_id',targetKey:'role_id' });
 User.hasMany(Faculty, { foreignKey: 'user_id' , sourceKey:'user_id' });
 Faculty.belongsTo(User, { foreignKey: 'user_id' ,targetKey:'user_id'});
 
-// Department ↔ Faculty
-Department.hasMany(Faculty, { foreignKey: 'department_id',sourceKey:'department_id' });
-Faculty.belongsTo(Department, { foreignKey: 'department_id',targetKey:'department_id' });
 
 // User ↔ Student
 User.hasMany(Student, { foreignKey: 'user_id' ,sourceKey:'user_id'});

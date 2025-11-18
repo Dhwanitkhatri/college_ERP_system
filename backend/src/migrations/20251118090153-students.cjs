@@ -79,7 +79,17 @@ module.exports = {
             year_of_study: {
                 type: Sequelize.ENUM("FY", "SY", "TY", "LY"),
                 allowNull: false,
-            }
+            },
+            createdAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') // Optional but helpful
+      },
+      updatedAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      }
 
         });
     },

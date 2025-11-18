@@ -9,9 +9,15 @@ export const login = async (req, res) => {
 
     //  Fetch user with role only
     const user = await User.findOne({
-      where: { username },
-      include: [{ model: Role }],
-    });
+    where: { username },
+    // Specify the attributes (columns) you want from the User table
+    attributes: ['username', 'password', 'role_Id' , 'user_id'],
+    include: [{
+        model: Role,
+        // Specify the attributes (columns) you want from the Role table
+        attributes: ['role_name'],
+    }],
+});
 
    
 
@@ -42,7 +48,7 @@ export const login = async (req, res) => {
     //  Generate JWT token
     const token = jwt.sign(
       {
-        id: user.id,
+        
         username: user.username,
         role_name: user.Role.role_name,
         course_id,

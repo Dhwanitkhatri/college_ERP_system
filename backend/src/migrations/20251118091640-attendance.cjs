@@ -41,7 +41,17 @@ module.exports = {
             status: {
                 type: Sequelize.ENUM("Present", "Absent", "Late"),
                 allowNull: false
-            }
+            },
+            createdAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') // Optional but helpful
+      },
+      updatedAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      }
 
         });
     },

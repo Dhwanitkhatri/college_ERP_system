@@ -31,14 +31,19 @@ module.exports = {
       status: {
         type: Sequelize.ENUM('active', 'inactive'),
         defaultValue: 'active'
+      },
+      createdAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') // Optional but helpful
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       }
-    })
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
+    });
+    
   },
 
   async down(queryInterface, Sequelize) {

@@ -55,7 +55,17 @@ module.exports = {
             end_time: {
                 type: Sequelize.TIME,
                 allowNull: false
-            }
+            },
+            createdAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') // Optional but helpful
+      },
+      updatedAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      }
         });
     },
 

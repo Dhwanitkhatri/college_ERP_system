@@ -80,11 +80,13 @@ export const createFaculty = async (req, res) => {
 //get all faculties
 export const getAllFaculties = async (req, res) => {
     try {
-        const faculties = await Faculty.findAll();
+        const faculties = await Faculty.findAll({
+            where:{course_id:req.user.course_id}
+        });
         res.json(faculties);
     } catch (error) {
         console.error("Error fetching faculties:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error",error });
     }
 };
 

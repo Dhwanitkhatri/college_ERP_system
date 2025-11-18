@@ -17,14 +17,18 @@ module.exports = {
           department_name:{
               type:Sequelize.STRING,
               allowNull:false
-          }
-    })
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
+          },
+          createdAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP') // Optional but helpful
+      },
+      updatedAt: {
+              allowNull: false,
+              type: Sequelize.DATE,
+              defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      }
+    });
   },
 
   async down (queryInterface, Sequelize) {
