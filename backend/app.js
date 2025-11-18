@@ -21,8 +21,6 @@ const PORT = process.env.PORT || 5000;
 try {
   await sequelize.authenticate();
   console.log('Database connected successfully!');
-  await sequelize.sync({alter:true});
-  console.log('all tables are created ');
 } catch (error) {
   console.error('Database connection failed:', error);
 } 
