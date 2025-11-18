@@ -118,7 +118,7 @@ export const createStudent = async (req, res) => {
 // Get all students
 export const getAllStudents = async (req, res) => {
     try {
-        const students = await Student.findAll();
+        const students = await Student.findAll({where : req.user.course_id});
         res.json(students);
     } catch (error) {
         console.error("Error fetching students:", error);
