@@ -3,23 +3,23 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable("Admins", {
+        await queryInterface.createTable("Subjects", {
             id: {
-                primaryKey: true,
                 autoIncrement: true,
+                primaryKey: true,
                 type: Sequelize.INTEGER
             },
-            admin_id: {
+            subject_id: {
+                type: Sequelize.STRING,
+                unique: true,
+                allowNull: false
+            },
+            faculty_id: {
                 type: Sequelize.STRING,
                 allowNull: false,
-                unique: true
-            },
-            user_id: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
                 references: {
-                    model: "Users",
-                    key: "user_id"
+                    model: "Faculties",
+                    key: "faculty_id"
                 },
                 onUpdate: "CASCADE",
                 onDelete: "RESTRICT"
@@ -34,27 +34,34 @@ module.exports = {
                 onUpdate: "CASCADE",
                 onDelete: "RESTRICT"
             },
-            full_name: {
+            subject_name: {
                 type: Sequelize.STRING,
+                allowNull: false,
+                unique: false
+            },
+            credit: {
+                type: Sequelize.INTEGER,
                 allowNull: false
             },
-            email: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                unique: true,
-                validate: { isEmail: true }
-            },
-            contact_number: {
-                type: Sequelize.STRING,
-                allowNull: false,
+            semester: {
+                type: Sequelize.INTEGER,
+                allowNull: true,
                 validate: {
-                    is: /^(\+91)?\d{10}$/
+                    min: 1, max: 6
+                }
+            },
+            lecture_per_week: {
+                type: Sequelize.INTEGER,
+                allowNull: true,
+                validate: {
+                    min: 1, max: 6
                 }
             }
-        });
+        }
+        );
     },
 
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable("Admins");
+        await queryInterface.dropTable("Subjects");
     }
 };

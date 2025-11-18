@@ -3,40 +3,35 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Courses", {
+    await queryInterface.createTable("Classes", {
       id: {
         primaryKey: true,
-        type: Sequelize.INTEGER,
-        autoIncrement: true
+        autoIncrement: true,
+        type: Sequelize.INTEGER
       },
-      course_id: {
-        unique: true,
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      department_id: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        references: {
-          model: "Departments",
-          key: "department_id"
-        },
-        onUpdate: "CASCADE",
-        onDelete: "RESTRICT"
-      },
-      course_name: {
+      class_id: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true
       },
-      duration: {
-        type: Sequelize.ENUM("2", "3", "4", "5"),
+      course_id: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        references: {
+          model: "Courses",
+          key: "course_id"
+        },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT"
+      },
+      section: {
+        type: Sequelize.STRING,
         allowNull: false
       }
     })
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Courses")
+    await queryInterface.dropTable("Classes");
   }
 };

@@ -8,8 +8,8 @@ import { Op } from "sequelize";
 
 // Create a new timetable entry(admin only)
 export const createTimetableEntry = async (req, res) => {
+    const t = await sequelize.transaction(); //start transaction    
     try {
-        const t = await sequelize.transaction(); //start transaction    
         const { schedule_id, class_id, subject_id, faculty_id, day_of_week, start_time, end_time } = req.body;
 
         //validation to require fields
@@ -40,13 +40,13 @@ export const createTimetableEntry = async (req, res) => {
             return res.status(400).json({ message: "Invalid day_of_week value" });
         }
 
-        // Validate foreign keys
-        const classExists = await Class.findByPk(class_id);
-        const subjectExists = await Subject.findByPk(subject_id);
-        const facultyExists = await Faculty.findByPk(faculty_id);
-        if (!classExists || !subjectExists || !facultyExists) {
-            return res.status(400).json({ message: 'Invalid class, subject, or faculty ID' });
-        }
+        // // Validate foreign keys
+        // const classExists = await Class.findByPk(class_id);
+        // const subjectExists = await Subject.findByPk(subject_id);
+        // const facultyExists = await Faculty.findByPk(faculty_id);
+        // if (!classExists || !subjectExists || !facultyExists) {
+        //     return res.status(400).json({ message: 'Invalid class, subject, or faculty ID' });
+        // }
 
         // Check for time conflicts
         const classConflict = await Timetable.findOne({
@@ -82,11 +82,10 @@ export const createTimetableEntry = async (req, res) => {
         });
 
         if (classConflict) {
-            await t.rollback();
             return res.status(400).json({
                 message: "This class already has another lecture during this time slot",
                 conflict: {
-                    class: classExists.class_name,
+                   // class: classExists.class_name,
                     existing_schedule: {
                         day: classConflict.day_of_week,
                         time: `${classConflict.start_time} - ${classConflict.end_time}`,
@@ -134,11 +133,10 @@ export const createTimetableEntry = async (req, res) => {
             transaction: t
         });
         if (facultyConflict) {
-            await t.rollback();
             return res.status(400).json({
                 message: "This faculty member has another lecture during this time slot",
                 conflict: {
-                    faculty: facultyExists.name,
+                  //  faculty: facultyExists.name,
                     existing_schedule: {
                         day: facultyConflict.day_of_week,
                         time: `${facultyConflict.start_time} - ${facultyConflict.end_time}`,

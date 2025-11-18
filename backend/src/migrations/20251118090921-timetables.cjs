@@ -3,23 +3,23 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable("Attendances", {
+        await queryInterface.createTable("Timetables", {
             id: {
                 primaryKey: true,
                 autoIncrement: true,
                 type: Sequelize.INTEGER
             },
-            attendance_id: {
+            schedule_id: {
                 type: Sequelize.STRING,
                 allowNull: false,
                 unique: true
             },
-            student_id: {
+            class_id: {
                 type: Sequelize.STRING,
                 allowNull: false,
                 references: {
-                    model: "Students",
-                    key: "student_id"
+                    model: "Classes",
+                    key: "class_id"
                 },
                 onUpdate: "CASCADE",
                 onDelete: "RESTRICT"
@@ -34,19 +34,32 @@ module.exports = {
                 onUpdate: "CASCADE",
                 onDelete: "RESTRICT"
             },
-            date: {
-                type: Sequelize.DATEONLY,
+            faculty_id: {
+                type: Sequelize.STRING,
+                allowNull: false,
+                references: {
+                    model: "Faculties",
+                    key: "faculty_id"
+                },
+                onUpdate: "CASCADE",
+                onDelete: "RESTRICT"
+            },
+            day_of_week: {
+                type: Sequelize.ENUM("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
                 allowNull: false
             },
-            status: {
-                type: Sequelize.ENUM("Present", "Absent", "Late"),
+            start_time: {
+                type: Sequelize.TIME,
+                allowNull: false
+            },
+            end_time: {
+                type: Sequelize.TIME,
                 allowNull: false
             }
-
         });
     },
 
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable("Attendances");
+        await queryInterface.dropTable("Timetables");
     }
 };
