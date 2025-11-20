@@ -1,7 +1,10 @@
 import LoginPage from "./Pages/LoginPage";
 import HomePage from "./Pages/HomePage";
-import { Routes, Route, createBrowserRouter } from "react-router-dom";
-import { BrowserRouter, RouterProvider } from "react-router-dom";
+import KnowMore from "./Pages/KnowMore";
+import AboutUs from "./Pages/AboutUs";
+import NavbarDashboard from "./Components/NavbarDashboard";
+import { createBrowserRouter } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import "./App.css";
 
 const router = createBrowserRouter([
@@ -10,9 +13,21 @@ const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
+    path: "/NavbarDashboard",   //Temporary Route
+    element: <NavbarDashboard />,
+  },
+  {
     path: "/LoginPage",
     element: <LoginPage />,
   },
+  {
+    path: "/AboutUs",
+    element: <AboutUs />,
+  },
+  {
+    path: "/KnowMore",
+    element: <KnowMore />,
+  }
 ]);
 function App() {
   return (

@@ -78,81 +78,83 @@ function LoginPage() {
   };
 
   return (
-    <form id="loginForm" onSubmit={handleSubmit}>
-      {/*Main login container */}
-      <div className="loginContainer w-full bg-white border-gray-200 p-5 rounded-xl shadow-lg justify-center items-center justify-items-center">
-        {/* login header*/}
-        <div className="loginHeader justify-center items-center justify-items-center w-full m-2 mt-1">
-          <div className="loginTitleHeader flex w-full justify-between items-center">
-            <div
-              onClick={handleBackButtonClick}
-              className="loginBackButton p-1 rounded-full hover:bg-gray-100 cursor-pointer"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-800" />
+    <div className="wrapperDiv bg-[var(--login-bg-color)] flex justify-center items-center h-full w-full m-0">
+      <form id="loginForm" onSubmit={handleSubmit}>
+        {/*Main login container */}
+        <div className="loginContainer w-full bg-white border-gray-200 p-5 rounded-xl shadow-lg justify-center items-center justify-items-center">
+          {/* login header*/}
+          <div className="loginHeader justify-center items-center justify-items-center w-full m-2 mt-1">
+            <div className="loginTitleHeader flex w-full justify-between items-center">
+              <div
+                onClick={handleBackButtonClick}
+                className="loginBackButton p-1 rounded-full hover:bg-gray-100 cursor-pointer"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-800" />
+              </div>
+
+              <p className="loginTitle">College ERP Login</p>
+
+              <div className="loginThemeButton p-1 rounded-full hover:bg-gray-100 cursor-pointer">
+                <Moon className="w-5 h-5 text-gray-800" />
+              </div>
             </div>
 
-            <p className="loginTitle">College ERP Login</p>
-
-            <div className="loginThemeButton p-1 rounded-full hover:bg-gray-100 cursor-pointer">
-              <Moon className="w-5 h-5 text-gray-800" />
-            </div>
-          </div>
-
-          <p className="loginInstruction text-gray-500 p-1">
-            Enter your credentials to access the system
-          </p>
-        </div>
-        {/* login details container */}
-        <div className="loginDetails justify-start items-center w-full m-2">
-          <p className="usernameLabel font-semibold text-sm my-1">Username</p>
-          <input
-            type="text"
-            className="usernameInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
-            placeholder="Enter Your Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-          {errors.username && (
-            <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-          )}{" "}
-          {/* only runs under condition */}
-          <p className="passwordLabel font-semibold text-sm my-1">Password</p>
-          <input
-            type="password"
-            className="passwordInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
-            placeholder="Enter Your Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {errors.password && (
-            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-          )}{" "}
-          {/* only runs under condition */}
-          {errors.general && (
-            <p className="text-red-500 text-sm mt-3 text-center">
-              {errors.general}
+            <p className="loginInstruction text-gray-500 p-1">
+              Enter your credentials to access the system
             </p>
-          )}{" "}
-          {/* only runs under condition */}
-          <button
-            type="submit"
-            className="signInButton bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold w-full rounded-lg p-2 mt-6"
-          >
-            Sign In
-          </button>
+          </div>
+          {/* login details container */}
+          <div className="loginDetails justify-start items-center w-full m-2">
+            <p className="usernameLabel font-semibold text-sm my-1">Username</p>
+            <input
+              type="text"
+              className="usernameInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Enter Your Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            {errors.username && (
+              <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+            )}{" "}
+            {/* only runs under condition */}
+            <p className="passwordLabel font-semibold text-sm my-1">Password</p>
+            <input
+              type="password"
+              className="passwordInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Enter Your Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}{" "}
+            {/* only runs under condition */}
+            {errors.general && (
+              <p className="text-red-500 text-sm mt-3 text-center">
+                {errors.general}
+              </p>
+            )}{" "}
+            {/* only runs under condition */}
+            <button
+              type="submit"
+              className="signInButton bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold w-full rounded-lg p-2 mt-6"
+            >
+              Sign In
+            </button>
+          </div>
+          {/* forgot password conatiner */}
+          <div className="bottomDiv p-3">
+            <a
+              href="#"
+              className="usernameLabel font-semibold text-sm my-1 text-blue-600 hover:text-blue-700"
+              onClick={() => alert("Redirecting to password recovery page...")}
+            >
+              Forgot your Password?
+            </a>
+          </div>
         </div>
-        {/* forgot password conatiner */}
-        <div className="bottomDiv p-3">
-          <a
-            href="#"
-            className="usernameLabel font-semibold text-sm my-1 text-blue-600 hover:text-blue-700"
-            onClick={() => alert("Redirecting to password recovery page...")}
-          >
-            Forgot your Password?
-          </a>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
 
