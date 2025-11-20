@@ -32,21 +32,22 @@ export const login = async (req, res) => {
     if (role === "Admin") {
       courseData = await Admin.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id"],
+        attributes: ["course_id" ,"full_name"],
       });
     } else if (role === "Faculty") {
       courseData = await Faculty.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id"],
+        attributes: ["course_id" , "name"],
       });
     } else if (role === "Student") {
       courseData = await Student.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id"],
+        attributes: ["course_id" , "name"],
       });
     }
 
     const course_id = courseData?.course_id || null;
+    const name = courseData?.name || null;
 
     //  Lightweight JWT payload → smaller token → faster sign
     const token = jwt.sign(
@@ -54,6 +55,8 @@ export const login = async (req, res) => {
         uid: user.user_id,
         role,
         course_id,
+        name
+
       },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
