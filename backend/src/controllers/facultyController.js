@@ -81,7 +81,7 @@ export const createFaculty = async (req, res) => {
 export const getAllFaculties = async (req, res) => {
     try {
         const faculties = await Faculty.findAll({
-            where:{course_id:req.user.course_id}
+            where:{course_id:req.user.course_id},
         });
         res.json(faculties);
     } catch (error) {

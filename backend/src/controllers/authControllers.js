@@ -7,64 +7,77 @@ export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    //  Fetch user with role only
+    // Fetch user + role in one optimized query
     const user = await User.findOne({
-    where: { username },
-    // Specify the attributes (columns) you want from the User table
-    attributes: ['username', 'password', 'role_Id' , 'user_id'],
-    include: [{
-        model: Role,
-        // Specify the attributes (columns) you want from the Role table
-        attributes: ['role_name'],
-    }],
-});
-
-   
+      where: { username },
+      attributes: ["user_id", "username", "password", "role_Id"],
+      include: [
+        {
+          model: Role,
+          attributes: ["role_name"],
+        },
+      ],
+    });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    //  Verify password
+    // Verify password BEFORE more DB calls
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(401).json({ message: "Invalid credentials" });
 
-    //  Fetch role-specific info
-    let course_id = null;
-    if (user.Role.role_name === "Admin") {
-      const admin = await Admin.findOne({ where: { user_id: user.user_id } });
-      course_id = admin?.course_id || null;
-    } else if (user.Role.role_name === "Faculty") {
-      const faculty = await Faculty.findOne({ where: { user_id: user.user_id } });
-      course_id = faculty?.course_id || null;
-    } else if (user.Role.role_name === "Student") {
-      const student = await Student.findOne({ where: { user_id: user.user_id } });
-      course_id = student?.course_id || null;
+    //  Fetch course_id based on role — only ONE query
+    let courseData = null;
+    const role = user.Role.role_name;
+
+    if (role === "Admin") {
+      courseData = await Admin.findOne({
+        where: { user_id: user.user_id },
+        attributes: ["course_id"],
+      });
+    } else if (role === "Faculty") {
+      courseData = await Faculty.findOne({
+        where: { user_id: user.user_id },
+        attributes: ["course_id"],
+      });
+    } else if (role === "Student") {
+      courseData = await Student.findOne({
+        where: { user_id: user.user_id },
+        attributes: ["course_id"],
+      });
     }
 
-    //  Determine redirect URL based on role
-    let redirectTo = "/student/dashboard";
-    if (user.Role.role_name === "Admin") redirectTo = "/admin/dashboard";
-    if (user.Role.role_name === "Faculty") redirectTo = "/faculty/dashboard";
+    const course_id = courseData?.course_id || null;
 
-    //  Generate JWT token
+    //  Lightweight JWT payload → smaller token → faster sign
     const token = jwt.sign(
       {
-        username: user.username,
-        role_name: user.Role.role_name,
+        uid: user.user_id,
+        role,
         course_id,
       },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
 
-    //  Send response
-    res.json({
+    //  Precomputed redirect
+    const roleRedirectMap = {
+  Admin: "/admin/dashboard",
+  Faculty: "/faculty/dashboard",
+  Student: "/student/dashboard",
+};
+
+const redirectTo = roleRedirectMap[role] || "/student/dashboard";
+
+
+    return res.json({
       message: "Login successful",
       token,
-      role: user.Role.role_name,
+      role,
       course_id,
       redirectTo,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login Error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
