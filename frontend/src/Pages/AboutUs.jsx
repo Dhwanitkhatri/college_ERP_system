@@ -5,7 +5,7 @@ import { ArrowLeft, Moon } from "lucide-react";
 function AboutUs() {
   return (
     <div className="min-h-screen w-screen bg-white p-6 md:p-10">
-      <div className="max-w-[1400px] mx-auto mb-12 flex justify-between items-center">
+      <div className="max-w-[95%] mx-auto mb-12 flex justify-between items-center">
         <Link to="/">
         <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
           <ArrowLeft className="w-4 h-4" strokeWidth={2.5} />
@@ -18,7 +18,7 @@ function AboutUs() {
         </button>
       </div>
 
-      <div className="max-w-[920px] mx-auto px-4">
+      <div className="max-w-[70%] mx-auto px-4">
         <h1 className="text-[26px] md:text-[28px] font-normal text-gray-900 text-center mb-10">
           About Our College ERP System
         </h1>
