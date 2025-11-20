@@ -32,7 +32,7 @@ export const login = async (req, res) => {
     if (role === "Admin") {
       courseData = await Admin.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id" ,"full_name"],
+        attributes: ["course_id" ,"name"],
       });
     } else if (role === "Faculty") {
       courseData = await Faculty.findOne({
