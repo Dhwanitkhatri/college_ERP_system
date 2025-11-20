@@ -48,7 +48,6 @@ export const login = async (req, res) => {
     //  Generate JWT token
     const token = jwt.sign(
       {
-        
         username: user.username,
         role_name: user.Role.role_name,
         course_id,
