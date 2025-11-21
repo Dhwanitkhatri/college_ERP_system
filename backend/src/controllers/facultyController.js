@@ -82,6 +82,7 @@ export const getAllFaculties = async (req, res) => {
     try {
         const faculties = await Faculty.findAll({
             where:{course_id:req.user.course_id},
+            attributes: { 'include': ['faculty_id', 'name', 'phone', 'email'] }
         });
         res.json(faculties);
     } catch (error) {

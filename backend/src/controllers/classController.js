@@ -6,8 +6,8 @@ import { Op } from 'sequelize';
 
 // Create a new class (admins only)
 export const createClass = async (req, res) => {
+    const t= await sequelize.transaction(); //start transaction
     try {
-        const t= await sequelize.transaction(); //start transaction
         const { class_id, course_id, section } = req.body;
         // Validation to require fields 
         if (!class_id || !course_id || !section) {

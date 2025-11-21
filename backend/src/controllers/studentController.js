@@ -12,7 +12,7 @@ export const createStudent = async (req, res) => {
     const student_id = await generateEnrollmentId(req.user.course_id);
     try {
         const {
-           // student_id,
+            // student_id,
             course_id,
             //class_id,
             name,
@@ -32,9 +32,9 @@ export const createStudent = async (req, res) => {
 
         //validation to require fields
         if (
-           !student_id ||
+            !student_id ||
             !course_id ||
-          //  !class_id ||
+            //  !class_id ||
             !name ||
             !dob ||
             !gender ||
@@ -64,7 +64,7 @@ export const createStudent = async (req, res) => {
         }
         //validation for admission range
         if (admission_year < 2000 || admission_year > 2040) {
-            await t.rollback(); 
+            await t.rollback();
             return res
                 .status(400)
                 .json({ message: "Admission year must be between 2000 and 2040" });
@@ -118,7 +118,10 @@ export const createStudent = async (req, res) => {
 // Get all students
 export const getAllStudents = async (req, res) => {
     try {
-        const students = await Student.findAll({where : req.user.course_id});
+        const students = await Student.findAll({
+            where: { course_id: req.user.course_id }
+        });
+
         res.json(students);
     } catch (error) {
         console.error("Error fetching students:", error);
@@ -171,30 +174,30 @@ export const updateStudentById = async (req, res) => {
             return res.status(400).json({ message: "At least one field is required to update" });
         }
 
-        const student = await Student.findByPk(id , { transaction: t });
+        const student = await Student.findByPk(id, { transaction: t });
         if (!student) {
             await t.rollback();
             return res.status(404).json({ message: "Student not found" });
         }
-       // Update only the provided fields
+        // Update only the provided fields
         const updateData = {};
         const allowedFields = [
-            'course_id', 'class_id', 'name', 'dob', 'gender', 
+            'course_id', 'class_id', 'name', 'dob', 'gender',
             'email', 'admission_year', 'year_of_study'
         ];
         //loop through allowed fields
-        for (const field of allowedFields) { 
+        for (const field of allowedFields) {
             if (req.body[field] !== undefined) {
                 updateData[field] = req.body[field];
             }
         }
         await student.update(updateData, { transaction: t });
         await t.commit();
-        
+
         const updatedStudent = await Student.findByPk(id);//fetch updated student
-        res.json({ 
-            message: "Student updated successfully", 
-            student: updatedStudent 
+        res.json({
+            message: "Student updated successfully",
+            student: updatedStudent
         });
     } catch (error) {
         await t.rollback();
@@ -222,7 +225,7 @@ export const deleteStudentById = async (req, res) => {
         if (user) {
             await user.destroy({ transaction: t });
         }
-        
+
         await t.commit();
         res.json({ message: "Student and associated user deleted successfully" });
     } catch (error) {
