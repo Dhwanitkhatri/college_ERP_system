@@ -3,15 +3,14 @@ import { ArrowLeft, Moon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 function KnowMore() {
-
   return (
     <div className="min-h-screen w-screen bg-white p-6 md:p-10">
       <div className="max-w-[1400px] mx-auto mb-8 flex justify-between items-center">
         <Link to="/AboutUs">
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-          <ArrowLeft className="w-4 h-4" strokeWidth={2.5} />
-          <span className="text-[15px] font-normal text-gray-900">Back</span>
-        </button>
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <ArrowLeft className="w-4 h-4" strokeWidth={2.5} />
+            <span className="text-[15px] font-normal text-gray-900">Back</span>
+          </button>
         </Link>
 
         <button className="p-2.5 bg-white border border-gray-300 rounded-full hover:bg-gray-50 transition-colors">

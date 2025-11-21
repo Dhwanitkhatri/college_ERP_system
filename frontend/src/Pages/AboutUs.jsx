@@ -7,10 +7,10 @@ function AboutUs() {
     <div className="min-h-screen w-screen bg-white p-6 md:p-10">
       <div className="max-w-[95%] mx-auto mb-12 flex justify-between items-center">
         <Link to="/">
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-          <ArrowLeft className="w-4 h-4" strokeWidth={2.5} />
-          <span className="text-[15px] font-normal text-gray-900">Back</span>
-        </button>
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <ArrowLeft className="w-4 h-4" strokeWidth={2.5} />
+            <span className="text-[15px] font-normal text-gray-900">Back</span>
+          </button>
         </Link>
 
         <button className="p-2.5 bg-white border border-gray-300 rounded-full hover:bg-gray-50 transition-colors">
@@ -66,9 +66,9 @@ function AboutUs() {
 
         <div className="flex justify-center">
           <Link to="/KnowMore">
-          <button className="px-7 py-3 bg-black text-white text-[15px] font-normal rounded-lg hover:bg-gray-900 transition-colors">
-            Know More About Us
-          </button>
+            <button className="px-7 py-3 bg-black text-white text-[15px] font-normal rounded-lg hover:bg-gray-900 transition-colors">
+              Know More About Us
+            </button>
           </Link>
         </div>
       </div>

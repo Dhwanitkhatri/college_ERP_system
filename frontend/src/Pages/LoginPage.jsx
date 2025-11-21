@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/axios.js";
 import { Moon } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function LoginPage() {
@@ -12,7 +13,10 @@ function LoginPage() {
     username: "",
     password: "",
     general: "",
-  }); /*variable to store errors*/
+  });
+  const [showPassword, setShowPassword] = useState(false);
+
+  /*variable to store errors*/
   //  const usernamePattern = /^[a-zA-Z0-9]+$/;           /*aplhanumeric username pattern */
   const handleBackButtonClick = () => {
     navigate("/");
@@ -118,13 +122,26 @@ function LoginPage() {
             )}{" "}
             {/* only runs under condition */}
             <p className="passwordLabel font-semibold text-sm my-1">Password</p>
-            <input
-              type="password"
-              className="passwordInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="Enter Your Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative w-full">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="passwordInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Enter Your Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-600"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <Eye className="w-5 h-5" />
+                ) : (
+                  <EyeOff className="w-5 h-5" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-xs mt-1">{errors.password}</p>
             )}{" "}
