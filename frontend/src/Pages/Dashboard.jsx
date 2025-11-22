@@ -1,6 +1,7 @@
 import React from 'react'
 import NavbarDashboard from '../Components/NavbarDashboard'
 import SideBarDashboard from '../Components/SideBarDashboard'
+import MainPanelDashboard from '../Components/mainPanelDashboard'
 
 const Dashboard = () => {
   return (
@@ -8,6 +9,7 @@ const Dashboard = () => {
         <NavbarDashboard></NavbarDashboard>
         <div className="sideBarMainContent flex flex-1 overflow-hidden divide-x">
             <SideBarDashboard />
+            <MainPanelDashboard />
         </div>
     </div>
   )

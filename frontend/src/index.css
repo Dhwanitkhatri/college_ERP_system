@@ -11,6 +11,7 @@
   --login-bg-color: #F5F5F4;
   --primary-color: #ffffff;
   --light-text: #6b7280;
+  --mainPanel-bg-color: #F9FAFB;
 }
 
 html, body, #root{
