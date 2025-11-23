@@ -7,14 +7,28 @@
   padding: 0;
 }
 
-:root{
+:root {
+  /* light theme */
   --login-bg-color: #F5F5F4;
   --primary-color: #ffffff;
   --light-text: #6b7280;
   --mainPanel-bg-color: #F9FAFB;
+  --light-border: #E5E7EB;
+
+  --sidebar-bg: #ffffff;
+  --navbar-bg: #ffffff;
+  --text-color: #1f2937;
 }
 
-html, body, #root{
-  height: 100%;
-  width: 100%;
+/* dark theme */
+.dark {
+  --login-bg-color: #0f0f0f;
+  --primary-color: #1a1a1a;
+  --light-text: #9ca3af;
+  --mainPanel-bg-color: #030712;
+  --light-border: #1F2937;
+
+  --sidebar-bg: #1a1a1a;
+  --navbar-bg: #1a1a1a;
+  --text-color: #f3f4f6;
 }

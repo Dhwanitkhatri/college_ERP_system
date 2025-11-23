@@ -1,27 +1,46 @@
-import { useState } from "react"
-import React from 'react'
-import { X, Bell, Moon,CircleUserRound } from "lucide-react"
+import React from "react";
+import { X, Bell, CircleUserRound } from "lucide-react";
+import ThemeButton from "../ui/ThemeButton";
 
 const NavbarDashboard = () => {
-    return (
-        <div className="navMainDiv bg-[var(--primary-color)] flex justify-between items-center border border-b-[0.8px] py-[0.8%]">
-            <div className="navLeftDiv flex items-center gap-3 ml-[1%]">
-                <div className="navSideBarBtnDiv flex items-center justify-center p-2 rounded-lg hover:bg-gray-200 cursor-pointer"><X /></div>
-                <div className="navTitleDiv items-center justify-center"><h2>College ERP - User Dashboard</h2></div>
-            </div>
-            <div className="navRightDiv flex items-center gap-5 mr-[1%]">
-                <div className="navNotificationBtnDiv p-2 rounded-lg hover:bg-gray-200 cursor-pointer"><Bell /></div>
-                <div className="navThemeBtnDiv p-2 rounded-lg hover:bg-gray-200 cursor-pointer"><Moon /></div>
-                <div className="navUserInfoDiv border-l-[0.8px] flex items-center gap-4">
-                    <div className="navUserNameDiv">
-                        <p className="navUserNamePara text-right ml-3">User Name</p>
-                        <p className="navUserRolePara text-[var(--light-text)] text-right ml-3">User Role</p>
-                    </div>
-                    <div className="navUserPictureDiv"><CircleUserRound /></div>
-                </div>
-            </div>
-        </div>
-    )
-}
+  return (
+    <div className="navMainDiv bg-white dark:bg-gray-900 flex justify-between items-center border-b-[0.8px] border-b-[var(--light-border)] dark:border-b-[0.8px] dark:border-b-[var(--light-border)] py-[0.8%] px-4">
+      {/* LEFT SECTION */}
+      <div className="navLeftDiv flex items-center gap-3">
+        <button className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+          <X className="text-black dark:text-white" />
+        </button>
 
-export default NavbarDashboard
+        <h2 className="font-semibold text-black dark:text-white">
+          College ERP - User Dashboard
+        </h2>
+      </div>
+
+      {/* RIGHT SECTION */}
+      <div className="navRightDiv flex items-center gap-5">
+        {/* Notification Button */}
+        <button className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+          <Bell className="text-black dark:text-white" />
+        </button>
+
+        {/* Theme Button */}
+        <ThemeButton />
+
+        {/* User Info */}
+        <div className="navUserInfoDiv border-l-[0.8px] dark:border-gray-700 flex items-center gap-4 pl-4">
+          <div>
+            <p className="text-right font-medium text-black dark:text-white">
+              User Name
+            </p>
+            <p className="text-right text-gray-600 dark:text-gray-300">
+              User Role
+            </p>
+          </div>
+          <CircleUserRound className="text-black dark:text-white" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NavbarDashboard;
