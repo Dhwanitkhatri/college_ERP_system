@@ -34,9 +34,7 @@ function KnowMore() {
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
               Dhwanit Khatri
             </h2>
-            <p className="text-[15px] text-gray-600 mb-5">
-              Team Lead & Backend Developer
-            </p>
+            <p className="text-[15px] text-gray-600 mb-5">Backend Developer</p>
 
             <div className="mb-5">
               <h3 className="text-[15px] text-gray-600 mb-2">Contribution:</h3>
@@ -86,9 +84,7 @@ function KnowMore() {
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
               Jiken Patel
             </h2>
-            <p className="text-[15px] text-gray-600 mb-5">
-              Full Stack Developer
-            </p>
+            <p className="text-[15px] text-gray-600 mb-5">Database Designer</p>
 
             <div className="mb-5">
               <h3 className="text-[15px] text-gray-600 mb-2">Contribution:</h3>
@@ -112,9 +108,7 @@ function KnowMore() {
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
               Yug Panchal
             </h2>
-            <p className="text-[15px] text-gray-600 mb-5">
-              QA Engineer & Documentation Specialist
-            </p>
+            <p className="text-[15px] text-gray-600 mb-5">Frontend Developer</p>
 
             <div className="mb-5">
               <h3 className="text-[15px] text-gray-600 mb-2">Contribution:</h3>
@@ -128,9 +122,7 @@ function KnowMore() {
 
             <div>
               <h3 className="text-[15px] text-gray-600 mb-2">Expertise:</h3>
-              <p className="text-[15px] text-gray-700">
-                Testing, Documentation, User Training
-              </p>
+              <p className="text-[15px] text-gray-700">React , Tailwind CSS</p>
             </div>
           </div>
         </div>
