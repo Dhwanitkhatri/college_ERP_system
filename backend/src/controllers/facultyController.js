@@ -3,6 +3,7 @@
 import { Faculty } from "../model/Faculty.js";
 import { User } from "../model/User.js";
 import { Role } from "../model/Role.js";
+import { Course } from "../model/Course.js";
 import bcrypt from "bcrypt";
 import { sequelize } from "../config/db.js";
 import { generateFacultyId } from "../services/generateFacultyId.js";
@@ -19,8 +20,19 @@ export const createFaculty = async (req, res) => {
             email,
         } = req.body;
 
-        
-        
+        const course = await Course.findOne({ where: { course_id } });
+        if (!course) {
+            await t.rollback();
+            return res.status(400).json({ message: "Invalid course_id" });
+        }
+
+        if (req.user.course_id !== course_id) {
+            await t.rollback();
+            return res.status(403).json({
+                message: `You are not allowed to create Faculty for course ${course_id}`
+            });
+        }
+
         // Get the role_id for 'Faculty'
         const facultyRole = await Role.findOne({ where: { role_name: "Faculty" } });
         if (!facultyRole) {
@@ -81,13 +93,13 @@ export const createFaculty = async (req, res) => {
 export const getAllFaculties = async (req, res) => {
     try {
         const faculties = await Faculty.findAll({
-            where:{course_id:req.user.course_id},
-            attributes: { 'include': ['faculty_id', 'name', 'phone', 'email'] }
+            where: { course_id: req.user.course_id },
+            attributes: { exclude: ["createdAt", "updatedAt"] }
         });
         res.json(faculties);
     } catch (error) {
         console.error("Error fetching faculties:", error);
-        res.status(500).json({ message: "Internal server error",error });
+        res.status(500).json({ message: "Internal server error", error });
     }
 };
 
@@ -95,7 +107,16 @@ export const getAllFaculties = async (req, res) => {
 export const getFacultyById = async (req, res) => {
     try {
         const { id } = req.params;
-        const faculty = await Faculty.findByPk(id);
+        const faculty = await Faculty.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id
+            },
+            attributes: {
+                exclude: ["createdAt", "updatedAt"]
+            }
+        });
+
         if (!faculty) {
             return res.status(404).json({ message: "Faculty not found" });
         }
@@ -123,13 +144,20 @@ export const updateFacultyById = async (req, res) => {
             await t.rollback();
             return res.status(400).json({ message: "At least one field is required to update" });
         }
-        
 
+        const faculty = await Faculty.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id
+            },
+            transaction: t
+        });
 
-        const faculty = await Faculty.findByPk(id);
         if (!faculty) {
             await t.rollback();
-            return res.status(404).json({ message: "Faculty not found" });
+            return res.status(404).json({
+                message: "Faculty not found or you don't have access to update this faculty"
+            });
         }
 
         // Update only provided fields
@@ -142,7 +170,7 @@ export const updateFacultyById = async (req, res) => {
                 updatedData[field] = req.body[field];
             }
         }
-        await faculty.update(updatedData , { transaction: t });
+        await faculty.update(updatedData, { transaction: t });
         await t.commit();
         res.json({ message: "Faculty updated successfully", faculty });
     }
@@ -158,10 +186,18 @@ export const deleteFacultyById = async (req, res) => {
     const t = await sequelize.transaction(); //start transaction
     try {
         const { id } = req.params;
-        const faculty = await Faculty.findByPk(id);
+        const faculty = await Faculty.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id
+            },
+            transaction: t
+        });
         if (!faculty) {
             await t.rollback();
-            return res.status(404).json({ message: "Faculty not found" });
+            return res.status(404).json({
+                message: "Faculty not found or you don't have access to delete this faculty"
+            });
         }
 
         await faculty.destroy({ transaction: t });

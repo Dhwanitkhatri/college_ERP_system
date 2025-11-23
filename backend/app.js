@@ -8,6 +8,7 @@ import authRoutes from './src/routes/authRoutes.js'
 import studentRoutes from './src/routes/studentRoutes.js';
 import facultyRoutes from './src/routes/facultyRoutes.js';
 import timetableRoutes from './src/routes/timetableRoutes.js';
+import  classRoutes from './src/routes/classRoutes.js';
 import { responseTimeLogger } from './src/middleware/responseTimeLogger.js';
 dotenv.config();
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api/auth",authRoutes);
 app.use("/api/students",studentRoutes);
 app.use("/api/faculties",facultyRoutes);
 app.use("/api/timetables",timetableRoutes);
+app.use("/api/classes",classRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');

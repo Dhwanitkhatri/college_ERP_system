@@ -10,7 +10,7 @@ export const login = async (req, res) => {
     // Fetch user + role in one optimized query
     const user = await User.findOne({
       where: { username },
-      attributes: ["user_id", "username", "password", "role_Id"],
+      attributes: ["user_id", "username", "password", "role_id"],
       include: [
         {
           model: Role,
@@ -32,17 +32,17 @@ export const login = async (req, res) => {
     if (role === "Admin") {
       courseData = await Admin.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id" ],
+        attributes: ["course_id" , "name"],
       });
     } else if (role === "Faculty") {
       courseData = await Faculty.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id" ],
+        attributes: ["course_id" , "name"],
       });
     } else if (role === "Student") {
       courseData = await Student.findOne({
         where: { user_id: user.user_id },
-        attributes: ["course_id" ],
+        attributes: ["course_id" , "name"],
       });
     }
 

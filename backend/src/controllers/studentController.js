@@ -2,6 +2,7 @@
 import { Student } from "../model/Student.js";
 import { User } from "../model/User.js";
 import { Role } from "../model/Role.js";
+import { Course } from "../model/Course.js";
 import bcrypt from "bcrypt";
 import { sequelize } from "../config/db.js";
 import { generateEnrollmentId } from "../services/generateEnrollmentId.js";
@@ -22,6 +23,19 @@ export const createStudent = async (req, res) => {
             admission_year,
             year_of_study,
         } = req.body;
+
+        const course = await Course.findOne({ where: { course_id } });
+        if (!course) {
+            await t.rollback();
+            return res.status(400).json({ message: "Invalid course_id" });
+        }
+
+        if (req.user.course_id !== course_id) {
+            await t.rollback();
+            return res.status(403).json({
+                message: `You are not allowed to create students for course ${course_id}`
+            });
+        }
 
         // Get the role_id for 'Student'
         const studentRole = await Role.findOne({ where: { role_name: "Student" } });
@@ -119,7 +133,8 @@ export const createStudent = async (req, res) => {
 export const getAllStudents = async (req, res) => {
     try {
         const students = await Student.findAll({
-            where: { course_id: req.user.course_id }
+            where: { course_id: req.user.course_id },
+            attributes: { exclude: ["createdAt", "updatedAt"] }
         });
 
         res.json(students);
@@ -133,7 +148,15 @@ export const getAllStudents = async (req, res) => {
 export const getStudentById = async (req, res) => {
     try {
         const { id } = req.params;
-        const student = await Student.findByPk(id);
+        const student = await Student.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id
+            },
+            attributes: {
+                exclude: ["createdAt", "updatedAt"]
+            }
+        });
         if (!student) {
             return res.status(404).json({ message: "Student not found" });
         }
@@ -174,10 +197,19 @@ export const updateStudentById = async (req, res) => {
             return res.status(400).json({ message: "At least one field is required to update" });
         }
 
-        const student = await Student.findByPk(id, { transaction: t });
+        const student = await Student.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id
+            },
+            transaction: t
+        });
+
         if (!student) {
             await t.rollback();
-            return res.status(404).json({ message: "Student not found" });
+            return res.status(404).json({
+                message: "Student not found or you don't have access to update this student"
+            });
         }
         // Update only the provided fields
         const updateData = {};
@@ -208,26 +240,36 @@ export const updateStudentById = async (req, res) => {
 
 // Delete a student by ID (admins only)
 export const deleteStudentById = async (req, res) => {
-    const t = await sequelize.transaction(); //start transaction
+    const t = await sequelize.transaction();
     try {
         const { id } = req.params;
+        const student = await Student.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id   // only delete if same course
+            },
+            transaction: t
+        });
 
-        const student = await Student.findByPk(id);
         if (!student) {
             await t.rollback();
-            return res.status(404).json({ message: "Student not found" });
+            return res.status(403).json({
+                success: false,
+                message: "Access denied: You cannot delete students from another course (course filter applied)."
+            });
         }
 
         await student.destroy({ transaction: t });
-
-        // Also delete the associated user
-        const user = await User.findByPk(student.user_id);
+        const user = await User.findByPk(student.user_id, { transaction: t });
         if (user) {
             await user.destroy({ transaction: t });
         }
 
         await t.commit();
-        res.json({ message: "Student and associated user deleted successfully" });
+        return res.json({
+            success: true,
+            message: "Student and associated user deleted successfully"
+        });
     } catch (error) {
         await t.rollback();
         console.error("Error deleting student:", error);
