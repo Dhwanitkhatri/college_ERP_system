@@ -16,23 +16,19 @@ const HomePage = () => {
         <div className="grid grid-cols-2 gap-4 mb-10 max-w-2xl mx-auto">
           <div className="bg-white border border-gray-300 rounded-xl p-5 hover:shadow-md transition-shadow">
             <p className="text-gray-700 font-normal text-base">
-              Student Name 1
+              Dhwanit Khatri
             </p>
           </div>
           <div className="bg-white border border-gray-300 rounded-xl p-5 hover:shadow-md transition-shadow">
-            <p className="text-gray-700 font-normal text-base">
-              Student Name 2
-            </p>
+            <p className="text-gray-700 font-normal text-base">Jiken Patel</p>
           </div>
           <div className="bg-white border border-gray-300 rounded-xl p-5 hover:shadow-md transition-shadow">
             <p className="text-gray-700 font-normal text-base">
-              Student Name 3
+              Aayush Bhavsar
             </p>
           </div>
           <div className="bg-white border border-gray-300 rounded-xl p-5 hover:shadow-md transition-shadow">
-            <p className="text-gray-700 font-normal text-base">
-              Student Name 4
-            </p>
+            <p className="text-gray-700 font-normal text-base">Yug Panchal</p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

@@ -32,7 +32,7 @@ function KnowMore() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[1300px] mx-auto">
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 md:p-7">
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
-              Student Name 1
+              Dhwanit Khatri
             </h2>
             <p className="text-[15px] text-gray-600 mb-5">
               Team Lead & Backend Developer
@@ -58,7 +58,7 @@ function KnowMore() {
 
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 md:p-7">
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
-              Student Name 2
+              Aayush Bhavsar
             </h2>
             <p className="text-[15px] text-gray-600 mb-5">
               Frontend Developer & UI/UX Designer
@@ -84,7 +84,7 @@ function KnowMore() {
 
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 md:p-7">
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
-              Student Name 3
+              Jiken Patel
             </h2>
             <p className="text-[15px] text-gray-600 mb-5">
               Full Stack Developer
@@ -110,7 +110,7 @@ function KnowMore() {
 
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 md:p-7">
             <h2 className="text-[18px] font-medium text-gray-900 mb-2">
-              Student Name 4
+              Yug Panchal
             </h2>
             <p className="text-[15px] text-gray-600 mb-5">
               QA Engineer & Documentation Specialist
