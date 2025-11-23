@@ -7,6 +7,7 @@ import SideBarDashboard from "./Components/SideBarDashboard";
 import Dashboard from "./Pages/Dashboard";
 import { createBrowserRouter } from "react-router-dom";
 import { RouterProvider } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
 import "./App.css";
 
 const router = createBrowserRouter([
@@ -15,15 +16,15 @@ const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
-    path: "/NavbarDashboard",   //Temporary Route
+    path: "/NavbarDashboard", //Temporary Route
     element: <NavbarDashboard />,
   },
   {
-    path: "/SideBarDashboard",   //Temporary Route
+    path: "/SideBarDashboard", //Temporary Route
     element: <SideBarDashboard />,
   },
   {
-    path: "/Dashboard",   //Temporary Route
+    path: "/Dashboard", //Temporary Route
     element: <Dashboard />,
   },
   {
@@ -37,12 +38,14 @@ const router = createBrowserRouter([
   {
     path: "/KnowMore",
     element: <KnowMore />,
-  }
+  },
 ]);
 function App() {
   return (
     <>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </>
   );
 }
