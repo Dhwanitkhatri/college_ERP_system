@@ -8,7 +8,9 @@ import Dashboard from "./Pages/Dashboard";
 import { createBrowserRouter } from "react-router-dom";
 import { RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
+import AddFacultyAdmin from "./Pages/Admin/AddFacultyAdmin";
 import "./App.css";
+import AdminPanelDashboard from "./Pages/AdminPanelDashboard";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,20 @@ const router = createBrowserRouter([
   {
     path: "/Dashboard", //Temporary Route
     element: <Dashboard />,
+    children: [
+      {
+        index: true,
+        element: <AdminPanelDashboard />,
+      },
+      {
+        path: "AddFacultyAdmin",
+        element: <AddFacultyAdmin />,
+      },
+    ],
+  },
+  {
+    path: "/AddFacultyAdmin", //Temporary Route
+    element: <AddFacultyAdmin />,
   },
   {
     path: "/LoginPage",

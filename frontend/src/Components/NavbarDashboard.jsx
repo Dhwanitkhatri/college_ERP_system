@@ -2,7 +2,7 @@ import React from "react";
 import { X, Bell, CircleUserRound } from "lucide-react";
 import ThemeButton from "../ui/ThemeButton";
 
-const NavbarDashboard = () => {
+const NavbarDashboard = ({user,userName}) => {
   return (
     <div className="navMainDiv bg-white dark:bg-gray-900 flex justify-between items-center border-b-[0.8px] border-b-[var(--light-border)] dark:border-b-[0.8px] dark:border-b-[var(--light-border)] py-[0.8%] px-4">
       {/* LEFT SECTION */}
@@ -12,7 +12,7 @@ const NavbarDashboard = () => {
         </button>
 
         <h2 className="font-semibold text-black dark:text-white">
-          College ERP - User Dashboard
+          College ERP - {user} Dashboard
         </h2>
       </div>
 
@@ -30,10 +30,10 @@ const NavbarDashboard = () => {
         <div className="navUserInfoDiv border-l-[0.8px] dark:border-gray-700 flex items-center gap-4 pl-4">
           <div>
             <p className="text-right font-medium text-black dark:text-white">
-              User Name
+              {userName}
             </p>
             <p className="text-right text-gray-600 dark:text-gray-300">
-              User Role
+              {user}
             </p>
           </div>
           <CircleUserRound className="text-black dark:text-white" />
