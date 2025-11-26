@@ -1,16 +1,14 @@
 import React from "react";
 
-const PanelTemplateDashboard = ({ user, desc, children }) => {
+const PanelTemplateDashboard = ({ user, children }) => {
   return (
     <div className="mainDashContentDiv">
 
       {/* HEADER */}
-      <div className="DashHeaderDiv p-3">
+      <div className="DashHeaderDiv p-3 pb-0">
         <h1 className="text-xl font-medium mb-2 text-black dark:text-white">
           Welcome Back, {user}
         </h1>
-
-        <p className="text-gray-600 dark:text-gray-400">{desc}</p>
       </div>
 
       {/* CONTENT */}

@@ -1,15 +1,14 @@
 import React from "react";
-import PanelTemplateDashboard from "../ui/PanelTemplateDashboard";
-import DashContentPanelDashboard from "../ui/DashContentPanelDashboard";
-import ActionContainerDashboard from "../ui/ActionContainerDashboard";
-import ActionButtonDashboard from "../ui/ActionButtonDashboard";
+import DashContentPanelDashboard from "../../ui/DashContentPanelDashboard";
+import ActionContainerDashboard from "../../ui/ActionContainerDashboard";
+import ActionButtonDashboard from "../../ui/ActionButtonDashboard";
+import PanelTemplateDashboard from "../../ui/PanelTemplateDashboard";
 import { Link } from "react-router-dom";
 
 const AdminPanelDashboard = () => {
   return (
     <PanelTemplateDashboard
       user="Admin"
-      desc="Manage your college administration efficiently with these quick actions."
     >
       {/* ROW 1 */}
       <DashContentPanelDashboard>

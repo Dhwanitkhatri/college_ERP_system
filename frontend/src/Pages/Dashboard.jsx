@@ -2,7 +2,6 @@ import React from "react";
 import NavbarDashboard from "../Components/NavbarDashboard";
 import SideBarDashboard from "../Components/SideBarDashboard";
 import MainPanelDashboard from "../Components/MainPanelDashboard";
-import AdminPanelDashboard from "./AdminPanelDashboard";
 import { Outlet } from "react-router-dom";
 
 const Dashboard = () => {

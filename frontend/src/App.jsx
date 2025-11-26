@@ -9,7 +9,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import AddFacultyAdmin from "./Pages/Admin/AddFacultyAdmin";
 import "./App.css";
-import AdminPanelDashboard from "./Pages/AdminPanelDashboard";
+import AdminPanelDashboard from "./Pages/Admin/AdminPanelDashboard";
+import FacultyPanelDashboard from "./Pages/Faculty/FacultyPanelDashboard";
+import StudentPanelDashboard from "./Pages/Student/StudentPanelDashboard";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +39,26 @@ const router = createBrowserRouter([
         element: <AddFacultyAdmin />,
       },
     ],
+  },
+  {
+    path: "faculty/dashboard",
+    element: <Dashboard />,
+    children: [
+      {
+        index: true,
+        element: <FacultyPanelDashboard />
+      }
+    ]
+  },
+  {
+    path: "student/dashboard",
+    element: <Dashboard />,
+    children: [
+      {
+        index: true,
+        element: <StudentPanelDashboard />
+      }
+    ]
   },
   {
     path: "/AddFacultyAdmin", //Temporary Route
