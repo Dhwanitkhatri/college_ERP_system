@@ -2,7 +2,7 @@ import React from "react";
 
 const PanelTemplateDashboard = ({ user, desc, children }) => {
   return (
-    <div className="mainDashContentDiv bg-[var(--mainPanel-bg-color)] dark:bg-[var(--mainPanel-bg-color)] w-full p-3 border-none">
+    <div className="mainDashContentDiv">
 
       {/* HEADER */}
       <div className="DashHeaderDiv p-3">
