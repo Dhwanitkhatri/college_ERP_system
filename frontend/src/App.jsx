@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     element: <SideBarDashboard />,
   },
   {
-    path: "/Dashboard", //Temporary Route
+    path: "admin/Dashboard", //Temporary Route
     element: <Dashboard />,
     children: [
       {

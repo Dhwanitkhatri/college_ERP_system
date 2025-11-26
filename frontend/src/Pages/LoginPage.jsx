@@ -2,7 +2,7 @@ import { useState } from "react";
 import api from "../api/axios.js";
 import { ArrowLeft } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate , Navigate } from "react-router-dom";
 import ThemeButton from "../ui/ThemeButton.jsx";
 
 function LoginPage() {
@@ -58,6 +58,8 @@ function LoginPage() {
       console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
 
       console.log("Response:", res.data);
+      console.log("res.data.redirectTo")
+      navigate(res.data.redirectTo)
     } catch (err) {
       const statusCode = err.response?.status;
       console.log(err);
