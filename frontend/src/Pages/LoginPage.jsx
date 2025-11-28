@@ -56,8 +56,6 @@ function LoginPage() {
       const end = performance.now(); //  End time
       console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
 
-      console.log("Response:", res.data);
-      console.log("res.data.redirectTo");
       navigate(res.data.redirectTo);
     } catch (err) {
       const statusCode = err.response?.status;

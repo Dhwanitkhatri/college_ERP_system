@@ -3,17 +3,25 @@ import NavbarDashboard from "../Components/NavbarDashboard";
 import SideBarDashboard from "../Components/SideBarDashboard";
 import MainPanelDashboard from "../Components/MainPanelDashboard";
 import { Outlet } from "react-router-dom";
+import { useSidebar } from "../context/SidebarContext";
 
 const Dashboard = () => {
-  return (
-    <div className="dashboardContainer h-screen w-full flex flex-col overflow-hidden divide-y">
-      <NavbarDashboard user="Admin" userName="Prof. Steve"/>  {/*added temporarily */}
+  const { sidebarOpen } = useSidebar();
 
-      <div className="sideBarMainContent flex flex-1 overflow-hidden divide-x border-none">
+  return (
+    <div className="min-h-screen flex flex-col">
+      <NavbarDashboard />
+
+      <div className="flex flex-1 overflow-hidden">
         <SideBarDashboard />
-        <MainPanelDashboard>
-          <Outlet />
-        </MainPanelDashboard>
+
+        <main
+          className={`flex-1 transition-all duration-300`}
+        >
+          <MainPanelDashboard>
+            <Outlet />
+          </MainPanelDashboard>
+        </main>
       </div>
     </div>
   );

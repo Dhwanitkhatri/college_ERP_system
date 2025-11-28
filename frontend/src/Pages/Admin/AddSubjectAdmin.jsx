@@ -2,12 +2,14 @@ import React from "react";
 import { ArrowLeft } from "lucide-react";
 import AddFacultyButton from "../../ui/AddFacultyButton";
 import CancelButton from "../../ui/CancelButton";
+import { useNavigate } from "react-router-dom";
 
 const AddSubjectAdmin = () => {
+  const navigate = useNavigate();
   return (
     <div className="mainDiv min-h-screen bg-white p-8 font-sans text-gray-900">
       <div className="headerDiv max-w-3xl mx-auto mb-8 flex items-start gap-4">
-        <button className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 transition-colors">
+        <button className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 transition-colors" onClick={() => navigate(-1)}>
           <ArrowLeft size={20} />
         </button>
         <div className="titleDiv">

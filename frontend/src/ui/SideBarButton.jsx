@@ -16,7 +16,7 @@ const SideBarButton = ({ to, icon: Icon, label }) => {
     >
       <div
         className="
-          sideBarButtonDiv flex items-center gap-3 p-[5%] rounded-md
+          sideBarButtonDiv flex items-center gap-3 p-[5%] my-[3%] rounded-md
           transition-colors duration-200
 
           /* Hover Styles */

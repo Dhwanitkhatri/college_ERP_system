@@ -8,10 +8,14 @@ import Dashboard from "./Pages/Dashboard";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import AddFacultyAdmin from "./Pages/Admin/AddFacultyAdmin";
+import AddStudentAdmin from "./Pages/Admin/AddStudentAdmin";
+import AddSubjectAdmin from "./Pages/Admin/AddSubjectAdmin";
+import AddCourseAdmin from "./Pages/Admin/AddCourseAdmin";
 import "./App.css";
 import AdminPanelDashboard from "./Pages/Admin/AdminPanelDashboard";
 import FacultyPanelDashboard from "./Pages/Faculty/FacultyPanelDashboard";
 import StudentPanelDashboard from "./Pages/Student/StudentPanelDashboard";
+import {SidebarProvider} from "./context/SidebarContext";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +42,18 @@ const router = createBrowserRouter([
         path: "AddFacultyAdmin",
         element: <AddFacultyAdmin />,
       },
+      {
+        path: "AddStudentAdmin",
+        element: <AddStudentAdmin />,
+      },
+      {
+        path: "AddSubjectAdmin",
+        element: <AddSubjectAdmin />,
+      },
+      {
+        path: "AddCourseAdmin",
+        element: <AddCourseAdmin />,
+      },
     ],
   },
   {
@@ -46,9 +62,9 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <FacultyPanelDashboard />
-      }
-    ]
+        element: <FacultyPanelDashboard />,
+      },
+    ],
   },
   {
     path: "student/dashboard",
@@ -56,9 +72,9 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <StudentPanelDashboard />
-      }
-    ]
+        element: <StudentPanelDashboard />,
+      },
+    ],
   },
   {
     path: "/AddFacultyAdmin", //Temporary Route
@@ -81,7 +97,9 @@ function App() {
   return (
     <>
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <SidebarProvider>
+          <RouterProvider router={router} />
+        </SidebarProvider>
       </ThemeProvider>
     </>
   );
