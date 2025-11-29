@@ -4,7 +4,7 @@ import { LayoutDashboard } from "lucide-react";
 import SideBarLogoutButton from "../ui/SideBarLogoutButton";
 import { useSidebar } from "../context/SidebarContext";
 
-const SideBarDashboard = () => {
+const SideBarDashboard = ({onLogoutClick}) => {
   const { sidebarOpen } = useSidebar();
 
   return (
@@ -24,7 +24,7 @@ const SideBarDashboard = () => {
     <SideBarButton to="/Dashboard" label="Dashboard" icon={LayoutDashboard} />
 
     <div className="pt-4 border-t dark:border-gray-700">
-      <SideBarLogoutButton />
+      <SideBarLogoutButton onClick={onLogoutClick} />
     </div>
   </div>
 </aside>

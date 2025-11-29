@@ -1,29 +1,67 @@
-import React from "react";
+import React, { useState } from "react";
 import NavbarDashboard from "../Components/NavbarDashboard";
 import SideBarDashboard from "../Components/SideBarDashboard";
 import MainPanelDashboard from "../Components/MainPanelDashboard";
 import { Outlet } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
 
-const Dashboard = () => {
+const Dashboard = ({ children }) => {
   const { sidebarOpen } = useSidebar();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  function handleSidebarLogout() {
+    setShowLogoutModal(true);
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <NavbarDashboard />
+    <>
+      <div
+        className={
+          showLogoutModal
+            ? "dashboardHolderDiv blur-sm pointer-events-none min-h-screen flex flex-col"
+            : "min-h-screen flex flex-col"
+        }
+      >
+        <NavbarDashboard />
 
-      <div className="flex flex-1 overflow-hidden">
-        <SideBarDashboard />
+        <div className="flex flex-1 overflow-hidden">
+          <SideBarDashboard onLogoutClick={handleSidebarLogout} />
 
-        <main
-          className={`flex-1 transition-all duration-300`}
-        >
-          <MainPanelDashboard>
-            <Outlet />
-          </MainPanelDashboard>
-        </main>
+          <main className={`flex-1 transition-all duration-300`}>
+            <MainPanelDashboard>
+              <Outlet />
+            </MainPanelDashboard>
+          </main>
+        </div>
       </div>
-    </div>
+      {showLogoutModal && 
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg w-80">
+            <h2 className="text-lg font-semibold mb-3">
+              Are you sure you want to logout?
+            </h2>
+
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-700"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="px-4 py-2 rounded-lg bg-red-600 text-white"
+                onClick={() => {
+                  sessionStorage.clear();
+                  window.location.href = "/LoginPage";
+                }}
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </>
   );
 };
 
