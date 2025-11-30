@@ -16,6 +16,7 @@ import AdminPanelDashboard from "./Pages/Admin/AdminPanelDashboard";
 import FacultyPanelDashboard from "./Pages/Faculty/FacultyPanelDashboard";
 import StudentPanelDashboard from "./Pages/Student/StudentPanelDashboard";
 import {SidebarProvider} from "./context/SidebarContext";
+import ManageFacultyAdmin from "./Pages/Admin/ManageFacultyAdmin";
 
 const router = createBrowserRouter([
   {
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
       {
         path: "AddCourseAdmin",
         element: <AddCourseAdmin />,
+      },
+      {
+        path: "ManageFacultyAdmin",
+        element: <ManageFacultyAdmin />,
       },
     ],
   },

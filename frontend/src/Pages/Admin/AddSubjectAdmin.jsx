@@ -7,7 +7,11 @@ import { useNavigate } from "react-router-dom";
 const AddSubjectAdmin = () => {
   const navigate = useNavigate();
   return (
+<<<<<<< Updated upstream
     <div className="mainDiv min-h-screen bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">
+=======
+    <div className="mainDiv h-full bg-white p-8 font-sans text-gray-900">
+>>>>>>> Stashed changes
       <div className="headerDiv max-w-3xl mx-auto mb-8 flex items-start gap-4">
         <button
           className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
