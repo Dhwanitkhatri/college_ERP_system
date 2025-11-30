@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
 
-import AddFacultyButton from "../../ui/AddFacultyButton";
+import AddFacultyButton from "../../ui/AddButton";
 import CancelButton from "../../ui/CancelButton";
 import { useNavigate } from "react-router-dom";
 

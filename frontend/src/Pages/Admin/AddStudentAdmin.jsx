@@ -1,24 +1,18 @@
 import React from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
-import AddFacultyButton from "../../ui/AddFacultyButton";
+import AddFacultyButton from "../../ui/AddButton";
 import CancelButton from "../../ui/CancelButton";
 import { useNavigate } from "react-router-dom";
 
 const AddStudentAdmin = () => {
   const navigate = useNavigate();
   return (
-<<<<<<< Updated upstream
-    <div className="maindiv min-h-screen bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <div className="maindiv h-full bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">
       <div className="headerdiv max-w-3xl mx-auto mb-8 flex items-start gap-4">
         <button
           className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           onClick={() => navigate(-1)}
         >
-=======
-    <div className="maindiv h-full bg-white p-8 font-sans text-gray-900">
-      <div className="headerdiv max-w-3xl m-auto flex items-start gap-4">
-        <button className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 transition-colors" onClick={() => navigate(-1)}>
->>>>>>> Stashed changes
           <ArrowLeft size={20} />
         </button>
         <div className="titlediv">

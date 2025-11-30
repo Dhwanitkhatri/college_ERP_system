@@ -1,15 +1,14 @@
 import React from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
-import AddFacultyButton from "../../ui/AddFacultyButton";
+import AddFacultyButton from "../../ui/AddButton";
 import CancelButton from "../../ui/CancelButton";
+import NavigateBackButton from "../../ui/NavigateBackButton";
 
 const AddClassAdmin = () => {
   return (
     <div className="mainDiv h-full bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">
       <div className="headerDiv max-w-3xl mx-auto mb-8 flex items-start gap-4">
-        <button className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-          <ArrowLeft size={20} />
-        </button>
+        <NavigateBackButton />
         <div className="titleDiv">
           <h1 className="text-xl font-bold dark:text-white">Add New Class</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">

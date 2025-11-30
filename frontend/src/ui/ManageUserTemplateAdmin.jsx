@@ -1,5 +1,5 @@
 import React from "react";
-import AddFacultyButton from "./AddFacultyButton";
+import AddFacultyButton from "./AddButton";
 import NavigateBackButton from "./NavigateBackButton";
 
 const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {

@@ -17,8 +17,8 @@ const AdminPanelDashboard = () => {
           <Link to="AddStudentAdmin"><ActionButtonDashboard title="Add Student" /></Link>
           <Link to="AddCourseAdmin"><ActionButtonDashboard title="Add Course" /></Link>
           <Link to="AddSubjectAdmin"><ActionButtonDashboard title="Add Subject" /></Link>
-          <ActionButtonDashboard title="Add New Classes" />
-          <ActionButtonDashboard title="Add Time Table" />
+          <Link to="AddClassAdmin"><ActionButtonDashboard title="Add New Classes" /></Link>
+          <Link to="AddTimeTableAdmin"><ActionButtonDashboard title="Add Time Table" /></Link>
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Manage">
