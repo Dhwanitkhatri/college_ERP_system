@@ -17,6 +17,7 @@ import FacultyPanelDashboard from "./Pages/Faculty/FacultyPanelDashboard";
 import StudentPanelDashboard from "./Pages/Student/StudentPanelDashboard";
 import {SidebarProvider} from "./context/SidebarContext";
 import ManageFacultyAdmin from "./Pages/Admin/ManageFacultyAdmin";
+import ManageStudentAdmin from "./Pages/Admin/ManageStudentAdmin";
 import AddClassAdmin from "./Pages/Admin/AddClassAdmin";
 import AddTimeTableAdmin from "./Pages/Admin/AddTimeTableAdmin";
 
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
       {
         path: "ManageFacultyAdmin",
         element: <ManageFacultyAdmin />,
+      },
+      {
+        path: "ManageStudentAdmin",
+        element: <ManageStudentAdmin />,
       },
     ],
   },
