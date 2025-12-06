@@ -37,7 +37,7 @@ const AdminPanelDashboard = () => {
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Communication & Services">
-          <ActionButtonDashboard title="Send Notifications" />
+          <Link to="SendNotificationAdmin"><ActionButtonDashboard title="Send Notifications" /></Link>
           <ActionButtonDashboard title="Check Fee Status" />
           <ActionButtonDashboard title="Live Classes" />
         </ActionContainerDashboard>

@@ -15,11 +15,12 @@ import "./App.css";
 import AdminPanelDashboard from "./Pages/Admin/AdminPanelDashboard";
 import FacultyPanelDashboard from "./Pages/Faculty/FacultyPanelDashboard";
 import StudentPanelDashboard from "./Pages/Student/StudentPanelDashboard";
-import {SidebarProvider} from "./context/SidebarContext";
+import { SidebarProvider } from "./context/SidebarContext";
 import ManageFacultyAdmin from "./Pages/Admin/ManageFacultyAdmin";
 import ManageStudentAdmin from "./Pages/Admin/ManageStudentAdmin";
 import AddClassAdmin from "./Pages/Admin/AddClassAdmin";
 import AddTimeTableAdmin from "./Pages/Admin/AddTimeTableAdmin";
+import SendNotificationAdmin from "./Pages/Admin/SendNotificationAdmin";
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
       {
         path: "ManageStudentAdmin",
         element: <ManageStudentAdmin />,
+      },
+      {
+        path: "SendNotificationAdmin",
+        element: <SendNotificationAdmin />,
       },
     ],
   },
