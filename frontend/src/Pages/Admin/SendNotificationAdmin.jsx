@@ -11,7 +11,7 @@ import NavigateBackButton from "../../ui/NavigateBackButton";
 
 export default function SendNotificationAdmin() {
   return (
-    <div className="mainDiv h-full bg-white dark:bg-[#1a1a1a] p-4 md:p-8 font-sans overflow-auto transition-colors duration-200">
+    <div className="mainDiv min-h-max bg-white dark:bg-[#1a1a1a] p-4 md:p-8 font-sans transition-colors duration-200">
       <div className="headerDiv max-w-5xl mx-auto">
         <NavigateBackButton />
         <div className="titleDiv mb-8">

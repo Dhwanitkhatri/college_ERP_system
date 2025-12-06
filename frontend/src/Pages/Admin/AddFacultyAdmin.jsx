@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 
 const AddFacultyAdmin = () => {
   const navigate = useNavigate();
-
   return (
     <div
       className="

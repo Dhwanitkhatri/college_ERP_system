@@ -17,8 +17,8 @@ const Dashboard = ({ children }) => {
       <div
         className={
           showLogoutModal
-            ? "dashboardHolderDiv blur-sm pointer-events-none min-h-screen flex flex-col"
-            : "min-h-screen flex flex-col"
+            ? "dashboardHolderDiv blur-sm pointer-events-none h-screen flex flex-col"
+: "h-screen flex flex-col"
         }
       >
         <NavbarDashboard />
@@ -26,7 +26,7 @@ const Dashboard = ({ children }) => {
         <div className="flex flex-1 overflow-hidden">
           <SideBarDashboard onLogoutClick={handleSidebarLogout} />
 
-          <main className={`flex-1 transition-all duration-300`}>
+          <main className={`flex-1 h-full overflow-hidden transition-all duration-300`}>
             <MainPanelDashboard>
               <Outlet />
             </MainPanelDashboard>
