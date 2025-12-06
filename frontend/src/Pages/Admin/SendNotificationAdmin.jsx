@@ -11,18 +11,21 @@ import NavigateBackButton from "../../ui/NavigateBackButton";
 
 export default function SendNotificationAdmin() {
   return (
-    <div className="mainDiv min-h-max bg-white dark:bg-[#1a1a1a] p-4 md:p-8 font-sans transition-colors duration-200">
+    <div className="mainDiv min-h-max bg-white dark:bg-[#000000] p-4 md:p-8 font-sans transition-colors duration-200">
       <div className="headerDiv max-w-5xl mx-auto">
-        <NavigateBackButton />
-        <div className="titleDiv mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-[#f3f4f6]">
-            Send Notifications
-          </h1>
-          <p className="text-gray-500 dark:text-[#9ca3af] mt-1">
-            Send announcements and notifications to students and faculty
-          </p>
+        <div className="flex items-center gap-4 mb-8">
+          <NavigateBackButton />
+          <div className="titleDiv">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-[#f3f4f6]">
+              Send Notifications
+            </h1>
+            <p className="text-gray-500 dark:text-[#9ca3af] mt-1">
+              Send announcements and notifications to students and faculty
+            </p>
+          </div>
         </div>
-        <div className="contentDiv space-y-6">
+
+        <div className="contentDiv space-y-6 border border-gray-200 dark:border-[#1F2937] rounded-lg p-6">
           <div className="gridDiv grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="sendToDiv flex flex-col gap-1.5">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -91,6 +94,7 @@ export default function SendNotificationAdmin() {
             </button>
           </div>
         </div>
+
         <div className="recentNotification mt-12">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-[#f3f4f6] mb-4">
             Recent Notifications
