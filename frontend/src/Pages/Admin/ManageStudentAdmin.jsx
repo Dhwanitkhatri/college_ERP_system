@@ -1,5 +1,5 @@
 import React from "react";
-import ManageUserTemplateAdmin from "../../ui/ManageUserTemplateAdmin";
+import ManageUserTemplateAdmin from "../../ui/Templates/ManageUserTemplateAdmin";
 
 const ManageStudentAdmin = () => {
   return (

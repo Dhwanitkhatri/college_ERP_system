@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
-import AddFacultyButton from "../../ui/AddButton";
-import CancelButton from "../../ui/CancelButton";
+import AddButton from "../../ui/Buttons/AddButton";
+import CancelButton from "../../ui/Buttons/CancelButton";
 import { useNavigate } from "react-router-dom";
 
 const AddCourseAdmin = () => {
@@ -40,7 +40,7 @@ const AddCourseAdmin = () => {
             />
           </div>
           <div className="buttonDiv flex items-center gap-3 pt-4">
-            <AddFacultyButton />
+            <AddButton />
             <CancelButton />
           </div>
         </form>

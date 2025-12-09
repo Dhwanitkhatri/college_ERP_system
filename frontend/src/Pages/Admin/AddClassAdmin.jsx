@@ -1,8 +1,8 @@
 import React from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
-import AddFacultyButton from "../../ui/AddButton";
-import CancelButton from "../../ui/CancelButton";
-import NavigateBackButton from "../../ui/NavigateBackButton";
+import AddButton from "../../ui/Buttons/AddButton";
+import CancelButton from "../../ui/Buttons/CancelButton";
+import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
 const AddClassAdmin = () => {
   return (
@@ -72,7 +72,7 @@ const AddClassAdmin = () => {
           </div>
 
           <div className="buttonsDiv flex items-center gap-3 pt-4">
-            <AddFacultyButton />
+            <AddButton />
             <CancelButton />
           </div>
         </form>

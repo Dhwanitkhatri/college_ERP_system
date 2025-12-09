@@ -2,7 +2,7 @@ import { useState } from "react";
 import api from "../api/axios.js";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate, Navigate } from "react-router-dom";
-import ThemeButton from "../ui/ThemeButton.jsx";
+import ThemeButton from "../ui/Buttons/ThemeButton.jsx";
 
 function LoginPage() {
   const navigate = useNavigate();

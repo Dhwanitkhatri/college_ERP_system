@@ -1,6 +1,6 @@
 import React from "react";
-import AddFacultyButton from "./AddButton";
-import NavigateBackButton from "./NavigateBackButton";
+import AddButton from "../../ui/Buttons/AddButton";
+import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
 const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {
 
@@ -25,7 +25,7 @@ const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {
                 <input type="text" placeholder={searchDesc} className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 
                    bg-white dark:bg-gray-900 text-gray-900 dark:text-white 
                    focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600"></input>
-                <AddFacultyButton />
+                <AddButton />
             </div>
             <div className="userListTableDiv w-full">
                 {children}

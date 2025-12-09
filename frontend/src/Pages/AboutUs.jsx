@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Moon } from "lucide-react";
-import ThemeButton from "../ui/ThemeButton";
+import ThemeButton from "../ui/Buttons/ThemeButton";
 import { useTheme } from "../context/ThemeContext";
 
 function AboutUs() {

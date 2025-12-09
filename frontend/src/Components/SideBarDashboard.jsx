@@ -1,7 +1,7 @@
 import React from "react";
-import SideBarButton from "../ui/SideBarButton";
+import SideBarButton from "../ui/Buttons/SideBarButton";
 import { LayoutDashboard } from "lucide-react";
-import SideBarLogoutButton from "../ui/SideBarLogoutButton";
+import SideBarLogoutButton from "../ui/Buttons/SideBarLogoutButton";
 import { useSidebar } from "../context/SidebarContext";
 
 const SideBarDashboard = ({onLogoutClick}) => {

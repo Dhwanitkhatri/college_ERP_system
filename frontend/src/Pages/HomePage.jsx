@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ThemeButton from "../ui/ThemeButton";
+import ThemeButton from "../ui/Buttons/ThemeButton";
 
 const HomePage = () => {
   return (

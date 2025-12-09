@@ -1,35 +1,17 @@
 import React from "react";
-import { ArrowLeft } from "lucide-react";
 
-import AddFacultyButton from "../../ui/AddButton";
-import CancelButton from "../../ui/CancelButton";
+import AddButton from "../../ui/Buttons/AddButton";
+import CancelButton from "../../ui/Buttons/CancelButton";
 import { useNavigate } from "react-router-dom";
+import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
 const AddFacultyAdmin = () => {
   const navigate = useNavigate();
   return (
-    <div
-      className="
-        wrapperDiv min-h-full w-full
-        bg-white dark:bg-gray-950 
-        p-3 md:p-6 font-sans 
-        text-gray-900 dark:text-white
-      "
-    >
+    <div className="wrapperDiv min-h-full w-full bg-white dark:bg-gray-950 p-3 md:p-6 font-sans text-gray-900 dark:text-white">
       <div className="mainContainer max-w-3xl mx-auto mb-8">
         <div className="firstDiv flex items-start gap-4">
-          <button
-            className="
-              p-2 -ml-2
-              text-gray-500 dark:text-gray-400 
-              hover:bg-gray-100 dark:hover:bg-gray-800 
-              rounded-full transition-colors
-            "
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft size={20} />
-          </button>
-
+          <NavigateBackButton />
           <div className="titleText">
             <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
               Add New Faculty
@@ -51,7 +33,6 @@ const AddFacultyAdmin = () => {
         "
       >
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-
           {/* Full Name */}
           <div className="fullNameDiv space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -125,7 +106,7 @@ const AddFacultyAdmin = () => {
           </div>
 
           <div className="buttonDiv flex items-center gap-3 mt-8 flex-wrap">
-            <AddFacultyButton />
+            <AddButton />
             <CancelButton />
           </div>
         </form>
@@ -133,6 +114,5 @@ const AddFacultyAdmin = () => {
     </div>
   );
 };
-
 
 export default AddFacultyAdmin;

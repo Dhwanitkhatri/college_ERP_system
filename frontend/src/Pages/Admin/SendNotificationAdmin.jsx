@@ -7,7 +7,7 @@ import {
   Users,
   Calendar,
 } from "lucide-react";
-import NavigateBackButton from "../../ui/NavigateBackButton";
+import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
 export default function SendNotificationAdmin() {
   return (

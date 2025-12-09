@@ -1,8 +1,8 @@
 import React from "react";
-import PanelTemplateDashboard from "../../ui/PanelTemplateDashboard";
-import DashContentPanelDashboard from "../../ui/DashContentPanelDashboard";
-import ActionContainerDashboard from "../../ui/ActionContainerDashboard";
-import ActionButtonDashboard from "../../ui/ActionButtonDashboard";
+import DashContentPanelDashboard from "../../ui/Templates/DashContentPanelDashboard";
+import ActionContainerDashboard from "../../ui/Templates/ActionContainerDashboard";
+import ActionButtonDashboard from "../../ui/Buttons/ActionButtonDashboard";
+import PanelTemplateDashboard from "../../ui/Templates/PanelTemplateDashboard";
 
 const AdminPanelDashboard = () => {
   return (

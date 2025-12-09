@@ -1,6 +1,6 @@
 import React from "react";
 import { X, Bell, CircleUserRound, Menu } from "lucide-react";
-import ThemeButton from "../ui/ThemeButton";
+import ThemeButton from "../ui/Buttons/ThemeButton";
 import { useSidebar } from "../context/SidebarContext";
 
 const NavbarDashboard = ({user,userName}) => {
