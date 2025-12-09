@@ -49,5 +49,10 @@ export const Student = sequelize.define("Student",{
     year_of_study: {
         type: DataTypes.ENUM("FY", "SY", "TY", "LY"),
         allowNull: false,
-    }
+    },
+    profile_picture: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
+}
 });

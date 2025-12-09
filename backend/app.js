@@ -9,11 +9,14 @@ import studentRoutes from './src/routes/studentRoutes.js';
 import facultyRoutes from './src/routes/facultyRoutes.js';
 import timetableRoutes from './src/routes/timetableRoutes.js';
 import  classRoutes from './src/routes/classRoutes.js';
+import notificationRoutes from './src/routes/notificationRoutes.js';
+import profilePictureRoutes from './src/routes/profilePictureRoutes.js';
 import { responseTimeLogger } from './src/middleware/responseTimeLogger.js';
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads")); //serve static files from uploads directory
 
 const PORT = process.env.PORT || 5000;
 
@@ -31,6 +34,8 @@ app.use("/api/students",studentRoutes);
 app.use("/api/faculties",facultyRoutes);
 app.use("/api/timetables",timetableRoutes);
 app.use("/api/classes",classRoutes);
+app.use("/api/notifications",notificationRoutes);
+app.use("/api/picture",profilePictureRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');

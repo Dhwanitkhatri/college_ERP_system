@@ -36,5 +36,10 @@ export const Admin = sequelize.define("Admin", {
         validate: {
             is: /^(\+91)?\d{10}$/ 
         }       
-    }
+    },
+    profile_picture: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null
+}
 });
