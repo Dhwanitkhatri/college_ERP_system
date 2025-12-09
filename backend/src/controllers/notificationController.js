@@ -197,6 +197,97 @@ export const getUserNotifications = async (req, res) => {
     }
 };
 
+// send class-specific and Year  notification (admins only)
+export const sendClassYearNotification = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const { notification_id, title, message, date, class_id, year } = req.body;
+        if (!title || !message || !class_id || !year) {
+            await t.rollback();
+            return res.status(400).json({
+                message: "Provide title, message, class_id, and year"
+            });
+        }   
+        const students = await Student.findAll({
+            where: {
+                course_id: req.user.course_id,
+                class_id,
+                year_of_study: year
+            },
+            attributes: ["user_id"],
+            transaction: t
+        });
+        const userIds = students.map(s => s.user_id);
+
+        if (userIds.length === 0) {
+            await t.rollback();
+            return res.status(404).json({
+                success: false,
+                message: "No students found for the specified class and year"
+            });
+        }
+        const notifications = userIds.map(uid => ({
+            notification_id: `${notification_id}-${uid}`,
+            title,
+            message,
+            date,
+            user_id: uid,
+            read_status: false
+        }));
+        await Notification.bulkCreate(notifications, { transaction: t });
+        await t.commit();
+        res.status(201).json({
+            success: true,
+            message: `Notification sent to ${userIds.length} students in class ${class_id}, year ${year}`,
+            data: {
+                title,
+                message,
+                total: userIds.length,
+                class_id,
+                year
+            }
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error("Error sending class-year notification:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        });
+    }
+};
+
+// Send notification to a single user (admin only)
+export const sendSingleUserNotification = async (req, res) => {
+    try {
+        const { notification_id, title, message, date, user_id } = req.body;
+        if (!title || !message || !user_id) {
+            return res.status(400).json({
+                message: "Provide title, message, and user_id"
+            });
+        }
+        const notification = await Notification.create({
+            notification_id,
+            title,
+            message,
+            date,
+            user_id,
+            read_status: false
+        });
+        res.status(201).json({  
+            success: true,
+            message: "Notification sent successfully",
+            data: notification
+        });
+    }catch (error) {
+        console.error("Error sending single user notification:", error);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong"
+        });
+    }   
+};
+
 // Mark notification as read
 export const markNotificationAsRead = async (req, res) => {
     try {

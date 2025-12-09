@@ -2,6 +2,8 @@ import express from "express";
 import {
     createNotification,
     sendGroupNotification,
+    sendClassYearNotification,
+    sendSingleUserNotification,
     getAllNotifications,
     getUserNotifications,
     markNotificationAsRead,
@@ -18,6 +20,12 @@ router.post("/create", authMiddleware, adminMiddleware, createNotification);
 
 // Send notification to group (students OR faculty)
 router.post("/group", authMiddleware, adminMiddleware, sendGroupNotification);
+
+// Send notification to class and year
+router.post("/class-year", authMiddleware, adminMiddleware, sendClassYearNotification);
+
+// Send notification to single user
+router.post("/single", authMiddleware, adminMiddleware, sendSingleUserNotification);
 
 // Get all notifications (admin only)
 router.get("/all", authMiddleware, adminMiddleware, getAllNotifications);
