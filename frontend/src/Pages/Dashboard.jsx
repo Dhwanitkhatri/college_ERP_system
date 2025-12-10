@@ -9,6 +9,7 @@ import api from "../api/axios.js";
 
 const Dashboard =  ({ children }) => {
   const token = localStorage.getItem("token");
+  const [dashboardData, setDashboardData] = useState(null);
   console.log("Dashboard Token:", token);
   const { sidebarOpen } = useSidebar();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -44,7 +45,7 @@ const Dashboard =  ({ children }) => {
             : "h-screen flex flex-col"
         }
       >
-        <NavbarDashboard />
+        <NavbarDashboard userRole={dashboardData?.role} userName={dashboardData?.data?.name}/>
 
         <div className="flex flex-1 overflow-hidden">
           <SideBarDashboard onLogoutClick={handleSidebarLogout} />

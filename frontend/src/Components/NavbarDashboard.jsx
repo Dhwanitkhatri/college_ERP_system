@@ -3,7 +3,7 @@ import { X, Bell, CircleUserRound, Menu } from "lucide-react";
 import ThemeButton from "../ui/Buttons/ThemeButton";
 import { useSidebar } from "../context/SidebarContext";
 
-const NavbarDashboard = ({user,userName}) => {
+const NavbarDashboard = ({userRole,userName}) => {
   const {sidebarOpen, toggleSidebar} = useSidebar();
   return (
     <div className="navMainDiv bg-white dark:bg-gray-900 flex justify-between items-center border-b-[0.8px] border-b-[var(--light-border)] dark:border-b-[0.8px] dark:border-b-[var(--light-border)] py-[0.8%] px-4">
@@ -14,7 +14,7 @@ const NavbarDashboard = ({user,userName}) => {
         </button>
 
         <h2 className="font-semibold text-black dark:text-white">
-          College ERP - {user} Dashboard
+          College ERP - {userRole} Dashboard
         </h2>
       </div>
 
@@ -35,7 +35,7 @@ const NavbarDashboard = ({user,userName}) => {
               {userName}
             </p>
             <p className="text-right text-gray-600 dark:text-gray-300">
-              {user}
+              {userRole}
             </p>
           </div>
           <CircleUserRound className="text-black dark:text-white" />
