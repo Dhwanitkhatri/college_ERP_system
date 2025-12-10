@@ -47,7 +47,7 @@ function KnowMore() {
                 Dhwanit Khatri
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Team Lead & Backend Developer
+                Backend Developer
               </p>
             </div>
 
@@ -58,10 +58,11 @@ function KnowMore() {
                 Contribution:
               </h3>
               <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                Led the project development, designed and implemented the
-                database architecture, developed RESTful APIs, and ensured
-                seamless integration between frontend and backend systems. Also
-                managed project timelines and coordinated team activities.
+                This member focused entirely on backend development, building
+                the core logic and server-side functionality of the ERP system.
+                They ensured smooth data processing, API handling, and system
+                performance. Their contribution formed the backbone of the
+                project.
               </p>
             </div>
 
@@ -72,7 +73,7 @@ function KnowMore() {
                 Expertise:
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                Node.js, MongoDB, API Design
+                Node.js , MySQL , API Design
               </p>
             </div>
           </div>
@@ -95,10 +96,11 @@ function KnowMore() {
                 Contribution:
               </h3>
               <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                Designed the user interface and user experience for all system
-                modules. Implemented responsive frontend components using React
-                and Tailwind CSS. Created interactive dashboards and ensured
-                cross-browser compatibility and accessibility standards.
+                This member handled all major frontend development tasks,
+                turning ideas into responsive screens and functional layouts.
+                They also designed the overall UI, focusing on clarity,
+                usability, and smooth user experience. Their work shaped how
+                users interact with the ERP.
               </p>
             </div>
 
@@ -109,7 +111,7 @@ function KnowMore() {
                 Expertise:
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                React, Tailwind CSS, Figma
+                React, Tailwind CSS , Figma
               </p>
             </div>
           </div>
@@ -121,7 +123,7 @@ function KnowMore() {
                 Jiken Patel
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Full Stack Developer
+                Database Designer & Backend Support
               </p>
             </div>
 
@@ -132,10 +134,11 @@ function KnowMore() {
                 Contribution:
               </h3>
               <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                Developed key features including the student management module,
-                attendance tracking system, and grade management interface.
-                Implemented authentication and authorization systems. Conducted
-                code reviews and maintained code quality standards.
+                This member mainly managed the database structure, queries, and
+                data relationships essential for the ERP system. They also
+                provided small backend support where needed. Their work ensured
+                data accuracy, security, and proper integration with the
+                backend.
               </p>
             </div>
 
@@ -146,7 +149,7 @@ function KnowMore() {
                 Expertise:
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                React, Express.js, SQL
+                Node.js , Express.js , MySQL
               </p>
             </div>
           </div>
@@ -158,7 +161,7 @@ function KnowMore() {
                 Yug Panchal
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                QA Engineer & Documentation Specialist
+                UI Implementation & Frontend Development
               </p>
             </div>
 
@@ -169,10 +172,11 @@ function KnowMore() {
                 Contribution:
               </h3>
               <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                Created comprehensive test cases and performed extensive testing
-                of all system modules. Identified and reported bugs, ensuring
-                system reliability. Prepared technical documentation, user
-                manuals, and conducted user training sessions.
+                This member worked on implementing the designed UI into fully
+                functional frontend components. They ensured the screens matched
+                the design and delivered a clean, consistent interface. Their
+                contribution helped finalize the visual and interactive elements
+                of the project.
               </p>
             </div>
 
@@ -183,7 +187,7 @@ function KnowMore() {
                 Expertise:
               </h3>
               <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                Testing, Documentation, User Training
+                React js , Tailwind CSS
               </p>
             </div>
           </div>
