@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
 import NavbarDashboard from "../Components/NavbarDashboard";
 import SideBarDashboard from "../Components/SideBarDashboard";
 import MainPanelDashboard from "../Components/MainPanelDashboard";
@@ -6,19 +7,33 @@ import { Outlet } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
 import api from "../api/axios.js";
 
-const Dashboard = ({ children }) => {
+const Dashboard =  ({ children }) => {
   const token = localStorage.getItem("token");
+  console.log("Dashboard Token:", token);
   const { sidebarOpen } = useSidebar();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   function handleSidebarLogout() {
     setShowLogoutModal(true);
   }
-  const res = api.get("/api/dashboard", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  console.log(res.data);
+   useEffect(() => {
+    if (!token) return;
+
+    const fetchDashboard = async () => {
+      try {
+        const res = await api.get("/api/dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Dashboard Data:", res.data);
+        setDashboardData(res.data);
+      } catch (err) {
+        console.log("Dashboard API Error:", err);
+      }
+    };
+
+    fetchDashboard();
+  }, [token]);
 
   return (
     <>
