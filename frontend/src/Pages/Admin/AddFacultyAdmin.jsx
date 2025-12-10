@@ -1,117 +1,59 @@
 import React from "react";
-
+import { ChevronDown } from "lucide-react";
 import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
-import { useNavigate } from "react-router-dom";
-import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
+import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
+import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import { useForm } from "react-hook-form";
 
 const AddFacultyAdmin = () => {
-  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: {errors}
+  } = useForm()
+
+  // async function handleClick(e) {
+  //   //Ahiya Api call karvi
+  // //   try {
+  // //     const res = await api.post("api/faculties/",{name , phone , email})
+  // //   } catch (error) {
+  // //     const statusCode = err.response?.status;
+  // //     console.log(err);
+  // //   }
+  // // }
   return (
-    <div className="wrapperDiv min-h-full w-full bg-white dark:bg-gray-950 p-3 md:p-6 font-sans text-gray-900 dark:text-white">
-      <div className="mainContainer max-w-3xl mx-auto mb-8">
-        <div className="firstDiv flex items-start gap-4">
-          <NavigateBackButton />
-          <div className="titleText">
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
-              Add New Faculty
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              Enter faculty member details to add them to the system
-            </p>
+    <DashboardChildPageTemplate title="Add New Faculty" desc="Enter faculty member details to add them to the system">
+      <DashboardChildPageCard>
+        <form action="" className="addFaculty">
+          <div className="fullNameDiv">
+            <label className="fullNameLabel custom-label">Full Name</label>
+            <input type="text" placeholder="Enter Full Name" className="fullNameInput custom-input" 
+            {...register("fullName",
+              {
+                required:"Please Fill This Field",
+                minLength:{value:3,message:"Minimum 3 Characters are Required"},
+                maxLength:{value:50,message:"Maximum Character Limit is 50"},
+                pattern:{value:/^[A-Za-z ]+$/,message:"Only Alphabets are Allowed"}
+              }
+            )}/>
           </div>
-        </div>
-      </div>
-
-      <div
-        className="
-          formDiv max-w-3xl mx-auto 
-          border border-gray-200 dark:border-gray-800 
-          rounded-xl p-8 
-          shadow-[0_2px_8px_rgba(0,0,0,0.04)] 
-          bg-white dark:bg-gray-900
-        "
-      >
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-          {/* Full Name */}
-          <div className="fullNameDiv space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Full Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Enter full name"
-              className="
-                w-full border border-gray-200 dark:border-gray-700 
-                rounded-lg px-4 py-3 
-                text-sm 
-                text-gray-900 dark:text-white
-                placeholder:text-gray-400 dark:placeholder:text-gray-500
-                focus:outline-none 
-                focus:border-gray-400 dark:focus:border-gray-500 
-                focus:ring-1 
-                focus:ring-gray-400 dark:focus:ring-gray-500 
-                transition-all shadow-sm
-                bg-white dark:bg-gray-900
-              "
-            />
-          </div>
-
-          {/* Phone Number */}
-          <div className="phoneNumberDiv space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              placeholder="Enter 10-digit phone number"
-              className="
-                w-full border border-gray-200 dark:border-gray-700 
-                rounded-lg px-4 py-3 
-                text-sm 
-                text-gray-900 dark:text-white
-                placeholder:text-gray-400 dark:placeholder:text-gray-500
-                focus:outline-none 
-                focus:border-gray-400 dark:focus:border-gray-500 
-                focus:ring-1 
-                focus:ring-gray-400 dark:focus:ring-gray-500 
-                transition-all shadow-sm
-                bg-white dark:bg-gray-900
-              "
-            />
-          </div>
-
-          {/* Email Address */}
-          <div className="emailDiv space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Email Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              placeholder="Enter email address"
-              className="
-                w-full border border-gray-200 dark:border-gray-700 
-                rounded-lg px-4 py-3 
-                text-sm 
-                text-gray-900 dark:text-white
-                placeholder:text-gray-400 dark:placeholder:text-gray-500
-                focus:outline-none 
-                focus:border-gray-400 dark:focus:border-gray-500 
-                focus:ring-1 
-                focus:ring-gray-400 dark:focus:ring-gray-500 
-                transition-all shadow-sm
-                bg-white dark:bg-gray-900
-              "
-            />
-          </div>
-
-          <div className="buttonDiv flex items-center gap-3 mt-8 flex-wrap">
-            <AddButton />
-            <CancelButton />
+          <div className="fullNameDiv">
+            <label className="fullNameLabel custom-label">Full Name</label>
+            <input type="text" placeholder="Enter Full Name" className="fullNameInput custom-input" 
+            {...register("fullName",
+              {
+                required:"Please Fill This Field",
+                minLength:{value:3,message:"Minimum 3 Characters are Required"},
+                maxLength:{value:50,message:"Maximum Character Limit is 50"},
+                pattern:{value:/^[A-Za-z ]+$/,message:"Only Alphabets are Allowed"}
+              }
+            )}/>
           </div>
         </form>
-      </div>
-    </div>
+      </DashboardChildPageCard>
+    </DashboardChildPageTemplate>
   );
 };
 

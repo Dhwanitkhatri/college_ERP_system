@@ -7,7 +7,7 @@ import { useTheme } from "../context/ThemeContext";
 function AboutUs() {
   const { theme } = useTheme();
   return (
-    <div className="min-h-screen w-screen bg-white dark:bg-gray-900 p-6 md:p-10">
+    <div className="min-h-screen w-screen bg-[--aboutUs-bg] dark:bg-[--aboutUs-bg] p-6 md:p-10">
       <div className="max-w-[95%] mx-auto mb-12 flex justify-between items-center">
         <Link to="/">
           <button className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">

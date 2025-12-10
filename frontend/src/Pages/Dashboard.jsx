@@ -4,13 +4,21 @@ import SideBarDashboard from "../Components/SideBarDashboard";
 import MainPanelDashboard from "../Components/MainPanelDashboard";
 import { Outlet } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
+import api from "../api/axios.js";
 
 const Dashboard = ({ children }) => {
+  const token = localStorage.getItem("token");
   const { sidebarOpen } = useSidebar();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   function handleSidebarLogout() {
     setShowLogoutModal(true);
   }
+  const res = api.get("/api/dashboard", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  console.log(res.data);
 
   return (
     <>
@@ -18,7 +26,7 @@ const Dashboard = ({ children }) => {
         className={
           showLogoutModal
             ? "dashboardHolderDiv blur-sm pointer-events-none h-screen flex flex-col"
-: "h-screen flex flex-col"
+            : "h-screen flex flex-col"
         }
       >
         <NavbarDashboard />
@@ -26,14 +34,16 @@ const Dashboard = ({ children }) => {
         <div className="flex flex-1 overflow-hidden">
           <SideBarDashboard onLogoutClick={handleSidebarLogout} />
 
-          <main className={`flex-1 h-full overflow-hidden transition-all duration-300`}>
+          <main
+            className={`flex-1 h-full overflow-hidden transition-all duration-300`}
+          >
             <MainPanelDashboard>
               <Outlet />
             </MainPanelDashboard>
           </main>
         </div>
       </div>
-      {showLogoutModal && 
+      {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg w-80">
             <h2 className="text-lg font-semibold mb-3 dark:text-white">
@@ -60,7 +70,7 @@ const Dashboard = ({ children }) => {
             </div>
           </div>
         </div>
-      }
+      )}
     </>
   );
 };

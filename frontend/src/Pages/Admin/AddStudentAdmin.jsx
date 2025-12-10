@@ -3,18 +3,14 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import { useNavigate } from "react-router-dom";
+import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
 const AddStudentAdmin = () => {
   const navigate = useNavigate();
   return (
     <div className="maindiv h-full bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">
       <div className="headerdiv max-w-3xl mx-auto mb-8 flex items-start gap-4">
-        <button
-          className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft size={20} />
-        </button>
+        <NavigateBackButton />
         <div className="titlediv">
           <h1 className="text-xl font-bold dark:text-white">Add New Student</h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">

@@ -8,33 +8,144 @@
 }
 
 :root {
-  /* light theme */
-  --login-bg-color: #F5F5F4;
-  --primary-color: #ffffff;
-  --light-text: #6b7280;
-  --mainPanel-bg-color: #F9FAFB;
-  --light-border: #E5E7EB;
+  /* -------------------- LIGHT MODE COLORS -------------------- */
 
-  --sidebar-bg: #ffffff;
-  --navbar-bg: #ffffff;
-  --text-color: #1f2937;
+  /* Backgrounds */
+  --bg-primary: #FFFFFF;        /* Main BG, cards, navbar */
+  --bg-secondary: #F9FAFB;      /* Dashboard main area */
+  --bg-tertiary: #F5F5F4;       /* Login page BG */
+  --bg-hover: #F3F4F6;          /* Generic hover BG */
+  --bg-error-hover: #FEF2F2;    /* Error hover light */
+
+  /* Text Colors */
+  --text-primary: #111827;      /* Headings */
+  --text-secondary: #374151;    /* Labels, body */
+  --text-muted: #4B5563;        /* Descriptions */
+  --text-light: #6B7280;        /* Placeholder */
+  --text-very-light: #9CA3AF;   /* Disabled */
+
+  /* Borders */
+  --border-light: #E5E7EB;      /* Card borders */
+  --border-medium: #D1D5DB;     /* Inputs, outlines */
+
+  /* Buttons */
+  --btn-primary-bg: #000000;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover: #1F2937;
+  --btn-aboutUs: #ffffff;
+
+  --btn-blue-bg: #2563EB;
+  --btn-blue-hover: #1D4ED8;
+  --btn-blue-text: #FFFFFF;
+
+  /* Special */
+  --dot-notification: #EF4444;
+  --error-text: #DC2626;
+  --error-border: #FCA5A5;
+
+  /* Component Specific (Optional) */
+  --sidebar-bg: var(--bg-primary);
+  --navbar-bg: var(--bg-primary);
+  --mainpanel-bg: var(--bg-secondary);
+  --aboutUs-bg:  #ffffff;
 }
 
-/* dark theme */
+/* -------------------- DARK MODE -------------------- */
 .dark {
-  --login-bg-color: #0f0f0f;
-  --primary-color: #1a1a1a;
-  --light-text: #9ca3af;
-  --mainPanel-bg-color: #030712;
-  --light-border: #1F2937;
+  /* Backgrounds */
+  --bg-primary: #000000;
+  --bg-secondary: #030712;
+  --bg-tertiary: #030712;
+  --bg-hover: #1F2937;
+  --bg-error-hover: #450A0A;
 
-  --sidebar-bg: #1a1a1a;
-  --navbar-bg: #1a1a1a;
-  --text-color: #f3f4f6;
+  /* Text Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --text-light: #6B7280;
+
+  /* Borders */
+  --border-light: #1F2937;
+  --border-medium: #374151;
+
+  /* Buttons */
+  --btn-primary-bg: #FFFFFF;
+  --btn-primary-text: #000000;
+  --btn-primary-hover: #E5E7EB;
+  --btn-aboutUs: #1F2937;
+
+  /* Special */
+  --error-text: #F87171;
+  --error-border: #B91C1C;
+
+  /* Component Specific */
+  --sidebar-bg: #111827;
+  --navbar-bg: #111827;
+  --mainpanel-bg: #030712;
+  --card-bg: #111827;
+  --aboutUs-bg: #111827;
 }
 
+/* ---------- Shared Classes ---------- */
 .table-row-style {
-  @apply border-b border-gray-200 dark:border-gray-700 
-         text-left px-4 py-2 
-         text-gray-700 dark:text-gray-300;
+  @apply border-b 
+         px-4 py-2 
+         text-left 
+         text-gray-700 dark:text-gray-300 
+         border-gray-200 dark:border-gray-700;
+}
+
+/*---------------- Class for Input Field --------------------*/
+.custom-input {
+  width: 100%;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.375rem; /* rounded-md */
+  padding: 0.625rem 0.75rem; /* py-2.5 px-3 */
+  font-size: 0.875rem; /* text-sm */
+  outline: none;
+  transition: color 0.2s, background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Placeholder */
+.custom-input::placeholder {
+  color: #9ca3af; /* gray-400 */
+}
+
+/* Focus */
+.custom-input:focus {
+  border-color: #9ca3af; 
+  box-shadow: 0 0 0 1px #9ca3af;
+}
+
+/* ---------------- DARK MODE ---------------- */
+
+.dark .custom-input {
+  background-color: #0a0a0a; /* gray-950 */
+  color: white;
+  border-color: #374151; /* gray-700 */
+}
+
+.dark .custom-input::placeholder {
+  color: #6b7280; /* gray-500 */
+}
+
+.dark .custom-input:focus {
+  border-color: #6b7280;
+  box-shadow: 0 0 0 1px #6b7280;
+}
+
+/*----------------Class for label of input------------------*/
+.custom-label {
+  display: block;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: #374151; /* gray-700 */
+  margin-bottom: 0.375rem; /* mb-1.5 */
+  transition: color 0.2s;
+}
+
+/* Dark mode */
+.dark .custom-label {
+  color: #d1d5db; /* gray-300 */
 }

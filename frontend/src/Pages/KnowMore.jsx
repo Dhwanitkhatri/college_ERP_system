@@ -8,10 +8,10 @@ function KnowMore() {
   const { theme } = useTheme();
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-black p-6 md:p-10 transition-colors duration-200 font-sans">
+    <div className="min-h-screen w-full bg-[--aboutUs-bg] dark:bg-[--aboutUs-bg] p-6 md:p-10 transition-colors duration-200 font-sans">
       <div className="max-w-7xl mx-auto mb-10 flex justify-between items-center">
         <Link to="/AboutUs">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] rounded-lg hover:bg-gray-50 dark:hover:bg-[#222] transition-all shadow-sm">
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-[--btn-aboutUs] dark:bg-[--btn-aboutUs] border border-gray-200 dark:border-[#333] rounded-lg hover:bg-gray-50 dark:hover:bg-[#222] transition-all shadow-sm">
             <ArrowLeft
               className={`w-4 h-4 stroke-[2.5] ${
                 theme === "light" ? "text-gray-700" : "text-gray-200"

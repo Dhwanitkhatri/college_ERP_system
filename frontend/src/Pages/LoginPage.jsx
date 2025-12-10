@@ -51,8 +51,8 @@ function LoginPage() {
     //calling API from backend (later)
     try {
       const res = await api.post("/api/auth/login", { username, password });
-      console.log("response ", res.data);
-
+      localStorage.setItem("token", res.data.token);
+      console.log(res.data.token);
       const end = performance.now(); //  End time
       console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
 
