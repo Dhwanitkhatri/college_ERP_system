@@ -4,7 +4,8 @@ import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
-import { useForm } from "react-hook-form";
+import { get, useForm } from "react-hook-form";
+import api from "../../api/axios.js";
 
 const AddFacultyAdmin = () => {
   const {
@@ -14,10 +15,30 @@ const AddFacultyAdmin = () => {
     formState: {errors}
   } = useForm()
 
-  function onSubmit(data) {
-    console.log(data);
-    alert("button is working");
-    //ahiya api call karvi
+  async function onSubmit(data) {
+    try {
+      const token = localStorage.getItem("token");
+       const res = await api.post("/api/faculties",{
+      name: data.fullName,
+      phone: data.phoneNo,
+      email: data.email,
+   }, {
+        headers: {
+          Authorization: `Bearer ${token}`,   
+          "Content-Type": "application/json"
+        }
+      });
+   if(res.status === 201){
+    console.log(res.data);
+    alert("Faculty Added Successfully");
+   } else {
+    console.log(res.data);
+    alert("Error Adding Faculty");
+   }
+    } catch (error) {
+      
+    }
+    
   }
 
   return (
