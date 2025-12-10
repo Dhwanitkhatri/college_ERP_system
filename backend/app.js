@@ -15,7 +15,13 @@ import dashboardRoutes from './src/routes/dashboardRoutes.js';
 import { responseTimeLogger } from './src/middleware/responseTimeLogger.js';
 dotenv.config();
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",  // Your frontend URL
+  credentials: true,                 // allow cookies if needed
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]  // IMPORTANT: allow Bearer token
+}));
+app.options("/", cors()); // Enable pre-flight for all routes
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); //serve static files from uploads directory
 
@@ -37,7 +43,7 @@ app.use("/api/timetables",timetableRoutes);
 app.use("/api/classes",classRoutes);
 app.use("/api/notifications",notificationRoutes);
 app.use("/api/picture",profilePictureRoutes);
-app.use("/api",dashboardRoutes);
+app.use("/api/dashboard",dashboardRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');

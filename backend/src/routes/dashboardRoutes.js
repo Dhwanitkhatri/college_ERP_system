@@ -5,6 +5,6 @@ import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Secure route — token required
-router.get("/dashboard", authMiddleware, getDashboardData);
+router.get("/", authMiddleware, getDashboardData);
 
 export default router;

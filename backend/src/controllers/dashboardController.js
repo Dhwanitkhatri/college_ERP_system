@@ -36,7 +36,7 @@ export const getDashboardData = async (req, res) => {
     if (!dashboardData) {
       return res.status(404).json({ message: "Dashboard data not found" });
     }
-
+      console.log("AUTH HEADER FROM BROWSER:", req.headers.authorization);
     return res.json({
       message: `${role} dashboard fetched successfully`,
       role,
