@@ -47,16 +47,14 @@ export const login = async (req, res) => {
     }
 
     const course_id = courseData?.course_id || null;
-    const name = courseData?.name || null;
+    //const name = courseData?.name || null;
 
     //  Lightweight JWT payload → smaller token → faster sign
     const token = jwt.sign(
       {
         uid: user.user_id,
         role,
-        course_id,
-        name
-
+        course_id
       },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }

@@ -11,6 +11,7 @@ import timetableRoutes from './src/routes/timetableRoutes.js';
 import  classRoutes from './src/routes/classRoutes.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
 import profilePictureRoutes from './src/routes/profilePictureRoutes.js';
+import dashboardRoutes from './src/routes/dashboardRoutes.js';
 import { responseTimeLogger } from './src/middleware/responseTimeLogger.js';
 dotenv.config();
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/timetables",timetableRoutes);
 app.use("/api/classes",classRoutes);
 app.use("/api/notifications",notificationRoutes);
 app.use("/api/picture",profilePictureRoutes);
+app.use("/api",dashboardRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');
