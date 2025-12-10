@@ -18,27 +18,27 @@ const AddFacultyAdmin = () => {
   async function onSubmit(data) {
     try {
       const token = localStorage.getItem("token");
-       const res = await api.post("/api/faculties",{
-      name: data.fullName,
-      phone: data.phoneNo,
-      email: data.email,
-   }, {
-        headers: {
-          Authorization: `Bearer ${token}`,   
-          "Content-Type": "application/json"
+      const res = await api.post(
+        "/api/faculties",
+        {
+          name: data.fullName,
+          phone: data.phoneNo,
+          email: data.email,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      });
-   if(res.status === 201){
-    console.log(res.data);
-    alert("Faculty Added Successfully");
-   } else {
-    console.log(res.data);
-    alert("Error Adding Faculty");
-   }
+      );
+
+      console.log(res.data);
+      alert("Faculty Added Successfully");
     } catch (error) {
-      
+      console.log(res.data);
+      alert("Error Adding Faculty");
     }
-    
   }
 
   return (
