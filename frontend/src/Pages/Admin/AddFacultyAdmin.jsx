@@ -4,7 +4,7 @@ import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
-import { get, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import api from "../../api/axios.js";
 
 const AddFacultyAdmin = () => {

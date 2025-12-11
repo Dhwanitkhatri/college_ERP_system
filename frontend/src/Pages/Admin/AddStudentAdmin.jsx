@@ -41,9 +41,9 @@ const AddStudentAdmin = () => {
     }
   
     return (
-      <DashboardChildPageTemplate title="Add New Faculty" desc="Enter faculty member details to add them to the system">
+      <DashboardChildPageTemplate title="Add New Student" desc="Enter student details to add them to the system">
         <DashboardChildPageCard>
-          <form action="" className="addStudent" onSubmit={handleSubmit(onSubmit)}>
+          <form className="addStudent" onSubmit={handleSubmit(onSubmit)}>
             <div className="fullNameDiv">
               <label className="fullNameLabel custom-label">Full Name</label>
               <input type="text" placeholder="Enter Full Name" className="fullNameInput custom-input" 
@@ -57,12 +57,26 @@ const AddStudentAdmin = () => {
               )}/>
             </div>
             {errors.fullName && <p>{errors.fullName.message}</p>}
+            <div className="genderDiv">
+              <label className="genderLabel custom-label">Gender</label>
+              <select className="genderInput custom-input" 
+              {...register("gender",
+                {
+                  required:"Please Fill This Field",
+                }
+              )}>
+                <option value="" hidden>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+            {errors.gender && <p className="errorMsg">{errors.gender.message}</p>}
             <div className="phoneNoDiv">
               <label className="phoneNoLabel custom-label">Phone</label>
               <input type="text" placeholder="Enter Phone Number" className="phoneNoInput custom-input" 
               {...register("phoneNo",
                 {
-                  required:"Please Fill This Field",
                   pattern:{value:/^[0-9]{10}$/,message:"Please Enter Valid Phone Number"}
                 }
               )}/>
@@ -89,6 +103,34 @@ const AddStudentAdmin = () => {
               )}/>
             </div>
             {errors.dob && <p className="errorMsg">{errors.dob.message}</p>}
+            <div className="admissionYearDiv">
+              <label className="admissionYearLabel custom-label">Year of Admission</label>
+              <input
+                type="number"
+                className="admissionYearInput custom-input"
+                defaultValue={new Date().getFullYear()}
+                readOnly     // prevents editing
+                {...register("admissionYear", {
+                  required: "Please Fill This Field",
+                })}
+              />
+            </div>
+            {errors.admissionYear && <p className="errorMsg">{errors.admissionYear.message}</p>}
+            <div className="yearOfStudyingDiv">
+              <label className="yearOfStudyingLabel custom-label">Year of Studying</label>
+              <select className="yearOfStudyingInput custom-input" 
+              {...register("yearOfStudying",
+                {
+                  required:"Please Fill This Field",
+                }
+              )}>
+                <option value="" hidden>Select Year of Studying</option>
+                <option value="First Year">First Year</option>
+                <option value="Second Year">Second Year</option>
+                <option value="Third Year">Third Year</option>
+              </select>
+            </div>
+            {errors.gender && <p className="errorMsg">{errors.gender.message}</p>}
         <AddButton />
         <CancelButton />
           </form>

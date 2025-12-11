@@ -15,7 +15,6 @@ const AdminPanelDashboard = () => {
         <ActionContainerDashboard title="Add New">
           <Link to="AddFacultyAdmin"> <ActionButtonDashboard title="Add Faculty" /></Link>
           <Link to="AddStudentAdmin"><ActionButtonDashboard title="Add Student" /></Link>
-          <Link to="AddCourseAdmin"><ActionButtonDashboard title="Add Course" /></Link>
           <Link to="AddSubjectAdmin"><ActionButtonDashboard title="Add Subject" /></Link>
           <Link to="AddClassAdmin"><ActionButtonDashboard title="Add New Classes" /></Link>
           <Link to="AddTimeTableAdmin"><ActionButtonDashboard title="Add Time Table" /></Link>
