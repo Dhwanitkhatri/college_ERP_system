@@ -21,6 +21,7 @@ import ManageStudentAdmin from "./Pages/Admin/ManageStudentAdmin";
 import AddClassAdmin from "./Pages/Admin/AddClassAdmin";
 import AddTimeTableAdmin from "./Pages/Admin/AddTimeTableAdmin";
 import SendNotificationAdmin from "./Pages/Admin/SendNotificationAdmin";
+import ManageProfileAdmin from "./Pages/Admin/ManageProfileAdmin";
 
 const router = createBrowserRouter([
   {
@@ -78,6 +79,10 @@ const router = createBrowserRouter([
       {
         path: "SendNotificationAdmin",
         element: <SendNotificationAdmin />,
+      },
+      {
+        path: "ManageProfileAdmin",
+        element: <ManageProfileAdmin />,
       },
     ],
   },
