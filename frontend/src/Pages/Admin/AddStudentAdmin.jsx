@@ -4,6 +4,7 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import api from "../../api/axios.js";
 
 const AddStudentAdmin = () => {
   const {
@@ -18,11 +19,15 @@ const AddStudentAdmin = () => {
       try {
         const token = localStorage.getItem("token");
         const res = await api.post(
-          "/api/faculties",
+          "/api/students/",
           {
             name: data.fullName,
-            phone: data.phoneNo,
+            //phone: data.phoneNo,
             email: data.email,
+            dob: data.dob,
+            gender: data.gender,
+            admission_year: data.admissionYear, 
+            year_of_study: data.yearOfStudying,
           },
           {
             headers: {
@@ -31,12 +36,10 @@ const AddStudentAdmin = () => {
             },
           }
         );
-  
-        console.log(res.data);
-        alert("Faculty Added Successfully");
+        alert("Student Added Successfully");
       } catch (error) {
-        console.log(res.data);
-        alert("Error Adding Faculty");
+        console.log(error);
+        alert("Error Adding Student");
       }
     }
   
@@ -125,9 +128,10 @@ const AddStudentAdmin = () => {
                 }
               )}>
                 <option value="" hidden>Select Year of Studying</option>
-                <option value="First Year">First Year</option>
-                <option value="Second Year">Second Year</option>
-                <option value="Third Year">Third Year</option>
+                <option value="FY">First Year</option>
+                <option value="SY">Second Year</option>
+                <option value="TY">Third Year</option>
+                <option value="LY">Last Year</option>
               </select>
             </div>
             {errors.gender && <p className="errorMsg">{errors.gender.message}</p>}

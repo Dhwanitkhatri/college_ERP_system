@@ -11,10 +11,12 @@ import { generateEnrollmentId } from "../services/generateEnrollmentId.js";
 export const createStudent = async (req, res) => {
     const t = await sequelize.transaction(); //start transaction
     const student_id = await generateEnrollmentId(req.user.course_id);
+    const course_id = req.user.course_id; //assign course_id from admin creating 
+    console.log("Creating student for course_id:", course_id);
     try {
         const {
             // student_id,
-            course_id,
+            
             //class_id,
             name,
             dob,
@@ -24,7 +26,7 @@ export const createStudent = async (req, res) => {
             year_of_study,
         } = req.body;
 
-        const course = await Course.findOne({ where: { course_id } });
+        const course = await Course.findOne({ where: {course_id} });
         if (!course) {
             await t.rollback();
             return res.status(400).json({ message: "Invalid course_id" });
@@ -104,6 +106,7 @@ export const createStudent = async (req, res) => {
                 user_id: newUser.user_id,
                 course_id,
                 //class_id,
+                department_id: course.department_id,
                 name,
                 dob,
                 gender,

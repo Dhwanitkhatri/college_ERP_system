@@ -16,6 +16,10 @@ export const Student = sequelize.define("Student",{
         type:DataTypes.INTEGER,
         allowNull:true
     },
+    department_id:{//this is foreign key from department table
+        type:DataTypes.STRING,
+        allowNull:true
+    },
     course_id:{//this is foreign key from department table
         type:DataTypes.STRING,
         allowNull:false

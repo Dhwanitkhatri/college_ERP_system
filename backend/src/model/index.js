@@ -135,6 +135,18 @@ Admin.belongsTo(User, { foreignKey: 'user_id' , targetKey:'user_id'});
 Course.hasOne(Admin, { foreignKey: 'course_id' , sourceKey:'course_id'});
 Admin.belongsTo(Course, { foreignKey: 'course_id' , targetKey:'course_id' });
 
+/* One Department → Many Students */
+Department.hasMany(Student, {
+  foreignKey: "department_id",
+  sourceKey: "department_id"
+});
+
+/* Each Student → One Department */
+Student.belongsTo(Department, {
+  foreignKey: "department_id",
+  targetKey: "department_id"
+});
+
 /* -------------------------------------------------
    EXPORT MODELS & SEQUELIZE
 --------------------------------------------------*/

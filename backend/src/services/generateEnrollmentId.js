@@ -8,7 +8,8 @@ export const generateEnrollmentId = async(course_id)=>{
     //to check the course exists or not 
     if(!course_id) throw new Error('course id not provide');
 
-   const courseName = course_id.replace(/\d/, "");// removes digits
+ const courseName = course_id.replace(/\d+/g, "");
+
     //get the current year
     const year = new Date().getFullYear().toString().slice(-2);
     const prefix = `${year}${courseName}`; // to find the total  student 
