@@ -13,6 +13,7 @@ import notificationRoutes from './src/routes/notificationRoutes.js';
 import profilePictureRoutes from './src/routes/profilePictureRoutes.js';
 import dashboardRoutes from './src/routes/dashboardRoutes.js';
 import { responseTimeLogger } from './src/middleware/responseTimeLogger.js';
+import subjectRoutes from './src/routes/subjectRoutes.js';
 dotenv.config();
 const app = express();
 app.use(cors({
@@ -44,6 +45,7 @@ app.use("/api/classes",classRoutes);
 app.use("/api/notifications",notificationRoutes);
 app.use("/api/picture",profilePictureRoutes);
 app.use("/api/dashboard",dashboardRoutes);
+app.use("/api/subjects",subjectRoutes);
 
 app.get('/', (req, res) => {
   res.send('College ERP System Backend is running');
