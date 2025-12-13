@@ -45,23 +45,7 @@ export default function SendNotificationAdmin() {
                 </div>
               </div>
             </div>
-            <div className="channelDiv flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Channel{" "}
-                <span className="text-red-500 dark:text-red-400">*</span>
-              </label>
-              <div className="optionDiv relative">
-                <select className="w-full border border-gray-300 dark:border-[#1F2937] rounded-md px-3 py-2.5 bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-[#f3f4f6] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm appearance-none cursor-pointer">
-                  <option>Email</option>
-                  <option>SMS</option>
-                  <option>Email & SMS</option>
-                  <option>In App Notification</option>
-                </select>
-                <div className="downIconDiv absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-[#9ca3af]" />
-                </div>
-              </div>
-            </div>
+            
           </div>
           <div className="titleDiv flex flex-col gap-1.5">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
