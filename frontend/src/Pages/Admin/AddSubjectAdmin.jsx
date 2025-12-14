@@ -31,7 +31,6 @@ const AddSubjectAdmin = () => {
       })
       .then((response) => {
         setFaculties(response.data);
-        console.log("Faculties data:", response.data);
       })
       .catch((error) => {
         console.error("Error fetching faculties:", error);
