@@ -2,6 +2,8 @@ import React from "react";
 import ManageUserTemplateAdmin from "../../ui/Templates/ManageUserTemplateAdmin";
 import { useState, useEffect } from "react";
 import api from "../../api/axios.js";
+import EditButton from "../../ui/Buttons/EditButton.jsx";
+import DeleteButton from "../../ui/Buttons/DeleteButton.jsx";
 
 const ManageFacultyAdmin = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
@@ -69,11 +71,8 @@ const ManageFacultyAdmin = () => {
         <td className="table-row-style">{faculty.faculty_id}</td>
         <td className="table-row-style">{faculty.email}</td>
         <td className="table-row-style">{faculty.phone}</td>
-        <td className="table-row-style">
-          <button className="px-3 py-1 rounded bg-black text-white">
-            Edit
-          </button>
-        </td>
+        <td className="table-row-style"><EditButton/> </td>
+        <td className="table-row-style"> <DeleteButton/></td>
       </tr>
     ))
   )}

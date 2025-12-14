@@ -83,12 +83,7 @@ export default function SendNotificationAdmin() {
                     <option>All Faculty</option>
                     <option>Specific Class</option>
                     <option>Individual User</option>
-                    <option value="">Select Student</option>
-                    {students.map((s) => (
-                      <option key={s.student_id} value={s.student_id}>
-                        {s.name} ({s.student_id})
-                      </option>
-                    ))}
+                   
                   </select>
                   <div className="downIconDiv absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <ChevronDown className="h-4 w-4 text-gray-500 dark:text-[#9ca3af]" />
@@ -114,13 +109,12 @@ export default function SendNotificationAdmin() {
                       <option value="" disabled>
                         Select Name
                       </option>
-                      <option>Aayush</option>
-                      <option>Jiken</option>
-                      <option>Dhwanit</option>
-                      <option>Yug</option>
-                      <option>Meet</option>
-                      <option>Vala</option>
-                      <option>Vyom</option>
+                     
+                    {students.map((s) => (
+                      <option key={s.student_id} value={s.student_id}>
+                        {s.name} ({s.student_id})
+                      </option>
+                    ))}
                     </select>
                     <div className="downIconDiv absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                       <ChevronDown className="h-4 w-4 text-gray-500 dark:text-[#9ca3af]" />
