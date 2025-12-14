@@ -3,10 +3,10 @@ import React from "react";
 const ActionContainerDashboard = ({ title, children }) => {
   return (
     <div
-      className="
-        border border-gray-200 dark:border-gray-700 rounded-xl
-        bg-white dark:bg-gray-800 shadow-sm p-5
-        w-full
+      className=" theme-transition
+        border-[0.8px] border-[var(--border-light)] dark:border-[var(--border-light)] rounded-xl
+        bg-[var(--card-bg)] dark:bg-[var(--card-bg)] shadow-sm p-5
+        w-full 
       "
     >
       <h3 className="font-semibold text-lg text-black dark:text-white mb-4">

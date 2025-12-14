@@ -13,6 +13,15 @@ const AddStudentAdmin = () => {
       watch,
       formState: {errors}
     } = useForm()
+
+    const today = new Date();
+    const maxDOB = new Date(
+      today.getFullYear() - 17,
+      today.getMonth(),
+      today.getDate()
+    )
+    .toISOString()
+    .split("T")[0];
   
     async function onSubmit(data) {
       alert("done");
@@ -47,7 +56,7 @@ const AddStudentAdmin = () => {
       <DashboardChildPageTemplate title="Add New Student" desc="Enter student details to add them to the system">
         <DashboardChildPageCard>
           <form className="addStudent" onSubmit={handleSubmit(onSubmit)}>
-            <div className="fullNameDiv">
+            <div className="fullNameDiv form-field">
               <label className="fullNameLabel custom-label">Full Name</label>
               <input type="text" placeholder="Enter Full Name" className="fullNameInput custom-input" 
               {...register("fullName",
@@ -58,9 +67,9 @@ const AddStudentAdmin = () => {
                   pattern:{value:/^[A-Za-z ]+$/,message:"Only Alphabets are Allowed"}
                 }
               )}/>
+            {errors.fullName && <p className="custom-error">{errors.fullName.message}</p>}
             </div>
-            {errors.fullName && <p>{errors.fullName.message}</p>}
-            <div className="genderDiv">
+            <div className="genderDiv form-field">
               <label className="genderLabel custom-label">Gender</label>
               <select className="genderInput custom-input" 
               {...register("gender",
@@ -73,9 +82,9 @@ const AddStudentAdmin = () => {
                 <option value="Female">Female</option>
                 <option value="Others">Others</option>
               </select>
+            {errors.gender && <p className="custom-error">{errors.gender.message}</p>}
             </div>
-            {errors.gender && <p className="errorMsg">{errors.gender.message}</p>}
-            <div className="phoneNoDiv">
+            <div className="phoneNoDiv form-field">
               <label className="phoneNoLabel custom-label">Phone</label>
               <input type="text" placeholder="Enter Phone Number" className="phoneNoInput custom-input" 
               {...register("phoneNo",
@@ -83,9 +92,9 @@ const AddStudentAdmin = () => {
                   pattern:{value:/^[0-9]{10}$/,message:"Please Enter Valid Phone Number"}
                 }
               )}/>
+            {errors.phoneNo && <p className="custom-error">{errors.phoneNo.message}</p>}
             </div>
-            {errors.phoneNo && <p className="errorMsg">{errors.phoneNo.message}</p>}
-            <div className="emailDiv">
+            <div className="emailDiv form-field">
               <label className="emailLabel custom-label">Email address</label>
               <input type="text" placeholder="Enter Email address" className="emailInput custom-input" 
               {...register("email",
@@ -94,19 +103,19 @@ const AddStudentAdmin = () => {
                   pattern:{value:/^[^\s@]+@[^\s@]+\.[^\s@]+$/,message:"Enter a valid email address"}
                 }
               )}/>
+            {errors.email && <p className="custom-error">{errors.email.message}</p>}
             </div>
-            {errors.email && <p className="errorMsg">{errors.email.message}</p>}
-            <div className="dobDiv">
+            <div className="dobDiv form-field">
               <label className="dobLabel custom-label">Date of Birth</label>
-              <input type="date" placeholder="Enter Date of Birth" className="dobInput custom-input" 
+              <input type="date" placeholder="Enter Date of Birth" max={maxDOB} className="dobInput custom-input" 
               {...register("dob",
                 {
                   required:"Please Fill This Field",
                 }
               )}/>
+            {errors.dob && <p className="custom-error">{errors.dob.message}</p>}
             </div>
-            {errors.dob && <p className="errorMsg">{errors.dob.message}</p>}
-            <div className="admissionYearDiv">
+            <div className="admissionYearDiv form-field">
               <label className="admissionYearLabel custom-label">Year of Admission</label>
               <input
                 type="number"
@@ -117,9 +126,9 @@ const AddStudentAdmin = () => {
                   required: "Please Fill This Field",
                 })}
               />
+            {errors.admissionYear && <p className="custom-error">{errors.admissionYear.message}</p>}
             </div>
-            {errors.admissionYear && <p className="errorMsg">{errors.admissionYear.message}</p>}
-            <div className="yearOfStudyingDiv">
+            <div className="yearOfStudyingDiv form-field">
               <label className="yearOfStudyingLabel custom-label">Year of Studying</label>
               <select className="yearOfStudyingInput custom-input" 
               {...register("yearOfStudying",
@@ -133,10 +142,13 @@ const AddStudentAdmin = () => {
                 <option value="TY">Third Year</option>
                 <option value="LY">Last Year</option>
               </select>
+            {errors.gender && <p className="custom-error">{errors.gender.message}</p>}
             </div>
-            {errors.gender && <p className="errorMsg">{errors.gender.message}</p>}
+            <div className="form-actions">
+
         <AddButton />
         <CancelButton />
+            </div>
           </form>
         </DashboardChildPageCard>
       </DashboardChildPageTemplate>

@@ -47,7 +47,9 @@
   --sidebar-bg: var(--bg-primary);
   --navbar-bg: var(--bg-primary);
   --mainpanel-bg: var(--bg-secondary);
+  --card-bg: #ffffff;
   --aboutUs-bg:  #ffffff;
+  --blackbtn-bg: #ffffff;
 }
 
 /* -------------------- DARK MODE -------------------- */
@@ -82,9 +84,10 @@
   /* Component Specific */
   --sidebar-bg: #111827;
   --navbar-bg: #111827;
-  --mainpanel-bg: #030712;
+  --mainpanel-bg: var(--bg-secondary);
   --card-bg: #111827;
   --aboutUs-bg: #111827;
+  --blackbtn-bg: #000000;
 }
 
 /* ---------- Shared Classes ---------- */
@@ -148,4 +151,36 @@
 /* Dark mode */
 .dark .custom-label {
   color: #d1d5db; /* gray-300 */
+}
+
+/*---------------Class for Error Messages---------------------*/
+.custom-error {
+  font-size: 0.875rem; /* text-sm */
+  color: #ef4444;      /* red-500 */
+}
+
+/*-----------------Smooth theme transition------------------- */
+.theme-transition {
+  transition:
+    width 0.3s ease,
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+/*-----------------Class for Input-Label Div------------------------*/
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem; /* same as mb-1.5 */
+  margin-top: 1rem; /* space between fields */
+  margin-bottom: 1rem; /* space between fields */
+}
+
+/*----------------Class for Add-Cancel button Div-------------------*/
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem; /* space between buttons */
+  margin-top: 1.5rem;
 }

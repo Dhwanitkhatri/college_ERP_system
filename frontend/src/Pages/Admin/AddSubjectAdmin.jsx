@@ -3,6 +3,8 @@ import { useState } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
+import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate.jsx";
+import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -66,22 +68,8 @@ const AddSubjectAdmin = () => {
   }
 
   return (
-    <div className="mainDiv h-full bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">
-      <div className="headerDiv max-w-3xl mx-auto mb-8 flex items-start gap-4">
-        <button
-          className="mt-1 -ml-1 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div className="titleDiv">
-          <h1 className="text-xl font-bold dark:text-white">Add New Subject</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-            Enter Subject details to add it to the system.
-          </p>
-        </div>
-      </div>
-      <div className="formDiv max-w-3xl mx-auto border border-gray-200 dark:border-gray-800 rounded-xl p-8 bg-white dark:bg-gray-900 shadow-sm transition-colors duration-200">
+    <DashboardChildPageTemplate title="Add New Subject" desc="Enter subject details to add it to the system">
+      <DashboardChildPageCard>
         <form
           className="flex flex-col gap-6"
            onSubmit={handleSubmit(onSubmit)}
@@ -250,8 +238,8 @@ const AddSubjectAdmin = () => {
             <CancelButton />
           </div>
         </form>
-      </div>
-    </div>
+      </DashboardChildPageCard>
+    </DashboardChildPageTemplate>
   );
 };
 

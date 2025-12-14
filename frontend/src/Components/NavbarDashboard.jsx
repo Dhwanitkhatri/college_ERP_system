@@ -3,14 +3,26 @@ import { X, Bell, CircleUserRound, Menu } from "lucide-react";
 import ThemeButton from "../ui/Buttons/ThemeButton";
 import { useSidebar } from "../context/SidebarContext";
 
-const NavbarDashboard = ({userRole,userName}) => {
-  const {sidebarOpen, toggleSidebar} = useSidebar();
+const NavbarDashboard = ({ userRole, userName }) => {
+  const { sidebarOpen, toggleSidebar } = useSidebar();
   return (
-    <div className="navMainDiv bg-white dark:bg-gray-900 flex justify-between items-center border-b-[0.8px] border-b-[var(--light-border)] dark:border-b-[0.8px] dark:border-b-[var(--light-border)] py-[0.8%] px-4">
+    <div
+      className="navMainDiv theme-transition bg-[var(--navbar-bg)] dark:bg-[var(--navbar-bg)] 
+    flex justify-between items-center 
+    border-b-[0.8px] border-b-[var(--border-light)] dark:border-b-[var(--border-light)] 
+    py-[0.8%] px-4"
+    >
       {/* LEFT SECTION */}
       <div className="navLeftDiv flex items-center gap-3">
-        <button className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition" onClick={toggleSidebar}>
-          {sidebarOpen?<X className="text-black dark:text-white" />:<Menu className="text-black dark:text-white" />}
+        <button
+          className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+          onClick={toggleSidebar}
+        >
+          {sidebarOpen ? (
+            <X className="text-black dark:text-white" />
+          ) : (
+            <Menu className="text-black dark:text-white" />
+          )}
         </button>
 
         <h2 className="font-semibold text-black dark:text-white">

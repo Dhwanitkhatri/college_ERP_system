@@ -2,7 +2,7 @@ import React from "react";
 
 const PanelTemplateDashboard = ({ user, children }) => {
   return (
-    <div className="mainDashContentDiv">
+    <div className="mainDashContentDiv ">
 
       {/* HEADER */}
       <div className="DashHeaderDiv p-3 pb-0">

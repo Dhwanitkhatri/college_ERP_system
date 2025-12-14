@@ -5,10 +5,11 @@ const MainPanelDashboard = ({ children }) => {
     <div
       className="
         mainPanelDiv 
-        bg-[var(--mainPanel-bg-color)] 
+        theme-transition
+        bg-[var(--bg-secondary)] 
+        dark:bg-[var(--bg-secondary)]
         w-full h-full overflow-auto 
-        border-l-[0.8px] 
-        border-l-[var(--light-border)]
+        p-4
       "
     >
       {children}

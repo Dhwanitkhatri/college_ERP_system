@@ -3,9 +3,8 @@ import AddButton from "../../ui/Buttons/AddButton";
 import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
 const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {
-
   return (
-    <div className="wrapperDiv w-full py-2 dark:bg-gray-950 flex justify-center font-sans text-gray-900 dark:text-white">
+    <div className="wrapperDiv w-full py-2 bg-inherit dark:bg-inherit flex justify-center font-sans text-gray-900 dark:text-white">
       <div className="mainContainer p-6 gap-y-5 w-full max-w-full sm:max-w-[90%] lg:max-w-[70%] flex flex-col">
         <div className="headerDiv flex gap-x-3 items-center">
           <div className="navigationDiv">
@@ -20,16 +19,23 @@ const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {
             </p>
           </div>
         </div>
-        <div className="mainContentDiv flex flex-col w-full border-2 p-6 rounded-xl gap-y-4">
-            <div className="searchAddDiv flex w-full items-center gap-3">
-                <input type="text" placeholder={searchDesc} className="flex-1 px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 
-                   bg-white dark:bg-gray-900 text-gray-900 dark:text-white 
-                   focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600"></input>
-                <AddButton />
-            </div>
-            <div className="userListTableDiv w-full">
-                {children}
-            </div>
+        <div
+          className="mainContentDiv theme-transition flex flex-col w-full bg-[var(--card-bg)] dark:bg-[var(--card-bg)]
+        border-[0.8px] border-[var(--border-light)] dark:border-[var(--border-light)] p-6 rounded-xl gap-y-4"
+        >
+          <div className="searchAddDiv flex w-full items-center gap-3 flex-wrap overflow-hidden">
+            <input
+              type="text"
+              placeholder={searchDesc}
+              className="custom-input flex-1 px-4 py-2 rounded-xl 
+                    border-[0.8px] border-[var(--border-light)] dark:border-[var(--border-light)] overflow-hidden
+                   focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600"
+            />
+            <AddButton />
+          </div>
+          <div className="userListTableDiv w-full overflow-auto">
+            {children}
+          </div>
         </div>
       </div>
     </div>

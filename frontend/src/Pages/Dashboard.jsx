@@ -53,7 +53,7 @@ const Dashboard =  ({ children }) => {
           <main
             className={`flex-1 h-full overflow-hidden transition-all duration-300`}
           >
-            <MainPanelDashboard>
+            <MainPanelDashboard userName={dashboardData?.data?.name}>
               <Outlet />
             </MainPanelDashboard>
           </main>

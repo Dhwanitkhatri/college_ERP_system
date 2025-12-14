@@ -45,7 +45,7 @@ const AddFacultyAdmin = () => {
     <DashboardChildPageTemplate title="Add New Faculty" desc="Enter faculty member details to add them to the system">
       <DashboardChildPageCard>
         <form action="" className="addFaculty" onSubmit={handleSubmit(onSubmit)}>
-          <div className="fullNameDiv">
+          <div className="fullNameDiv form-field">
             <label className="fullNameLabel custom-label">Full Name</label>
             <input type="text" placeholder="Enter Full Name" className="fullNameInput custom-input" 
             {...register("fullName",
@@ -56,9 +56,9 @@ const AddFacultyAdmin = () => {
                 pattern:{value:/^[A-Za-z ]+$/,message:"Only Alphabets are Allowed"}
               }
             )}/>
+          {errors.fullName && <p className="custom-error">{errors.fullName.message}</p>}
           </div>
-          {errors.fullName && <p>{errors.fullName.message}</p>}
-          <div className="phoneNoDiv">
+          <div className="phoneNoDiv form-field">
             <label className="phoneNoLabel custom-label">Phone</label>
             <input type="text" placeholder="Enter Phone Number" className="phoneNoInput custom-input" 
             {...register("phoneNo",
@@ -67,9 +67,9 @@ const AddFacultyAdmin = () => {
                 pattern:{value:/^[0-9]{10}$/,message:"Please Enter Valid Phone Number"}
               }
             )}/>
+          {errors.phoneNo && <p className="custom-error">{errors.phoneNo.message}</p>}
           </div>
-          {errors.phoneNo && <p className="errorMsg">{errors.phoneNo.message}</p>}
-          <div className="emailDiv">
+          <div className="emailDiv form-field">
             <label className="emailLabel custom-label">Email address</label>
             <input type="text" placeholder="Enter Email address" className="emailInput custom-input" 
             {...register("email",
@@ -78,10 +78,14 @@ const AddFacultyAdmin = () => {
                 pattern:{value:/^[^\s@]+@[^\s@]+\.[^\s@]+$/,message:"Enter a valid email address"}
               }
             )}/>
+          {errors.email && <p className="custom-error">{errors.email.message}</p>}
           </div>
-          {errors.email && <p className="errorMsg">{errors.email.message}</p>}
+
+        <div className="form-actions">
+
       <AddButton />
       <CancelButton />
+        </div>
         </form>
       </DashboardChildPageCard>
     </DashboardChildPageTemplate>

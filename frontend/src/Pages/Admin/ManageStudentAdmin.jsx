@@ -1,5 +1,6 @@
 import React from "react";
 import ManageUserTemplateAdmin from "../../ui/Templates/ManageUserTemplateAdmin";
+import EditButton from "../../ui/Buttons/EditButton";
 
 const ManageStudentAdmin = () => {
   return (
@@ -9,8 +10,8 @@ const ManageStudentAdmin = () => {
         desc="View, edit, and manage student records"
         searchDesc="Search by name or roll no.."
       >
-        <table className="w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
-          <thead className="bg-gray-100 dark:bg-gray-800">
+        <table className="theme-transition w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+          <thead className="theme-transition bg-gray-100 dark:bg-gray-800">
             <tr>
               <th className="table-row-style font-semibold">Roll No</th>
               <th className="table-row-style font-semibold">Name</th>
@@ -29,9 +30,7 @@ const ManageStudentAdmin = () => {
               <td className="table-row-style">6</td>
               <td className="table-row-style">eleven11@gmail.com</td>
               <td className="table-row-style">
-                <button className="px-3 py-1 rounded bg-black text-white">
-                  Edit
-                </button>
+                <EditButton />
               </td>
             </tr>
             <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
@@ -41,9 +40,7 @@ const ManageStudentAdmin = () => {
               <td className="table-row-style">6</td>
               <td className="table-row-style">eleven11@gmail.com</td>
               <td className="table-row-style">
-                <button className="px-3 py-1 rounded bg-black text-white">
-                  Edit
-                </button>
+                <EditButton />
               </td>
             </tr>
             <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
@@ -53,9 +50,7 @@ const ManageStudentAdmin = () => {
               <td className="table-row-style">6</td>
               <td className="table-row-style">eleven11@gmail.com</td>
               <td className="table-row-style">
-                <button className="px-3 py-1 rounded bg-black text-white">
-                  Edit
-                </button>
+                <EditButton />
               </td>
             </tr>
             <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
@@ -65,9 +60,7 @@ const ManageStudentAdmin = () => {
               <td className="table-row-style">6</td>
               <td className="table-row-style">eleven11@gmail.com</td>
               <td className="table-row-style">
-                <button className="px-3 py-1 rounded bg-black text-white">
-                  Edit
-                </button>
+                <EditButton />
               </td>
             </tr>
           </tbody>
