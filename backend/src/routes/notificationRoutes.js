@@ -8,7 +8,9 @@ import {
     getUserNotifications,
     markNotificationAsRead,
     deleteNotification,
-    deleteAllNotifications
+    deleteAllNotifications,
+    fetchAllUsersForNotification,
+    getAllClasses
 } from "../controllers/notificationController.js";
 
 import { authMiddleware, adminMiddleware } from "../middleware/authMiddleware.js";
@@ -41,5 +43,9 @@ router.delete("/delete/:notification_id", authMiddleware, deleteNotification);
 
 // Delete ALL notifications (admin only)
 router.delete("/delete-all", authMiddleware, adminMiddleware, deleteAllNotifications);
+
+router.get("/users-for-notification", authMiddleware, adminMiddleware, fetchAllUsersForNotification);
+
+router.get("/classes", authMiddleware, adminMiddleware, getAllClasses);
 
 export default router;

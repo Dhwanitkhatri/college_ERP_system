@@ -55,7 +55,7 @@ export const getAllClasses = async (req, res) => {
             attributes: { exclude: ["createdAt", "updatedAt"] }
 
         });
-        res.json(classes);
+        res.status(200).json(classes);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

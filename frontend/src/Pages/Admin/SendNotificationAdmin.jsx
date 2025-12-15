@@ -20,19 +20,39 @@ export default function SendNotificationAdmin() {
   } = useForm();
   let sendTo = watch("sendTo");
 
-  const [students, setStudents] = React.useState([]);
+  const [allUsers, setAllUsers] = React.useState([]);
   const token = localStorage.getItem("token");
   useEffect(() => {
     if (sendTo === "Individual User") {
       api
-        .get("api/students/", {
+        .get("api/notifications/users-for-notification", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         })
         .then((res) => {
-          setStudents(res.data); // backend sends array
-          console.log("Fetched students:", res.data);
+          setAllUsers(res.data.allUsers); // backend sends array
+          console.log("Fetched data:", res.data.allUsers);
+        })
+        .catch((err) => {
+          console.error(
+            "Error fetching students:",
+            err.response?.data || err.message
+          );
+        });
+    }
+  }, [sendTo]);
+  useEffect(() => {
+    if (sendTo === "Specific Class") {
+      api
+        .get("api/notifications/classes", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          setAllUsers(res.data); // backend sends array
+           console.log("Fetched data:", res.data);
         })
         .catch((err) => {
           console.error(
@@ -94,7 +114,7 @@ export default function SendNotificationAdmin() {
                 )}
               </div>
               {/* added another field for individual user*/}
-              {sendTo === "Individual User" && (
+              {(sendTo === "Individual User" || sendTo == "Specific Class") && (
                 <div className="subjectDiv flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Name{" "}
@@ -110,9 +130,9 @@ export default function SendNotificationAdmin() {
                         Select Name
                       </option>
                      
-                    {students.map((s) => (
-                      <option key={s.student_id} value={s.student_id}>
-                        {s.name} ({s.student_id})
+                    {allUsers.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.id})
                       </option>
                     ))}
                     </select>
