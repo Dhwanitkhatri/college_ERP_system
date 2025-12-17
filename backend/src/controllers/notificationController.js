@@ -6,7 +6,9 @@ import { Student } from "../model/Student.js";
 import { Faculty } from "../model/Faculty.js";
 import { Admin } from "../model/Admin.js";
 import { Class } from "../model/Class.js";
+import { Course } from "../model/Course.js";
 import { User } from "../model/User.js";
+import { where } from "sequelize";
 
 // Send notification
 export const sendNotification = async (req, res) => {
@@ -169,6 +171,37 @@ export const sendNotification = async (req, res) => {
           count: totalCount
         });
       }
+      case "COURSE": {
+        const students = await Student.findAll({ where: { course_id } });
+        const faculties = await Faculty.findAll({ where: { course_id } });
+        const recipients = [
+          ...students.map(student => ({
+            receiver_id: student.student_id,
+            receiver_role: "Student"
+          })),
+          ...faculties.map(faculty => ({
+            receiver_id: faculty.faculty_id,
+            receiver_role: "Faculty"
+          }))
+        ];
+        const notifications = recipients.map(recipient => ({
+          title,
+          message,
+          sender_id: senderUserName,
+          sender_role,
+          receiver_id: recipient.receiver_id,
+          receiver_role: recipient.receiver_role,
+          course_id,
+          target_type
+        }));
+        await Notification.bulkCreate(notifications);
+        return res.status(201).json({
+          success: true,
+          message: `Notification sent to all users in course ${course_id}`,
+          count: recipients.length
+        });
+      }
+      
       default:
         return res.status(400).json({ message: "Invalid target_type." });
     }

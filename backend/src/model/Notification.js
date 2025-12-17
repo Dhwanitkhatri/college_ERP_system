@@ -59,7 +59,8 @@ export const Notification = sequelize.define(
       type: DataTypes.ENUM(
         "INDIVIDUAL",
         "ROLE",
-        "CLASS"
+        "CLASS",
+        "COURSE"
       ),
       allowNull: false
     }
