@@ -107,9 +107,9 @@ SessionPlanning.belongsTo(Faculty, { foreignKey: 'faculty_id' ,targetKey:'facult
 Subject.hasMany(SessionPlanning, { foreignKey: 'subject_id' , sourceKey:'subject_id' });
 SessionPlanning.belongsTo(Subject, { foreignKey: 'subject_id', targetKey:'subject_id' });
 
-// User ↔ Notification
-User.hasMany(Notification, { foreignKey: 'user_id', sourceKey:'user_id' });
-Notification.belongsTo(User, { foreignKey: 'user_id' ,targetKey:'user_id'});
+// // User ↔ Notification
+// User.hasMany(Notification, { foreignKey: 'user_id', sourceKey:'user_id' });
+// Notification.belongsTo(User, { foreignKey: 'user_id' ,targetKey:'user_id'});
 
 // Student ↔ Feedback
 Student.hasMany(Feedback, { foreignKey: 'student_id', sourceKey:'student_id' });
