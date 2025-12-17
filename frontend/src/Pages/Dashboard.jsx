@@ -13,6 +13,7 @@ const Dashboard =  ({ children }) => {
   console.log("Dashboard Token:", token);
   const { sidebarOpen } = useSidebar();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [role, setRole] = useState(null);
   function handleSidebarLogout() {
     setShowLogoutModal(true);
   }
@@ -27,7 +28,9 @@ const Dashboard =  ({ children }) => {
           },
         });
         console.log("Dashboard Data:", res.data);
+        console.log(res.data.role)
         setDashboardData(res.data);
+        setRole(res.data.role);
       } catch (err) {
         console.log("Dashboard API Error:", err);
       }
@@ -48,7 +51,7 @@ const Dashboard =  ({ children }) => {
         <NavbarDashboard userRole={dashboardData?.role} userName={dashboardData?.data?.name}/>
 
         <div className="flex flex-1 overflow-hidden">
-          <SideBarDashboard onLogoutClick={handleSidebarLogout} />
+          <SideBarDashboard onLogoutClick={handleSidebarLogout} role={role}/>
 
           <main
             className={`flex-1 h-full overflow-hidden transition-all duration-300`}
