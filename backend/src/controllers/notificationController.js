@@ -9,6 +9,7 @@ import { Class } from "../model/Class.js";
 import { Course } from "../model/Course.js";
 import { User } from "../model/User.js";
 import { where } from "sequelize";
+import { QueryTypes } from "sequelize";
 
 // Send notification
 export const sendNotification = async (req, res) => {
@@ -301,19 +302,19 @@ export const fetchAllUsersForNotification = async (req, res) => {
 
     const allUsers = await sequelize.query(
       `
-      SELECT student_id AS id, name, 'student' AS role
+      SELECT student_id AS id, name, 'Student' AS role
       FROM students
       WHERE course_id = :course_id
 
       UNION ALL
 
-      SELECT faculty_id AS id, name, 'faculty' AS role
+      SELECT faculty_id AS id, name, 'Faculty' AS role
       FROM faculties
       WHERE course_id = :course_id
 
       UNION ALL
 
-      SELECT admin_id AS id, name, 'admin' AS role
+      SELECT admin_id AS id, name, 'Admin' AS role
       FROM admins
       `,
       {
@@ -326,7 +327,7 @@ export const fetchAllUsersForNotification = async (req, res) => {
       allUsers, // ✅ ARRAY
     });
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.log("Error fetching users:", error);
     res.status(500).json({
       message: "Internal server error",
     });
@@ -344,6 +345,7 @@ export const getAllClasses = async (req, res) => {
     console.log(classes);
     res.status(200).json(classes);
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ message: error.message });
   }
 };

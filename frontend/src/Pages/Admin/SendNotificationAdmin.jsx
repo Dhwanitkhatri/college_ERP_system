@@ -18,7 +18,7 @@ export default function SendNotificationAdmin() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (sendTo === "Individual User") {
+    if (sendTo === "Individual") {
       api
         .get("api/notifications/users-for-notification", {
           headers: { Authorization: `Bearer ${token}` },
@@ -29,7 +29,7 @@ export default function SendNotificationAdmin() {
   }, [sendTo]);
 
   useEffect(() => {
-    if (sendTo === "Specific Class") {
+    if (sendTo === "Class") {
       api
         .get("api/notifications/classes", {
           headers: { Authorization: `Bearer ${token}` },
@@ -39,9 +39,64 @@ export default function SendNotificationAdmin() {
     }
   }, [sendTo]);
 
-  function onSubmit(data) {
-    console.log(data);
+async function onSubmit(data) {
+  console.log(data)
+  const payload = {
+    title: data.title,
+    message: data.message
+  };
+
+  // ALL USERS (COURSE)
+  if (data.sendTo === "COURSE") {
+    payload.target_type = "COURSE";
   }
+
+  // ALL STUDENTS
+  else if (data.sendTo === "ROLE_STUDENT") {
+    payload.target_type = "ROLE";
+    payload.receiver_role = "Student";
+  }
+
+  // ALL FACULTY
+  else if (data.sendTo === "ROLE_FACULTY") {
+    payload.target_type = "ROLE";
+    payload.receiver_role = "Faculty";
+  }
+
+  // SPECIFIC CLASS
+  else if (data.sendTo === "CLASS") {
+    if (!classId) {
+      alert("Please select a class");
+      return;
+    }
+    payload.target_type = "CLASS";
+    payload.class_id = data.classId;
+  }
+
+  // INDIVIDUAL
+  else if (data.sendTo === "INDIVIDUAL") {
+    if (!receiverRole || !receiverId) {
+      alert("Please select role and user");
+      return;
+    }
+    payload.target_type = "INDIVIDUAL";
+    payload.receiver_role = receiverRole;
+    payload.receiver_id = receiverId;
+  }
+
+  else {
+    alert("Please select target");
+    return;
+  }
+
+  try {
+    await api.post("/api/notifications/send", payload);
+    alert("Notification sent successfully");
+  } catch (error) {
+    console.error(error);
+    alert(error.response?.data?.message || "Failed to send notification");
+  }
+}
 
   return (
     <DashboardChildPageTemplate
@@ -69,11 +124,11 @@ export default function SendNotificationAdmin() {
                   <option value="" disabled>
                     Select subject
                   </option>
-                  <option>All Users</option>
-                  <option>All Students</option>
-                  <option>All Faculty</option>
-                  <option>Specific Class</option>
-                  <option>Individual User</option>
+                  <option value="course">All Users</option>
+                  <option value="Students">All Students</option>
+                  <option value="Faculty">All Faculty</option>
+                  <option value="Class">Specific Class</option>
+                  <option value="Individual">Individual User</option>
                 </select>
 
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -87,7 +142,7 @@ export default function SendNotificationAdmin() {
             </div>
 
             {/* -------- optional field ahiya chhe -------- */}
-            {(sendTo === "Individual User" || sendTo === "Specific Class") && (
+            {(sendTo === "Individual" || sendTo === "Class") && (
               <div className="subjectDiv form-field">
                 <label className="subjectLabel custom-label">Name</label>
 
@@ -95,7 +150,7 @@ export default function SendNotificationAdmin() {
                   <select
                     defaultValue=""
                     className="subjectInput custom-input appearance-none cursor-pointer"
-                    {...register("subject", {
+                    {...register("name", {
                       required: "Please select a name",
                     })}
                   >
