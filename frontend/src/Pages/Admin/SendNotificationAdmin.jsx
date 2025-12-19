@@ -26,10 +26,7 @@ export default function SendNotificationAdmin() {
         .then((res) => setAllUsers(res.data.allUsers))
         .catch((err) => console.error(err.response?.data || err.message));
     }
-  }, [sendTo]);
-
-  useEffect(() => {
-    if (sendTo === "Class") {
+     if (sendTo === "Class") {
       api
         .get("api/notifications/classes", {
           headers: { Authorization: `Bearer ${token}` },
@@ -37,51 +34,58 @@ export default function SendNotificationAdmin() {
         .then((res) => setAllUsers(res.data))
         .catch((err) => console.error(err.response?.data || err.message));
     }
-  }, [sendTo]);
+  }
+  , [sendTo]);
+
+ 
 
 async function onSubmit(data) {
-  console.log(data)
+
   const payload = {
     title: data.title,
     message: data.message
   };
 
-  // ALL USERS (COURSE)
-  if (data.sendTo === "COURSE") {
+  // ALL USERS (COURSE)//this is done
+  if (data.sendTo === "Course") {
     payload.target_type = "COURSE";
   }
 
   // ALL STUDENTS
-  else if (data.sendTo === "ROLE_STUDENT") {
+  else if (data.sendTo === "Student") {
     payload.target_type = "ROLE";
     payload.receiver_role = "Student";
   }
 
   // ALL FACULTY
-  else if (data.sendTo === "ROLE_FACULTY") {
+  else if (data.sendTo === "Faculty") {
     payload.target_type = "ROLE";
     payload.receiver_role = "Faculty";
   }
 
-  // SPECIFIC CLASS
-  else if (data.sendTo === "CLASS") {
-    if (!classId) {
+  // SPECIFIC CLASS this is done 
+  else if (data.sendTo === "Class") {
+      const [section, name] = data.name.split("|");
+    if (!data.name) {
       alert("Please select a class");
       return;
     }
     payload.target_type = "CLASS";
-    payload.class_id = data.classId;
+    payload.class_id = name;
+    payload.section = section;
   }
 
   // INDIVIDUAL
-  else if (data.sendTo === "INDIVIDUAL") {
-    if (!receiverRole || !receiverId) {
+  else if (data.sendTo === "Individual") {
+   
+    const [role, id] = data.name.split("|");
+    if (!role || !id) {
       alert("Please select role and user");
       return;
     }
     payload.target_type = "INDIVIDUAL";
-    payload.receiver_role = receiverRole;
-    payload.receiver_id = receiverId;
+    payload.receiver_role = role;
+    payload.receiver_id = id;
   }
 
   else {
@@ -89,13 +93,25 @@ async function onSubmit(data) {
     return;
   }
 
-  try {
-    await api.post("/api/notifications/send", payload);
-    alert("Notification sent successfully");
-  } catch (error) {
-    console.error(error);
-    alert(error.response?.data?.message || "Failed to send notification");
-  }
+ try {
+  const token = localStorage.getItem("token");
+
+  await api.post(
+    "/api/notifications/send",
+    payload, //  data goes here
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  alert("Notification sent successfully");
+} catch (error) {
+  console.error(error);
+  alert(error.response?.data?.message || "Failed to send notification");
+}
+
 }
 
   return (
@@ -124,8 +140,8 @@ async function onSubmit(data) {
                   <option value="" disabled>
                     Select subject
                   </option>
-                  <option value="course">All Users</option>
-                  <option value="Students">All Students</option>
+                  <option value="Course">All Users</option>
+                  <option value="Student">All Students</option>
                   <option value="Faculty">All Faculty</option>
                   <option value="Class">Specific Class</option>
                   <option value="Individual">Individual User</option>
@@ -156,13 +172,15 @@ async function onSubmit(data) {
                   >
                     <option value="" disabled>
                       Select Name
+
                     </option>
                     {allUsers.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} ({u.id})
+                      <option key={`${u.role}|${u.id}`} value={`${u.role}|${u.id}`}>
+                        {u.id} 
                       </option>
                     ))}
                   </select>
+                
 
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <ChevronDown className="h-4 w-4 text-gray-500 dark:text-[#9ca3af]" />

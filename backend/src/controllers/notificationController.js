@@ -92,25 +92,24 @@ export const sendNotification = async (req, res) => {
           return res.status(404).json({ message: "Class not found." });
         }
 
-        const students = await Student.findAll({ where: { class_id, course_id } });
+        
 
-        const notifications = students.map(student => ({
+        const notifications = await Notification.create({
           title,
           message,
           sender_id: senderUserName,
           sender_role,
-          receiver_id: student.student_id, // Academic ID
-          receiver_role: "Student",
+          receiver_id: null, // Academic ID
+          receiver_role: null,
           course_id,
           class_id,
-          section: classExists.section,
+          section,
           target_type
-        }));
-        await Notification.bulkCreate(notifications);
+        });
+       
         return res.status(201).json({
           success: true,
-          message: `Notification sent to ${students.length} students in class ${class_id}`,
-          count: students.length
+          message: `Notification sent to students in class ${class_id}`,
         });
 
       }
@@ -118,88 +117,42 @@ export const sendNotification = async (req, res) => {
         if (!receiver_role) {
           return res.status(400).json({ message: "receiver_role is required for ROLE target_type." });
         }
-        let recipients = [];
-        let totalCount = 0;
+        
 
-        if (receiver_role === "Student") {
-          const students = await Student.findAll({ where: { course_id } });
-          recipients = students.map(student => ({
-            receiver_id: student.student_id, // Academic ID
-            receiver_role: "S"
-          }));
-          totalCount = students.length;
-        }
-        else if (receiver_role === "Faculty") {
-          const faculties = await Faculty.findAll({ where: { course_id } });
-          recipients = faculties.map(faculty => ({
-            receiver_id: faculty.faculty_id, // Should be academic ID
-            receiver_role: "Faculty"
-          }));
-          totalCount = faculties.length;
-        }
-        else if (receiver_role === "Admin") {
-          const admins = await Admin.findAll();
-          recipients = admins.map(admin => ({
-            receiver_id: admin.admin_id, // Should be academic ID
-            receiver_role: "Admin"
-          }));
-          totalCount = admins.length;
-        }
-
-        if (totalCount === 0) {
-          return res.status(404).json({
-            success: false,
-            message: `No ${receiver_role}s found`
-          });
-        }
-
-        const notifications = recipients.map(recipient => ({
+       
+        await Notification.create({
           title,
           message,
           sender_id: senderUserName, // Use academic ID
           sender_role: sender_role,
-          receiver_id: recipient.receiver_id, // Academic ID
-          receiver_role: recipient.receiver_role,
+          receiver_id: null, // Academic ID
+          receiver_role:receiver_role,
           course_id,
           target_type
-        }));
+        });
 
-        await Notification.bulkCreate(notifications);
+        
 
         return res.status(201).json({
           success: true,
-          message: `Notification sent to ${totalCount} ${receiver_role}(s)`,
-          count: totalCount
         });
       }
       case "COURSE": {
-        const students = await Student.findAll({ where: { course_id } });
-        const faculties = await Faculty.findAll({ where: { course_id } });
-        const recipients = [
-          ...students.map(student => ({
-            receiver_id: student.student_id,
-            receiver_role: "Student"
-          })),
-          ...faculties.map(faculty => ({
-            receiver_id: faculty.faculty_id,
-            receiver_role: "Faculty"
-          }))
-        ];
-        const notifications = recipients.map(recipient => ({
+        
+        const notifications = Notification.create({
           title,
           message,
           sender_id: senderUserName,
           sender_role,
-          receiver_id: recipient.receiver_id,
-          receiver_role: recipient.receiver_role,
+          receiver_id: null,
+          receiver_role: null,
           course_id,
           target_type
-        }));
+        });
         await Notification.bulkCreate(notifications);
         return res.status(201).json({
           success: true,
           message: `Notification sent to all users in course ${course_id}`,
-          count: recipients.length
         });
       }
       
@@ -324,7 +277,7 @@ export const fetchAllUsersForNotification = async (req, res) => {
     );
 
     res.status(200).json({
-      allUsers, // ✅ ARRAY
+      allUsers, // Array of users with id, name, and role
     });
   } catch (error) {
     console.log("Error fetching users:", error);
@@ -336,13 +289,12 @@ export const fetchAllUsersForNotification = async (req, res) => {
 // Get all classes
 export const getAllClasses = async (req, res) => {
   try {
-    const course_id = req.user.course_id;
-    const classes = await sequelize.query("SELECT class_id as id, section as name   FROM classes WHERE course_id = :course_id", {
+    
+    const classes = await sequelize.query("SELECT class_id as id, section as role   FROM classes WHERE course_id = :course_id", {
       replacements: { course_id: req.user.course_id },
       type: QueryTypes.SELECT
 
     });
-    console.log(classes);
     res.status(200).json(classes);
   } catch (error) {
     console.log(error.message);

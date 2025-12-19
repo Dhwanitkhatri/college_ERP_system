@@ -17,7 +17,7 @@ import subjectRoutes from './src/routes/subjectRoutes.js';
 dotenv.config();
 const app = express();
 app.use(cors({
-  origin: " http://10.85.207.41:5173",  // Your frontend URL
+  origin: " http://192.168.31.128:5173",  // Your frontend URL
   credentials: true,                 // allow cookies if needed
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]  // IMPORTANT: allow Bearer token
