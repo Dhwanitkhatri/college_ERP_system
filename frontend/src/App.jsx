@@ -44,7 +44,7 @@ const router = createBrowserRouter([
     element: <Dashboard />,
     children: [
       {
-        index: true,       //default admin dash page
+        index: true, //default admin dash page
         element: <AdminPanelDashboard />,
       },
       {
@@ -96,7 +96,7 @@ const router = createBrowserRouter([
         element: <Classroom />,
       },
       {
-        path: "NotificationPage",
+        path: "notifications",
         element: <NotificationPage />,
       },
     ],
