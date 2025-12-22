@@ -24,6 +24,7 @@ import SendNotificationAdmin from "./Pages/Admin/SendNotificationAdmin";
 import ManageProfileAdmin from "./Pages/Admin/ManageProfileAdmin";
 import StudentReportAdmin from "./Pages/Admin/StudentReportAdmin";
 import Classroom from "./Pages/Classroom";
+import NotificationPage from "./Pages/NotificationPage";
 
 const router = createBrowserRouter([
   {
@@ -43,7 +44,7 @@ const router = createBrowserRouter([
     element: <Dashboard />,
     children: [
       {
-        index: true,
+        index: true,       //default admin dash page
         element: <AdminPanelDashboard />,
       },
       {
@@ -93,6 +94,10 @@ const router = createBrowserRouter([
       {
         path: "Classroom",
         element: <Classroom />,
+      },
+      {
+        path: "NotificationPage",
+        element: <NotificationPage />,
       },
     ],
   },
