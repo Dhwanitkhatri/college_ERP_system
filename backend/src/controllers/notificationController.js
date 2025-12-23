@@ -8,9 +8,6 @@ import { Admin } from "../model/Admin.js";
 import { Class } from "../model/Class.js";
 import { Course } from "../model/Course.js";
 import { User } from "../model/User.js";
-import { where } from "sequelize";
-import { QueryTypes } from "sequelize";
-
 // Send notification
 export const sendNotification = async (req, res) => {
   try {
@@ -94,7 +91,7 @@ export const sendNotification = async (req, res) => {
 
         
 
-        const notifications = await Notification.create({
+        await Notification.create({
           title,
           message,
           sender_id: senderUserName,
@@ -198,6 +195,7 @@ export const getUserNotifications = async (req, res) => {
       const studentRecord = await Student.findOne({
         where: { student_id: academicId }
       });
+      
 
     } catch (userError) {
       console.error("Error fetching user:", userError);
