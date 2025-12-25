@@ -173,20 +173,28 @@ export const getUserNotifications = async (req, res) => {
     if (!user_id || !user_role || !course_id) {
       return res.status(400).json({ message: "Invalid user credentials." });
     }
-
+    const username = await User.findOne({
+      where: { user_id: user_id },
+      attributes: ['username']
+    });
    
     let class_id = null;
 
     
-    if (user_role === 'Student') {
-      const student = await Student.findOne({
-        where: {
-          student_id: user_id,
-          course_id: course_id
-        },
-        attributes: ['class_id']
-      });
-
+   if (user_role === "Student") {
+  const student = await Student.findOne({
+    where: {
+      student_id: user_id,
+      course_id: course_id,
+    },
+    attributes: ["class_id"],
+    include: [
+      {
+        model: User,
+        attributes: ["username"],
+      },
+    ],
+  });
       class_id = student?.class_id || null;
     }
     console.log("Class ID:", class_id);
@@ -215,7 +223,7 @@ export const getUserNotifications = async (req, res) => {
         replacements: {
           course_id,
           role: user_role,
-          user_id,
+          user_id:username.username,
           class_id   // NULL for faculty/admin → auto ignored
         },
         type: QueryTypes.SELECT
