@@ -71,8 +71,8 @@ const ManageFacultyAdmin = () => {
         <td className="table-row-style">{faculty.faculty_id}</td>
         <td className="table-row-style">{faculty.email}</td>
         <td className="table-row-style">{faculty.phone}</td>
-        <td className="table-row-style"><EditButton/> </td>
-        <td className="table-row-style"> <DeleteButton/></td>
+        <td className="table-row-style"><EditButton/></td>
+        <td className="table-row-style"><DeleteButton/></td>
       </tr>
     ))
   )}

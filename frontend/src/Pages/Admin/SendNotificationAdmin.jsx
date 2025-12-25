@@ -255,13 +255,6 @@ async function onSubmit(data) {
               <Send size={16} />
               Send Notification
             </button>
-
-            <button
-              type="button"
-              className="px-6 py-2.5 rounded-md text-sm font-medium border border-gray-300 dark:border-[#1F2937]"
-            >
-              Save as Draft
-            </button>
           </div>
         </form>
       </DashboardChildPageCard>

@@ -4,6 +4,7 @@ const DashboardChildPageCard = ({ children, className = "" }) => {
   return (
     <div
       className={`
+        theme-transition
         border border-gray-200 dark:border-gray-800
         rounded-xl
         p-8
