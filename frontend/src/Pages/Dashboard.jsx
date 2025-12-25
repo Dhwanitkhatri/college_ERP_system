@@ -6,6 +6,7 @@ import MainPanelDashboard from "../Components/MainPanelDashboard";
 import { Outlet } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
 import api from "../api/axios.js";
+import { useOutletContext } from "react-router-dom";
 
 const Dashboard =  ({ children }) => {
   const token = localStorage.getItem("token");
@@ -56,8 +57,8 @@ const Dashboard =  ({ children }) => {
           <main
             className={`flex-1 h-full overflow-hidden transition-all duration-300`}
           >
-            <MainPanelDashboard userName={dashboardData?.data?.name}>
-              <Outlet />
+            <MainPanelDashboard>
+              <Outlet context={{ username: dashboardData?.data?.name }} />
             </MainPanelDashboard>
           </main>
         </div>

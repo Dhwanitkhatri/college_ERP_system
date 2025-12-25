@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import api from "../../api/axios.js";
 import EditButton from "../../ui/Buttons/EditButton.jsx";
 import DeleteButton from "../../ui/Buttons/DeleteButton.jsx";
+import { useNavigate } from "react-router-dom";
 
 const ManageFacultyAdmin = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
@@ -36,6 +37,7 @@ const ManageFacultyAdmin = () => {
         user="Faculty"
         desc="View, edit, and manage faculty members"
         searchDesc="Search by name or department.."
+        addLink="/admin/dashboard/AddFacultyAdmin"
       >
         <table className="w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead className="bg-gray-100 dark:bg-gray-800">
@@ -65,14 +67,13 @@ const ManageFacultyAdmin = () => {
     faculties.map((faculty) => (
       <tr
         key={faculty.faculty_id}
-        className="hover:bg-gray-200 dark:hover:bg-gray-900 transition"
+        className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
       >
         <td className="table-row-style">{faculty.name}</td>
         <td className="table-row-style">{faculty.faculty_id}</td>
         <td className="table-row-style">{faculty.email}</td>
         <td className="table-row-style">{faculty.phone}</td>
-        <td className="table-row-style"><EditButton/></td>
-        <td className="table-row-style"><DeleteButton/></td>
+        <td className="table-row-style"><EditButton/> <DeleteButton/></td>
       </tr>
     ))
   )}

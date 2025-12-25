@@ -36,6 +36,7 @@ const ManageStudentAdmin = () => {
         user="Student"
         desc="View, edit, and manage student records"
         searchDesc="Search by name or roll no.."
+        addLink="/admin/dashboard/AddStudentAdmin"
       >
         <table className="theme-transition w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead className="theme-transition bg-gray-100 dark:bg-gray-800">
@@ -45,8 +46,7 @@ const ManageStudentAdmin = () => {
               <th className="table-row-style font-semibold">Class</th>
               <th className="table-row-style font-semibold">Year</th>
               <th className="table-row-style font-semibold">Email</th>
-              <th className="table-row-style font-semibold">edit</th>
-               <th className="table-row-style font-semibold">delete</th>
+              <th className="table-row-style font-semibold">Actions</th>
             </tr>
           </thead>
 
@@ -67,15 +67,14 @@ const ManageStudentAdmin = () => {
     students.map((student) => (
       <tr
         key={student.faculty_id}
-        className="hover:bg-gray-200 dark:hover:bg-gray-900 transition"
+        className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
       >
         <td className="table-row-style">{student.student_id}</td>
         <td className="table-row-style">{student.name}</td>
         <td className="table-row-style">{student.class_id}</td>
         <td className="table-row-style">{student.year_of_study}</td>
         <td className="table-row-style">{student.email}</td>
-        <td className="table-row-style"><EditButton/> </td>
-        <td className="table-row-style"> <DeleteButton/></td>
+        <td className="table-row-style"><EditButton/>  <DeleteButton/></td>
       </tr>
     ))
   )}

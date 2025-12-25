@@ -1,11 +1,12 @@
 import React from "react";
 import AddButton from "../../ui/Buttons/AddButton";
 import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
+import { Link } from "react-router-dom";
 
-const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {
+const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children, addLink }) => {
   return (
     <div className="wrapperDiv w-full py-2 bg-inherit dark:bg-inherit flex justify-center font-sans text-gray-900 dark:text-white">
-      <div className="mainContainer p-6 gap-y-5 w-full max-w-full sm:max-w-[90%] lg:max-w-[70%] flex flex-col">
+      <div className="mainContainer p-6 gap-y-5 w-full max-w-full flex flex-col">
         <div className="headerDiv flex gap-x-3 items-center">
           <div className="navigationDiv">
             <NavigateBackButton />
@@ -31,7 +32,7 @@ const ManageUserTemplateAdmin = ({ user, desc, searchDesc, children }) => {
                     border-[0.8px] border-[var(--border-light)] dark:border-[var(--border-light)] overflow-hidden
                    focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600"
             />
-            <AddButton />
+            <Link to={addLink}><AddButton /></Link>
           </div>
           <div className="userListTableDiv w-full overflow-auto">
             {children}

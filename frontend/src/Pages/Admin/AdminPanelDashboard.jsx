@@ -3,12 +3,13 @@ import DashContentPanelDashboard from "../../ui/Templates/DashContentPanelDashbo
 import ActionContainerDashboard from "../../ui/Templates/ActionContainerDashboard";
 import ActionButtonDashboard from "../../ui/Buttons/ActionButtonDashboard";
 import PanelTemplateDashboard from "../../ui/Templates/PanelTemplateDashboard";
-import { Link } from "react-router-dom";
+import { useOutletContext, Link } from "react-router-dom";
 
 const AdminPanelDashboard = () => {
+  const { username } = useOutletContext();
   return (
     <PanelTemplateDashboard
-      user="Admin"
+      username={username}
     >
       {/* ROW 1 */}
       <DashContentPanelDashboard>
@@ -18,7 +19,7 @@ const AdminPanelDashboard = () => {
           <Link to="AddSubjectAdmin"><ActionButtonDashboard title="Add Subject" /></Link>
           <Link to="AddClassAdmin"><ActionButtonDashboard title="Add New Classes" /></Link>
           <Link to="AddTimeTableAdmin"><ActionButtonDashboard title="Add Time Table" /></Link>
-        </ActionContainerDashboard>
+          </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Manage">
           <Link to="ManageFacultyAdmin"><ActionButtonDashboard title="Manage Faculty" /></Link>

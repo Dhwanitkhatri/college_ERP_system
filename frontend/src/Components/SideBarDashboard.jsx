@@ -32,7 +32,7 @@ const SideBarDashboard = ({ onLogoutClick, role }) => {
           icon={LayoutDashboard}
         />
 
-        <SideBarButton to="Classes" label="Classes" icon={School} />
+        <SideBarButton to="Classroom" label="Classes" icon={School} />
         <SideBarButton to="Events" label="Events" icon={CalendarDays} />
         <SideBarButton
           to="Notifications"

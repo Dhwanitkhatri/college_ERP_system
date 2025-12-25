@@ -112,7 +112,11 @@ const router = createBrowserRouter([
        {
         path: "notifications",
         element: <NotificationPage />,
-      }
+      },
+      {
+        path: "Classroom",
+        element: <Classroom />,
+      },
     ],
   },
   {
@@ -126,7 +130,11 @@ const router = createBrowserRouter([
       {
         path: "notifications",
         element: <NotificationPage />,
-      }
+      },
+      {
+        path: "Classroom",
+        element: <Classroom />,
+      },
     ],
   },
   {
