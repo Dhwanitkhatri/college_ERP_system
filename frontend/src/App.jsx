@@ -109,6 +109,10 @@ const router = createBrowserRouter([
         index: true,
         element: <FacultyPanelDashboard />,
       },
+       {
+        path: "notifications",
+        element: <NotificationPage />,
+      }
     ],
   },
   {
@@ -119,6 +123,10 @@ const router = createBrowserRouter([
         index: true,
         element: <StudentPanelDashboard />,
       },
+      {
+        path: "notifications",
+        element: <NotificationPage />,
+      }
     ],
   },
   {

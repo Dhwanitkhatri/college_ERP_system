@@ -52,7 +52,7 @@ export const login = async (req, res) => {
     //  Lightweight JWT payload → smaller token → faster sign
     const token = jwt.sign(
       {
-        uid: user.user_id,
+        uid: user.username,
         role,
         course_id
       },

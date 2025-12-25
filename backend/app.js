@@ -16,7 +16,6 @@ import { responseTimeLogger } from "./src/middleware/responseTimeLogger.js";
 import subjectRoutes from "./src/routes/subjectRoutes.js";
 dotenv.config();
 const app = express();
-console.log(process.env.SERVER_IP);
 app.use(
   cors({
     origin: `http://${process.env.SERVER_IP}:5173`, // Your frontend URL

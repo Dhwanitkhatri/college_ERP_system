@@ -6,8 +6,8 @@ import { Student } from "../model/Student.js";
 import { Faculty } from "../model/Faculty.js";
 import { Admin } from "../model/Admin.js";
 import { Class } from "../model/Class.js";
-import { Course } from "../model/Course.js";
 import { User } from "../model/User.js";
+import { QueryTypes } from "sequelize";
 // Send notification
 export const sendNotification = async (req, res) => {
   try {
@@ -164,85 +164,72 @@ export const sendNotification = async (req, res) => {
 
 export const getUserNotifications = async (req, res) => {
   try {
-    const UserId = req.user.uid;
-    const userRole = req.user.role;
-    const courseId = req.user.course_id;
+    const user_id = req.user.uid;
+    const user_role = req.user.role;        // STUDENT | FACULTY | ADMIN
+    const course_id = req.user.course_id;
+    console.log("User Role:", user_role);
+    console.log(user_id);
 
-    console.log("JWT payload:", {
-      UserId,
-      userRole,
-      courseId
-    });
+    if (!user_id || !user_role || !course_id) {
+      return res.status(400).json({ message: "Invalid user credentials." });
+    }
 
+   
+    let class_id = null;
 
-    let academicId = null;
-    try {
-      const userRecord = await User.findOne({
-        where: { user_id: UserId },
-        attributes: ['username']
+    
+    if (user_role === 'Student') {
+      const student = await Student.findOne({
+        where: {
+          student_id: user_id,
+          course_id: course_id
+        },
+        attributes: ['class_id']
       });
 
-      if (!userRecord) {
-        console.log("User not found with ID:", UserId);
-        return res.status(404).json({
-          success: false,
-          message: "User profile not found"
-        });
+      class_id = student?.class_id || null;
+    }
+    console.log("Class ID:", class_id);
+    const notifications = await sequelize.query(
+      `
+      SELECT *
+      FROM notifications
+      WHERE
+    
+        (target_type = 'COURSE' and course_id = :course_id)
+        OR
+        (target_type = 'CLASS' AND class_id = :class_id and course_id = :course_id)
+        OR
+        (target_type = 'ROLE' AND receiver_role = :role and course_id = :course_id)
+        OR
+          (
+            target_type = 'INDIVIDUAL'
+            AND receiver_role = :role
+            AND receiver_id = :user_id
+            and course_id = :course_id
+          )
+    
+      ORDER BY created_at DESC
+      `,
+      {
+        replacements: {
+          course_id,
+          role: user_role,
+          user_id,
+          class_id   // NULL for faculty/admin → auto ignored
+        },
+        type: QueryTypes.SELECT
       }
+    );
 
-      academicId = userRecord.username;
+    return res.status(200).json({ notifications });
 
-      const studentRecord = await Student.findOne({
-        where: { student_id: academicId }
-      });
-      
-
-    } catch (userError) {
-      console.error("Error fetching user:", userError);
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching user information"
-      });
-    }
-
-
-    const whereCondition = {
-      receiver_id: academicId, // Use academic ID '23BCA001'
-      receiver_role: userRole // Use actual role from User table
-    };
-
-    // For students and faculty, filter by course_id
-    if (userRole === "Student" || userRole === "Faculty") {
-      whereCondition.course_id = courseId;
-    }
-
-
-    const notifications = await Notification.findAll({
-      where: whereCondition,
-      order: [['created_at', 'DESC']],
-      attributes: [
-        'id',
-        'title',
-        'message',
-        'sender_id',
-        'sender_role',
-        'receiver_id',
-        'receiver_role',
-        'course_id',
-        'class_id',
-        'target_type',
-        'created_at'
-      ]
-    });
-    res.status(200).json({
-      success: true,
-      notifications
-    });
   } catch (error) {
     console.error("Error fetching notifications:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 
 //to fetch all the student admin and faculty for notification purpose

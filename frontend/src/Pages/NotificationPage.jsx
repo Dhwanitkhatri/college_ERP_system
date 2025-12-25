@@ -15,7 +15,7 @@ const NotificationPage = () => {
     })
     .then((res)=>{
       setNotifications(res.data.notifications);
-      console.log("NOtifications: ",res.data);
+      console.log("Notifications: ",res.data);
     })
     .catch((err)=>{
       console.log("Error: ", err.response?.data || err.message);
