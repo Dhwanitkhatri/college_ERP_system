@@ -1,6 +1,6 @@
 //class routes.js
 import express from 'express';
-import { createClass, getAllClasses, getClassesByCourse, updateClassById, deleteClassById } from '../controllers/classController.js';
+import { createClass, getAllClasses, updateClass, deleteClass } from '../controllers/classController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
@@ -11,12 +11,12 @@ router.post('/', authMiddleware, adminMiddleware, createClass);
 router.get('/', authMiddleware, adminMiddleware , getAllClasses);
 
 // Get classes by course ID (authenticated users)
-router.get('/course/:course_id', authMiddleware, getClassesByCourse);
+//router.get('/course/:course_id', authMiddleware, getClassesByCourse);
 
 // Update class by ID (admins only)
-router.put('/:id', authMiddleware, adminMiddleware, updateClassById);
+router.put('/:id', authMiddleware, adminMiddleware, updateClass);
 
 // Delete class by ID (admins only)
-router.delete('/:id', authMiddleware, adminMiddleware, deleteClassById);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteClass);
 
 export default router;

@@ -51,9 +51,15 @@ Student.belongsTo(User, { foreignKey: 'user_id',targetKey:'user_id' });
 Course.hasMany(Student, { foreignKey: 'course_id' ,sourceKey:'course_id'});
 Student.belongsTo(Course, { foreignKey: 'course_id',targetKey:'course_id' });
 
-// Class ↔ Student
-Class.hasMany(Student, { foreignKey: 'class_id' ,sourceKey:'class_id'});
-Student.belongsTo(Class, { foreignKey: 'class_id',targetKey:'class_id' });
+Class.hasMany(Student, {
+  foreignKey: "class_pk",
+  as: "students"
+});
+
+Student.belongsTo(Class, {
+  foreignKey: "class_pk",
+  as: "class"
+});
 
 // Department ↔ Course
 Department.hasMany(Course, { foreignKey: 'department_id',sourceKey:'department_id' });
@@ -107,9 +113,7 @@ SessionPlanning.belongsTo(Faculty, { foreignKey: 'faculty_id' ,targetKey:'facult
 Subject.hasMany(SessionPlanning, { foreignKey: 'subject_id' , sourceKey:'subject_id' });
 SessionPlanning.belongsTo(Subject, { foreignKey: 'subject_id', targetKey:'subject_id' });
 
-// // User ↔ Notification
-// User.hasMany(Notification, { foreignKey: 'user_id', sourceKey:'user_id' });
-// Notification.belongsTo(User, { foreignKey: 'user_id' ,targetKey:'user_id'});
+
 
 // Student ↔ Feedback
 Student.hasMany(Feedback, { foreignKey: 'student_id', sourceKey:'student_id' });

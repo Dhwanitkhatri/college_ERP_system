@@ -184,7 +184,7 @@ export const getUserNotifications = async (req, res) => {
    if (user_role === "Student") {
   const student = await Student.findOne({
     where: {
-      student_id: user_id,
+      user_id: user_id,
       course_id: course_id,
     },
     attributes: ["class_id"],
@@ -195,8 +195,10 @@ export const getUserNotifications = async (req, res) => {
       },
     ],
   });
+    
       class_id = student?.class_id || null;
     }
+    
     console.log("Class ID:", class_id);
     const notifications = await sequelize.query(
       `

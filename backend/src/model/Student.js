@@ -24,8 +24,8 @@ export const Student = sequelize.define("Student",{
         type:DataTypes.STRING,
         allowNull:false
     },
-    class_id:{ //this is foreign key from class table
-        type:DataTypes.STRING,
+    class_pk:{ //this is foreign key from class table
+        type:DataTypes.INTEGER,
         allowNull:true
     },
     name:{
