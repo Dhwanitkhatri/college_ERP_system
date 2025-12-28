@@ -53,12 +53,11 @@ Student.belongsTo(Course, { foreignKey: 'course_id',targetKey:'course_id' });
 
 Class.hasMany(Student, {
   foreignKey: "class_pk",
-  as: "students"
+ 
 });
 
 Student.belongsTo(Class, {
   foreignKey: "class_pk",
-  as: "class"
 });
 
 // Department ↔ Course

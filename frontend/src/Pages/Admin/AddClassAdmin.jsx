@@ -4,7 +4,9 @@ import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import NavigateBackButton from "../../ui/Buttons/NavigateBackButton";
 
+
 const AddClassAdmin = () => {
+
   const [selectedYear, setSelectedYear] = useState("");
   const semesterMap = {
     FY: ["1", "2"],
@@ -13,6 +15,8 @@ const AddClassAdmin = () => {
     LY: ["7", "8"],
   };
   const currentSemesters = semesterMap[selectedYear] || [];
+
+  
 
   return (
     <div className="mainDiv h-full bg-white dark:bg-gray-950 p-8 font-sans text-gray-900 dark:text-gray-100 transition-colors duration-200">

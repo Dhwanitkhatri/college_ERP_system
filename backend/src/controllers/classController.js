@@ -1,6 +1,9 @@
 //class controller.js
 import { Class } from '../model/Class.js ';
-
+import {getCurrentAcademicYear , getSemesterType} from '../services/academicYear.js';
+import { sequelize } from "../config/db.js";
+import { Student } from '../model/Student.js ';
+import { Op, fn, col } from 'sequelize';
 
 // Create a new class (admins only)
 export const createClass = async (req, res) => {
@@ -114,9 +117,57 @@ export const deleteClass = async (req, res) => {
   }
 };
 
+//to fetch the classes of current academic year
+export const getCurrentYearClasses = async (req, res) => {
+ try {
+    const academic_year = getCurrentAcademicYear();
+    const sem_type = getSemesterType();
 
+    const semesterCondition =
+      sem_type === "odd" ? [1, 3, 5] : [2, 4, 6];
 
+    const classes = await Class.findAll({
+      where: {
+        academic_year,
+        semester: { [Op.in]: semesterCondition }
+      },
+      attributes: [
+        "id",
+        "class_id",
+        "course_id",
+        "year",
+        "semester",
+        "section",
+        [
+          fn("COUNT", col("Students.id")),
+          "total_students"
+        ]
+      ],
+      include: [
+        {
+          model: Student,
+          attributes: [],
+          required: false
+        }
+      ],
+      group: ["Class.id"],
+      order: [
+        ["year", "ASC"],
+        ["semester", "ASC"],
+        ["section", "ASC"]
+      ]
+    });
 
+    res.json({
+      academic_year,
+      semester_type: sem_type,
+      total_classes: classes.length,
+      data: classes
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 
 
