@@ -31,7 +31,7 @@ const AdminPanelDashboard = () => {
       {/* ROW 2 */}
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Reports">
-          <ActionButtonDashboard title="Datewise Report" />
+          <Link to="DatewiseReportAdmin"><ActionButtonDashboard title="Datewise Report" /></Link>
           <Link to="StudentReportAdmin"><ActionButtonDashboard title="Studentwise Report" /></Link>
           <ActionButtonDashboard title="Classwise Report" />
         </ActionContainerDashboard>

@@ -70,6 +70,7 @@
   --blackbtn-bg: #ffffff;
   --notification-hover: #f9fafb;
   --icon-color:#000000;
+  --Submit-Btn-General:#000000;
 }
 
 /* -------------------- DARK MODE -------------------- */
@@ -110,6 +111,7 @@
   --blackbtn-bg: #000000;
   --notification-hover: #1f2937;
   --icon-color:#ffffff;
+  --Submit-Btn-General:#ffffff;
 }
 
 /* ---------- Shared Classes ---------- */

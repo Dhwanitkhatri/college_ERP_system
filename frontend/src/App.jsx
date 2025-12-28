@@ -23,6 +23,7 @@ import AddTimeTableAdmin from "./Pages/Admin/AddTimeTableAdmin";
 import SendNotificationAdmin from "./Pages/Admin/SendNotificationAdmin";
 import ManageProfileAdmin from "./Pages/Admin/ManageProfileAdmin";
 import StudentReportAdmin from "./Pages/Admin/StudentReportAdmin";
+import DatewiseReportAdmin from "./Pages/Admin/DatewiseReportAdmin";
 import Classroom from "./Pages/Classroom";
 import NotificationPage from "./Pages/NotificationPage";
 
@@ -98,6 +99,10 @@ const router = createBrowserRouter([
       {
         path: "notifications",
         element: <NotificationPage />,
+      },
+      {
+        path: "DatewiseReportAdmin",
+        element: <DatewiseReportAdmin />,
       },
     ],
   },
