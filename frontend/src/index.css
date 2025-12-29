@@ -205,6 +205,7 @@
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem; /* space between buttons */
+  gap: 0.75rem;       /* space between buttons */
   margin-top: 1.5rem;
+  flex-wrap: wrap;   /* allows buttons to go to next line */
 }

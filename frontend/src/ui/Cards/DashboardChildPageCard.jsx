@@ -10,6 +10,7 @@ const DashboardChildPageCard = ({ children, className = "" }) => {
         p-8
         bg-white dark:bg-gray-900
         shadow-sm
+        overflow-auto
         ${className}
       `}
     >
