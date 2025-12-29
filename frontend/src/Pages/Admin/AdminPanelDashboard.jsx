@@ -24,7 +24,7 @@ const AdminPanelDashboard = () => {
         <ActionContainerDashboard title="Manage">
           <Link to="ManageFacultyAdmin"><ActionButtonDashboard title="Manage Faculty" /></Link>
           <Link to="ManageStudentAdmin"><ActionButtonDashboard title="Manage Student" /></Link>
-          <ActionButtonDashboard title="Manage Settings" />
+          <Link to="ManageSettingsAdmin"><ActionButtonDashboard title="Manage Settings" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
 
