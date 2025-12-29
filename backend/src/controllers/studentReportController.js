@@ -6,151 +6,126 @@ import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
 import { User } from "../model/User.js";
 import{getSemesterType} from "../services/academicYear.js";
+import { number } from "zod";
 
 // Get date wise attendance report for a student
 export const getStudentDateWiseReport = async (req, res) => {
   try {
-    const { student_id, class_id, subject_id, month } = req.body;
+    // Get query parameters
+    const { student_id, class_id, subject_id, month } = req.query;
     const user_id = req.user.uid;
     const role = req.user.role;
     const course_id = req.user.course_id;
 
     // Validate required fields
     if (!student_id || !class_id || !subject_id || !month) {
-      return res.status(400).json({ message: "student_id, class_id, subject_id, and month are required." });
+      return res.status(400).json({
+        message: "student_id, class_id, subject_id, and month are required."
+      });
     }
 
-    // student existence check
-    const studentRecord = await Student.findOne({ where: { student_id, course_id } });
+    // Convert month to number
+    const monthNum = Number(month);
+    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+      return res.status(400).json({ message: "Invalid month. Must be 1-12." });
+    }
 
+    // Check student existence
+    const studentRecord = await Student.findOne({ where: { student_id, course_id } });
     if (!studentRecord) {
       return res.status(404).json({ message: "Student not found." });
     }
 
-    // Only Faculty and Admin can access
+    // Role-based access check
     if (!["Faculty", "Admin"].includes(role)) {
       return res.status(403).json({ message: "Access denied. Only Faculty and Admin can access this report." });
     }
-    // Get faculty username for Faculty role
+
+    // If Faculty, get their username to filter
     let faculty_id = null;
     if (role === "Faculty") {
       const FacultyUser = await User.findOne({
-        where: { user_id: user_id },
-        attributes: ['username']
+        where: { user_id },
+        attributes: ["username"]
       });
       faculty_id = FacultyUser ? FacultyUser.username : null;
     }
 
-    // Verify that the class belongs to the faculty
+    // Verify the class
     const classRecord = await Class.findOne({
-      where: {
-        id: studentRecord.class_pk,
-        course_id
-      }
+      where: { id: studentRecord.class_pk, course_id }
     });
-
     if (!classRecord) {
-      return res.status(403).json({
-        message: "Student is not assigned to a valid class."
-      });
+      return res.status(403).json({ message: "Student is not assigned to a valid class." });
     }
-    // Verify that the student belongs to the requested class
-    if (class_id !== classRecord.class_id) {
-      return res.status(403).json({
-        message: "Student does not belong to the requested class."
-      });
+    if (Number(class_id) !== classRecord.id) {
+      return res.status(403).json({ message: "Student does not belong to the requested class." });
     }
-    // Subject existence check
+
+    // Extract academic year from class table
+    if (!classRecord.academic_year || !classRecord.academic_year.includes("-")) {
+      return res.status(500).json({ message: "Invalid academic year in class record." });
+    }
+    const [yearStartStr, yearEndStr] = classRecord.academic_year.split("-");
+    const yearStart = Number(yearStartStr);
+    const yearEnd = Number(yearEndStr);
+
+    // Determine correct year for the month
+    let year;
+    if (monthNum >= 7) { // July-Dec → start year
+      year = yearStart;
+    } else {          // Jan-June → end year
+      year = yearEnd;
+    }
+
+    // Build start and end dates for the month
+    const startDate = new Date(year, monthNum - 1, 1);
+    const endDate = new Date(year, monthNum, 0);
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+
+    // Verify the subject
     const subjectRecord = await Subject.findOne({ where: { subject_id, course_id } });
     if (!subjectRecord) {
       return res.status(404).json({ message: "Subject not found." });
     }
 
-    // parse month to get dtaes
-    const [year, monthNum] = month.split("-").map(Number); // month in "YYYY-MM" format
-    const startDate = new Date(year, monthNum - 1, 1); // first day of month
-    const endDate = new Date(year, monthNum, 0); // last day of month
-
-    const startDateStr = startDate.toISOString().split('T')[0]; // "YYYY-MM-DD"
-    const endDateStr = endDate.toISOString().split('T')[0]; // "YYYY-MM-DD"
-
-    // Build where clause for attendance query
+    // Build attendance query
     const whereClause = {
       student_id,
       class_id,
       subject_id,
-      date: {
-        [Op.between]: [startDateStr, endDateStr]
-      }
+      date: { [Op.between]: [startDateStr, endDateStr] }
     };
-
-    // If user is Faculty, filter by their attendance only
     if (role === "Faculty" && faculty_id) {
       whereClause.faculty_id = faculty_id;
     }
 
-    // Fetch attendance records for the student in the specified month
+    // Fetch attendance records
     const attendanceRecords = await Attendance.findAll({
       where: whereClause,
-      order: [['date', 'ASC'], ['lecture_no', 'ASC']]
+      order: [["date", "ASC"], ["lecture_no", "ASC"]]
     });
 
-    // calculate total
-    const totalPresent = attendanceRecords.filter(record => record.status === 'Present').length;
-    const totalAbsent = attendanceRecords.filter(record => record.status === 'Absent').length;
+    // Attendance summary
     const totalClasses = attendanceRecords.length;
+    const totalPresent = attendanceRecords.filter(r => r.status === "Present").length;
+    const totalAbsent = attendanceRecords.filter(r => r.status === "Absent").length;
     const attendancePercentage = totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(2) : "0.00";
 
-    // Group attendance by date
-    const attendanceByDate = {};
-    for (const record of attendanceRecords) {
-      const dateStr = record.date;
-      if (!attendanceByDate[dateStr]) {
-        attendanceByDate[dateStr] = [];
-      }
-      // Push lecture info
-      attendanceByDate[dateStr].push({
-        lecture_no: record.lecture_no,
-        status: record.status
-      });
-    }
-    //get all dates in month(calendar view)
-    // const allDatesInMonth = [];
-    // const currentDate = new Date(startDate);
-    // while (currentDate <= endDate) {
-    //   const dateStr = currentDate.toISOString().split('T')[0];
-    //   allDatesInMonth.push(dateStr);
-    //   currentDate.setDate(currentDate.getDate() + 1);
-    // }
+    // Prepare detailed records
+    const detailedRecords = attendanceRecords.map(r => ({
+      attendance_id: r.attendance_id,
+      date: r.date,
+      day: new Date(r.date).toLocaleDateString("en-US", { weekday: "short" }),
+      lecture_no: r.lecture_no,
+      status: r.status,
+      faculty_id: r.faculty_id
+    }));
 
-    // // create daily attendance summary
-    // const dailyAttendanceSummary = allDatesInMonth.map(date => {
-    //   const dayRecords = attendanceByDate[date] || [];
-    //   const dayOfWeek = new Date(date).getDay(); // 0 (Sun) to 6 (Sat)
-    //   const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6); // assuming weekend is Saturday and Sunday
-
-    //   let dayStatus = 'No Record';
-    //   if (dayRecords.length > 0) {
-    //     if(dayRecords.every(r => r.status === 'Present')) {
-    //       dayStatus = 'Present';
-    //     } else if(dayRecords.every(r => r.status === 'Absent')) {
-    //       dayStatus = 'Absent';
-    //     } else {
-    //       dayStatus = 'Mixed';
-    //     }
-    //   }
-    //   return {
-    //     date: date,
-    //     day :  new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
-    //     is_weekend: isWeekend,
-    //     lecture : dayRecords,
-    //     status: dayStatus
-    //   };
-    // });
-
-    //prepare response
+    // Prepare response
     const report = {
-      sucess: true,
+      success: true,
       student_info: {
         student_id: studentRecord.student_id,
         name: studentRecord.name,
@@ -158,16 +133,13 @@ export const getStudentDateWiseReport = async (req, res) => {
       },
       subject_info: {
         subject_id: subjectRecord.subject_id,
-        subject_name: subjectRecord.subject_name,
+        subject_name: subjectRecord.subject_name
       },
       report_info: {
         generated_by: role,
         faculty_id: faculty_id,
-        month: month,
-        date_range: {
-          from: startDateStr,
-          to: endDateStr
-        }
+        month: `${year}-${monthNum.toString().padStart(2, "0")}`,
+        date_range: { from: startDateStr, to: endDateStr }
       },
       attendance_summary: {
         total_classes: totalClasses,
@@ -176,22 +148,14 @@ export const getStudentDateWiseReport = async (req, res) => {
         attendance_percentage: attendancePercentage,
         attendance_rating: attendancePercentage >= 50 ? "Good" : "Poor"
       },
-      //daily_attendance: dailyAttendanceSummary,
-      detailed_records: attendanceRecords.map(record => ({
-        attendance_id: record.attendance_id,
-        date: record.date,
-        day: new Date(record.date).toLocaleDateString('en-US', { weekday: 'short' }),
-        lecture_no: record.lecture_no,
-        status: record.status,
-        faculty_id: record.faculty_id
-      }))
+      detailed_records: detailedRecords
     };
 
-
     return res.status(200).json({
-      message: "Student date-wise attendance report fetched successfully.",
+      message: "Student month-wise attendance report fetched successfully.",
       data: report
     });
+
   } catch (error) {
     console.error("Error fetching student date-wise report:", error);
     return res.status(500).json({ message: "Internal server error." });
@@ -380,7 +344,7 @@ export const getClassesForDatewiseReport = async (req, res) => {
     const semester = semesterType === "odd" ? ["1", "3", "5", "7"] : ["2", "4", "6", "8"];
     const classes = await Class.findAll({
       where: { course_id , semester: { [Op.in]: semester } },
-      attributes: ['class_id', 'year', 'section', 'semester', 'academic_year']
+      attributes: ['class_id',  'semester', 'id' ]
     });
     return res.status(200).json({
       message: "Classes fetched successfully.",
@@ -388,6 +352,44 @@ export const getClassesForDatewiseReport = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching classes for date-wise report:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getSubjectsAndStudentForDatewiseReport = async (req, res) => {
+  try {
+    // Read from query
+    const semesterNumber = Number(req.query.semester);
+    const class_id = Number(req.query.class_id);
+
+    const course_id = req.user.course_id;
+
+    //  Validation
+    if (Number.isNaN(semesterNumber) || Number.isNaN(class_id)) {
+      return res.status(400).json({ message: "Invalid query parameters" });
+    }
+
+    const subjects = await Subject.findAll({
+      where: { course_id, semester: semesterNumber },
+      attributes: ["subject_id", "subject_name"],
+    });
+
+    const students = await Student.findAll({
+      where: { course_id, class_pk: class_id },
+      attributes: ["student_id", "name"],
+    });
+
+    console.log("Class ID:", class_id);
+    console.log("Semester Number:", semesterNumber);
+    console.log("Course ID:", course_id);
+
+    return res.status(200).json({
+      message: "Subjects and students fetched successfully.",
+      subjects,
+      students,
+    });
+  } catch (error) {
+    console.error("Error fetching subjects for date-wise report:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };

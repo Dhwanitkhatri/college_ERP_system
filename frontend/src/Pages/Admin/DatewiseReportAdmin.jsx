@@ -2,10 +2,13 @@ import React from "react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { FileText } from "lucide-react";
+import api from "../../api/axios.js";
 
 const DatewiseReportAdmin = () => {
+  const token = localStorage.getItem("token");
+
   const {
     register,
     handleSubmit,
@@ -21,7 +24,7 @@ const DatewiseReportAdmin = () => {
     },
   });
 
-  const months = [
+  const monthsArray = [
     "January",
     "February",
     "March",
@@ -35,57 +38,57 @@ const DatewiseReportAdmin = () => {
     "November",
     "December",
   ];
+  const months = monthsArray.map((name, index) => ({
+    name,
+    number: index + 1,
+  }));
 
+  const [classes, setClasses] = useState([]);
+  const [subjectsByClass, setSubjectsByClass] = useState([]);
+  const [studentsByClassAndSubject, setStudentsByClassAndSubject] = useState(
+    []
+  );
+  const [reportData, setReportData] = useState([]);
+
+  //this api is called for to get classes for datewise report
   useEffect(() => {
-    //call the class api here
+    // Fetch classes for datewise report
+    api
+      .get("api/reports/student/classes-for-datewise-report", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setClasses(res.data.data))
+      .catch((err) => console.error(err.response?.data || err.message));
   }, []);
-
-  const [classes, setClasses] = useState([
-    //store classes in this state
-    "FYBCA-A", //atyar maate dummy classes mukya chhe
-    "FYBCA-B",
-    "SYBCA-A",
-    "SYBCA-B",
-    "TYBCA-A",
-    "TYBCA-B",
-  ]);
   const selectedClass = watch("class"); //this will store the selected class of dropdown
 
+  const [class_id, semester] = selectedClass
+    ? selectedClass.split("|")
+    : [null, null];
+
+  // this api is called to get subjects and students based on class and semester
   useEffect(() => {
-    if (selectedClass) {
-      //call api based on selected class
-      // future ma ahiya API call thase
-      // fetch(`/api/subjects?class=${selectedClass}`)
-      // .then(...)
-    }
+    if (!selectedClass) return;
+
+    api
+      .get("/api/reports/student/subjects-and-students-for-datewise-report", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { class_id, semester },
+      })
+      .then((res) => {
+        setSubjectsByClass(res.data.subjects);
+        setStudentsByClassAndSubject(res.data.students);
+      })
+      .catch((err) => console.error(err.response?.data || err.message));
   }, [selectedClass]);
 
-  const [subjectsByClass, setSubjectsByClass] = useState({
-    //store subjects called by api here
-    "FYBCA-A": ["Maths", "C", "DBMS"], //dummy subjects data
-    "SYBCA-A": ["Java", "OS", "CN"],
-  });
-  const subjectsList = subjectsByClass[selectedClass] || [];
   const selectedSubject = watch("subject"); // this will watch the dropdown's selected subject
 
   const selectedMonth = watch("month");
 
-  const [studentsByClassAndSubject, setStudentsByClassAndSubject] = useState({
-    //dummy student data
-    "FYBCA-A": {
-      Maths: ["Aayush", "Rahul", "Karan"],
-      C: ["Neel", "Parth"],
-    },
-    "SYBCA-A": {
-      Java: ["Ravi", "Meet"],
-      OS: ["Harsh"],
-    },
-  });
   const selectedStudent = watch("student");
-  const studentsList =
-    studentsByClassAndSubject[selectedClass]?.[selectedSubject] || [];
+
   useEffect(() => {
-    setValue("subject", "");
     setValue("month", "");
     setValue("student", "");
   }, [selectedClass]);
@@ -98,16 +101,33 @@ const DatewiseReportAdmin = () => {
   useEffect(() => {
     setValue("student", "");
   }, [selectedMonth]);
-
+  const [isReportGenerated, setIsReportGenerated] = useState(false);
   //onsubmit kaam kaaj
   const onSubmit = (data) => {
-    alert("hmmmmm su bhai report jovi chhe");
-    console.log("Form Submitted Data:", data);
-    // future ma API call
-    setIsReportGenerated(true);
+    console.log("Generating report with data:", data);
+
+    const monthStr = data.month.toString().padStart(2, "0");
+
+    api
+      .get("/api/reports/student/date-wise-report", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          student_id: selectedStudent,
+          class_id: class_id,
+          subject_id: data.subject,
+          month: monthStr,
+        },
+      })
+      .then((res) => {
+        console.log(res.data);
+        setIsReportGenerated(true);
+        setReportData(res.data);
+      })
+      .catch((err) => console.error(err.response?.data || err.message));
   };
 
-  const [isReportGenerated, setIsReportGenerated] = useState(false);
+  console.log("Report Data:", reportData);
+
   return (
     <DashboardChildPageTemplate
       title="Datewise Report"
@@ -140,8 +160,11 @@ const DatewiseReportAdmin = () => {
                     (
                       cls //<--- class mapping ahiya karvi
                     ) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                      <option
+                        key={`${cls.id}|${cls.semester}`}
+                        value={`${cls.id}|${cls.semester}`}
+                      >
+                        {cls.class_id} semester {cls.semester}
                       </option>
                     )
                   )}
@@ -167,12 +190,12 @@ const DatewiseReportAdmin = () => {
                   <option value="" disabled>
                     Select a Subject
                   </option>
-                  {subjectsList.map(
+                  {subjectsByClass.map(
                     (
                       sub //<--- ahiya subject list map karvi
                     ) => (
-                      <option key={sub} value={sub}>
-                        {sub}
+                      <option key={sub.subject_id} value={sub.subject_id}>
+                        {sub.subject_name}
                       </option>
                     )
                   )}
@@ -201,8 +224,8 @@ const DatewiseReportAdmin = () => {
                   </option>
 
                   {months.map((month) => (
-                    <option key={month} value={month}>
-                      {month}
+                    <option key={month.number} value={month.number}>
+                      {month.name}
                     </option>
                   ))}
                 </select>
@@ -232,9 +255,9 @@ const DatewiseReportAdmin = () => {
                     Select a Student
                   </option>
 
-                  {studentsList.map((student) => (
-                    <option key={student} value={student}>
-                      {student}
+                  {studentsByClassAndSubject.map((student) => (
+                    <option key={student.student_id} value={student.student_id}>
+                      {student.name}
                     </option>
                   ))}
                 </select>
@@ -281,24 +304,37 @@ const DatewiseReportAdmin = () => {
               {/* Report Summary */}
               <DashboardChildPageCard>
                 <div className="details grid sm:grid-cols-1 lg:grid-cols-2">
-                  <div className="studentName">name: </div><span></span>
-                  <div className="studentClass">class: </div><span></span>
-                  <div className="subjectName">subject: </div><span></span>
-                  <div className="month">month: </div><span></span>
+                  <div className="studentName">name: </div>
+                  <span>{reportData.data.student_info.name}</span>
+                  <div className="studentClass">class: </div>
+                  <span>{reportData.data.student_info.class_id}</span>
+                  <div className="subjectName">subject: </div>
+                  <span>{reportData.data.subject_info.subject_name}</span>
+                  <div className="month">month: </div>
+                  <span>{reportData.data.report_info.month}</span>
                 </div>
                 <div className="reportDetails">
-                  <div className="totalLectures">total lectures:</div><p></p>
-                  <div className="totalPresent">total present:</div><p></p>
-                  <div className="totalAbsent">total absent:</div><p></p>
-                  <div className="attendance">attendance:</div><p></p>
+                  <div className="totalLectures">total lectures:</div>
+                  <span>
+                    {reportData.data.attendance_summary.total_classes}
+                  </span>
+
+                  <div className="totalPresent">total present:</div>
+                  <span>
+                    {reportData.data.attendance_summary.total_present}
+                  </span>
+                  <div className="totalAbsent">total absent:</div>
+                  {reportData.data.attendance_summary.total_absent}
+                  <div className="attendance">attendance:</div>
+                  <span>
+                    {reportData.data.attendance_summary.attendance_percentage}
+                  </span>
                 </div>
               </DashboardChildPageCard>
 
               {/* Datewise Report Table */}
               <DashboardChildPageCard>
-                <h3 className="">
-                  Datewise Attendance
-                </h3>
+                <h3 className="">Datewise Attendance</h3>
 
                 <table className="w-full border">
                   <thead className="">
@@ -308,7 +344,22 @@ const DatewiseReportAdmin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                      {/*do the mapping here */}
+                    {reportData?.data?.detailed_records?.map(
+                      (record, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="px-4 py-2">
+                            {record.date} ({record.day}) <br />
+                            <span className="text-sm text-gray-500">
+                              Lecture {record.lecture_no}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-2 font-semibold">
+                            {record.status}
+                          </td>
+                        </tr>
+                      )
+                    )}
                   </tbody>
                 </table>
               </DashboardChildPageCard>
