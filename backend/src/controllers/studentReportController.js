@@ -5,6 +5,7 @@ import { Op } from "sequelize";
 import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
 import { User } from "../model/User.js";
+import{getSemesterType} from "../services/academicYear.js";
 
 // Get date wise attendance report for a student
 export const getStudentDateWiseReport = async (req, res) => {
@@ -370,5 +371,23 @@ export const getClassWiseReport = async (req, res) => {
       message: "Internal server error.",
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
+  }
+};
+export const getClassesForDatewiseReport = async (req, res) => {
+  try {
+    const course_id = req.user.course_id;
+    const semesterType = getSemesterType();
+    const semester = semesterType === "odd" ? ["1", "3", "5", "7"] : ["2", "4", "6", "8"];
+    const classes = await Class.findAll({
+      where: { course_id , semester: { [Op.in]: semester } },
+      attributes: ['class_id', 'year', 'section', 'semester', 'academic_year']
+    });
+    return res.status(200).json({
+      message: "Classes fetched successfully.",
+      data: classes
+    });
+  } catch (error) {
+    console.error("Error fetching classes for date-wise report:", error);
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
