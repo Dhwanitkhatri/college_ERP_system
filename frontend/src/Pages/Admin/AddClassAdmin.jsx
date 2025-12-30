@@ -5,6 +5,7 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import api from "../../api/axios.js";
 
 const AddClassAdmin = () => {
   const {
@@ -24,11 +25,34 @@ const AddClassAdmin = () => {
   };
 
   const currentSemesters = semesterMap[selectedYear] || [];
+const onSubmit = async (data) => {
+  const token = localStorage.getItem("token");
+  try {
+    await api.post(
+      "api/classes",
+      {
+        year: data.year,
+        semester: data.semester,
+        sections: data.section,
+        academic_year: data.academicYear,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  const onSubmit = (data) => {
-    console.log("Class Data:", data);
-    //call karo api ahiya
-  };
+    alert("Class created successfully");
+  } catch (error) {
+    console.error("Error creating class:", error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to create class. Please try again."
+    );
+  }
+};
 
   return (
     <DashboardChildPageTemplate title="Add New Class" desc="Enter class details to add it to the system">

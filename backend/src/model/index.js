@@ -77,8 +77,19 @@ Course.hasMany(Class, { foreignKey: 'course_id',sourceKey:'course_id' });
 Class.belongsTo(Course, { foreignKey: 'course_id',targetKey:'course_id' });
 
 // Class ↔ Timetable
-Class.hasMany(Timetable, { foreignKey: 'class_id' , sourceKey:'class_id'});
-Timetable.belongsTo(Class, { foreignKey: 'class_id', targetKey:'class_id' });
+Class.hasMany(Timetable, { 
+  foreignKey: 'class_pk',  // column in Timetable table
+  sourceKey: 'id',         // primary key in Class table
+  as: 'timetables'         // optional alias
+});
+
+// Timetable → Class
+Timetable.belongsTo(Class, { 
+  foreignKey: 'class_pk',  // column in Timetable table
+  targetKey: 'id',         // primary key in Class table
+  as: 'class'              // optional alias
+});
+
 
 // Subject ↔ Timetable
 Subject.hasMany(Timetable, { foreignKey: 'subject_id' , sourceKey:'subject_id'});

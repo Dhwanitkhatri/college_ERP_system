@@ -10,32 +10,32 @@ export const createClass = async (req, res) => {
   try {
     const  course_id  = req.user.course_id;
     const {  year, semester, sections, academic_year } = req.body;
-    console.log(course_id, year, semester, sections, academic_year);
+    
     // Validation
     const validSemesters = {
-      1: [1, 2],
-      2: [3, 4],
-      3: [5, 6],
-      4: [7, 8]
+      'FY': [1, 2],
+      'SY': [3, 4],
+      'TY': [5, 6],
+      'LY': [7, 8]
     };
 
-    if (!validSemesters[year]?.includes(semester)) {
+    if (!validSemesters[year]?.includes(Number(semester))) {
       return res.status(400).json({
         message: "Invalid semester for selected year"
       });
     }
 
-    const yearMap = { 1: "FY", 2: "SY", 3: "TY" , 4: "FY" };
+    
     const created = [];
     const course = course_id.replace(/\d/g, '');
     for (const section of sections) {
-      const class_id = `${yearMap[year]}_${course}_${section}`;
+      const class_id = `${year}_${course}_${section}`;
 
       const cls = await Class.create({
         class_id,
         course_id,
         year,
-        semester,
+        semester:Number(semester),
         section,
         academic_year
       });
@@ -49,6 +49,7 @@ export const createClass = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 };

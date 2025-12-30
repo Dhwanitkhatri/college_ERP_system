@@ -12,8 +12,8 @@ export const Timetable = sequelize.define("Timetable",{
         allowNull:false,
         unique:true
     },
-    class_id:{
-        type:DataTypes.STRING,
+    class_pk:{
+        type:DataTypes.INTEGER,
         allowNull:false
     },
     subject_id:{
