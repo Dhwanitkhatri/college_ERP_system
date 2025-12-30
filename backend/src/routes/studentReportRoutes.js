@@ -1,6 +1,6 @@
 // students report  routes
 import express from "express";
-import { getStudentDateWiseReport , getClassWiseReport ,getClassesForDatewiseReport ,getSubjectsAndStudentForDatewiseReport} from "../controllers/studentReportController.js";
+import { getStudentDateWiseReport , getClassWiseReport ,getClassesForDatewiseReport ,getSubjectsAndStudentForDatewiseReport , getOverallClassAttendancereport} from "../controllers/studentReportController.js";
 import { adminMiddleware, authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -15,4 +15,6 @@ router.post("/student/class-wise-report", authMiddleware, getClassWiseReport);
 router.get("/student/classes-for-datewise-report", authMiddleware, getClassesForDatewiseReport);
 // Route to get subjects and students for datewise report
 router.get("/student/subjects-and-students-for-datewise-report", authMiddleware, getSubjectsAndStudentForDatewiseReport);
+
+router.get("/overall-class-wise" , authMiddleware ,getOverallClassAttendancereport )
 export default router;

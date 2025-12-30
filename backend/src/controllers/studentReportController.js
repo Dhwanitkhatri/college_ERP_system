@@ -6,7 +6,6 @@ import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
 import { User } from "../model/User.js";
 import{getSemesterType} from "../services/academicYear.js";
-import { number } from "zod";
 
 // Get date wise attendance report for a student
 export const getStudentDateWiseReport = async (req, res) => {
@@ -391,5 +390,187 @@ export const getSubjectsAndStudentForDatewiseReport = async (req, res) => {
   } catch (error) {
     console.error("Error fetching subjects for date-wise report:", error);
     return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getOverallClassAttendancereport = async (req, res) => {
+  try {
+    const { class_id } = req.query;
+
+    if (!class_id) {
+      return res.status(400).json({
+        message: "class_id is required"
+      });
+    }
+
+    const classRecord = await Class.findOne({
+      where: { class_id },
+      include: [{
+        model: User,
+        as: "mentor",
+        attributes: ["username"]
+      }]
+    });
+
+    if (!classRecord) {
+      return res.status(404).json({
+        message: "Class not found"
+      });
+    }
+
+    const students = await Student.findAll({
+      where: { class_pk :classRecord.id },
+      order: [["student_id", "ASC"]]
+    });
+
+    if (!students.length) {
+      return res.status(404).json({
+        message: "No students found in class"
+      });
+    }
+
+    const studentIds = students.map(s => s.student_id);
+
+    const attendanceRecords = await Attendance.findAll({
+      where: {
+        class_id : classRecord.id,
+        student_id: { [Op.in]: studentIds }
+      },
+      include: [
+        {
+          model: Subject,
+          as: "Subject",
+          attributes: ["subject_id", "subject_name"]
+        },
+        {
+          model: User,
+          as: "Faculty",
+          attributes: ["username"]
+        }
+      ],
+      order: [["date", "ASC"], ["student_id", "ASC"]]
+    });
+
+    const studentMap = {};
+    const subjectSummary = {};
+    const facultySummary = {};
+    const monthlySummary = {};
+    const uniqueDates = new Set();
+
+    students.forEach(s => {
+      studentMap[s.student_id] = {
+        student_id: s.student_id,
+        name: s.name,
+        total_classes: 0,
+        present: 0,
+        absent: 0,
+        subject_wise: {},
+        faculty_wise: {},
+        monthly_attendance: {}
+      };
+    });
+
+    attendanceRecords.forEach(r => {
+      const student = studentMap[r.student_id];
+      if (!student) return;
+
+      const date = new Date(r.date);
+      const dateStr = date.toISOString().split("T")[0];
+      const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      const subjectId = r.Subject.subject_id;
+      const facultyName = r.Faculty.username;
+
+      uniqueDates.add(dateStr);
+
+      student.total_classes++;
+      r.status === "Present" ? student.present++ : student.absent++;
+
+      /* Subject-wise */
+      student.subject_wise[subjectId] ??= {
+        subject_name: r.Subject.subject_name,
+        total_classes: 0,
+        present: 0,
+        absent: 0
+      };
+      const sw = student.subject_wise[subjectId];
+      sw.total_classes++;
+      r.status === "Present" ? sw.present++ : sw.absent++;
+
+      /* Faculty-wise */
+      student.faculty_wise[facultyName] ??= {
+        total_classes: 0,
+        present: 0,
+        absent: 0
+      };
+      const fw = student.faculty_wise[facultyName];
+      fw.total_classes++;
+      r.status === "Present" ? fw.present++ : fw.absent++;
+
+      /* Monthly */
+      student.monthly_attendance[monthStr] ??= {
+        total_classes: 0,
+        present: 0,
+        absent: 0
+      };
+      const mw = student.monthly_attendance[monthStr];
+      mw.total_classes++;
+      r.status === "Present" ? mw.present++ : mw.absent++;
+
+       
+      subjectSummary[subjectId] ??= {
+        subject_name: r.Subject.subject_name,
+        total_classes: 0,
+        present: 0,
+        absent: 0
+      };
+      subjectSummary[subjectId].total_classes++;
+      r.status === "Present"
+        ? subjectSummary[subjectId].present++
+        : subjectSummary[subjectId].absent++;
+
+      facultySummary[facultyName] ??= {
+        faculty: facultyName,
+        total_classes: 0,
+        present: 0,
+        absent: 0
+      };
+      facultySummary[facultyName].total_classes++;
+      r.status === "Present"
+        ? facultySummary[facultyName].present++
+        : facultySummary[facultyName].absent++;
+
+      monthlySummary[monthStr] ??= {
+        month: monthStr,
+        total_classes: 0,
+        present: 0,
+        absent: 0
+      };
+      monthlySummary[monthStr].total_classes++;
+      r.status === "Present"
+        ? monthlySummary[monthStr].present++
+        : monthlySummary[monthStr].absent++;
+    });
+
+    return res.status(200).json({
+      success: true,
+      class_info: {
+        class_id: classRecord.class_id,
+        mentor: classRecord.mentor?.username
+      },
+      summary: {
+        total_students: students.length,
+        working_days: uniqueDates.size
+      },
+      students: Object.values(studentMap),
+      subject_wise_summary: Object.values(subjectSummary),
+      faculty_wise_summary: Object.values(facultySummary),
+      monthly_breakdown: Object.values(monthlySummary)
+    });
+
+  } catch (error) {
+    console.error("Overall Attendance Error:", error);
+    return res.status(500).json({
+      message: "Internal server error"
+    });
   }
 };

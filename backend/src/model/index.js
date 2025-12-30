@@ -161,6 +161,19 @@ Student.belongsTo(Department, {
   targetKey: "department_id"
 });
 
+
+
+Class.belongsTo(User, {
+  foreignKey: "mentor_id",
+  targetKey: "username",
+  as: "mentor"
+});
+Attendance.belongsTo(User, {
+  foreignKey: "faculty_id",
+  targetKey: "username",
+  as: "Faculty"
+});
+
 /* -------------------------------------------------
    EXPORT MODELS & SEQUELIZE
 --------------------------------------------------*/

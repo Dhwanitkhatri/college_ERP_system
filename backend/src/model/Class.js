@@ -13,7 +13,11 @@ export const Class = sequelize.define(
     class_id: {
       type: DataTypes.STRING,
       allowNull: false
-      
+
+    },
+    mentor_id: {
+      type: DataTypes.STRING,
+      allowNull: false
     },
 
     course_id: {
