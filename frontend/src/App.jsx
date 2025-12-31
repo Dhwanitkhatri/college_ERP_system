@@ -27,6 +27,7 @@ import DatewiseReportAdmin from "./Pages/Admin/DatewiseReportAdmin";
 import Classroom from "./Pages/Classroom";
 import NotificationPage from "./Pages/NotificationPage";
 import ManageSettingsAdmin from "./Pages/Admin/ManageSettingsAdmin";
+import Events from "./Pages/Events";
 
 const router = createBrowserRouter([
   {
@@ -100,6 +101,10 @@ const router = createBrowserRouter([
       {
         path: "Classroom",
         element: <Classroom />,
+      },
+      {
+        path: "Events",
+        element: <Events />,
       },
       {
         path: "notifications",
