@@ -1,20 +1,99 @@
-import React from "react";
+import React, { use } from "react";
 import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
+import api from "../../api/axios.js"
+import { useEffect , useState} from "react";
+import { Watch } from "react-hook-form";
 
 const AddTimetableAdmin = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
 
+  const token = localStorage.getItem("token");
+  const selectedClass = watch("class");
+  const [classes, setClasses] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [faculties , setFaculties] = useState([]);
+
+ // api to fetch classes for current academic year
+  useEffect(() => {
+    api.get('api/timetables/current-year-classes', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      setClasses(response.data.data);
+    })
+    .catch(error => {
+      console.error("Error fetching classes:", error);
+    }); 
+  },[]);
+
+  //this is api is use to get the subject as per the selected class
+const [classId , classSemester] = selectedClass ? selectedClass.split("|") : [null, null];
+console.log("Selected Class ID:", classId);
+  useEffect(() => {
+    if (selectedClass) {
+      api.get('api/timetables/subjects', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          semester:classSemester
+        }
+      })
+      .then(response => {
+        setSubjects(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching subjects:", error);
+      });
+    }}, [selectedClass]);
+
+    useEffect(() => {
+      api.get('api/timetables/faculties', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then(response => {
+        setFaculties(response.data);
+      })
+      .catch(error => {
+        console.error("Error fetching faculties:", error);
+      });
+    }, []);
+
   const onSubmit = (data) => {
     console.log("Timetable Data:", data);
-    //ahiya api call karvi
+    console.log("Class ID for submission:", classId);
+    api.post('api/timetables', {
+      class_id: classId,
+      subject_id: data.subject,
+      faculty_id: data.faculty,
+      start_time: data.startTime,
+      end_time: data.endTime,
+      day_of_week: data.day
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      alert("Timetable entry created successfully");
+    })
+    .catch(error => {
+      console.error("Error creating timetable entry:", error);
+      alert(error);
+    });
   };
 
   return (
@@ -32,8 +111,11 @@ const AddTimetableAdmin = () => {
               {...register("class", { required: "Please select class" })}
             >
               <option value="">Select class</option>
-              <option value="bca_sem5">BCA Sem 5</option>
-              <option value="bca_sem6">BCA Sem 6</option>
+              {classes.map((cls) => (
+                <option key={`${cls.id}|${cls.semester}`} value={`${cls.id}|${cls.semester}`}>
+                  {`${cls.class_id} - Sem ${cls.semester}`}
+                </option>
+              ))}
             </select>
             {errors.class && (
               <p className="custom-error">{errors.class.message}</p>
@@ -48,9 +130,11 @@ const AddTimetableAdmin = () => {
               {...register("subject", { required: "Subject is required" })}
             >
               <option value="">Select subject</option>
-              <option value="stqa">STQA</option>
-              <option value="cc">CC</option>
-              <option value="iot">IOT</option>
+              {subjects.map((subj) => (
+                <option key={subj.subject_id} value={subj.subject_id}>
+                  {subj.subject_name}
+                </option>
+              ))}
             </select>
             {errors.subject && (
               <p className="custom-error">{errors.subject.message}</p>
@@ -65,9 +149,11 @@ const AddTimetableAdmin = () => {
               {...register("faculty", { required: "Faculty is required" })}
             >
               <option value="">Select faculty</option>
-              <option value="aayush">Aayush</option>
-              <option value="jiken">Jiken</option>
-              <option value="dhwanit">Dhwanit</option>
+              {faculties.map((fac) => (
+                <option key={fac.faculty_id} value={fac.faculty_id}>
+                  {fac.name}
+                </option>
+              ))}
             </select>
             {errors.faculty && (
               <p className="custom-error">{errors.faculty.message}</p>
@@ -112,12 +198,12 @@ const AddTimetableAdmin = () => {
               {...register("day", { required: "Day is required" })}
             >
               <option value="">Select day</option>
-              <option value="monday">Monday</option>
-              <option value="tuesday">Tuesday</option>
-              <option value="wednesday">Wednesday</option>
-              <option value="thursday">Thursday</option>
-              <option value="friday">Friday</option>
-              <option value="saturday">Saturday</option>
+              <option value="Monday">Monday</option>
+              <option value="Tuesday">Tuesday</option>
+              <option value="Wednesday">Wednesday</option>
+              <option value="Thursday">Thursday</option>
+              <option value="Friday">Friday</option>
+              <option value="Saturday">Saturday</option>
             </select>
             {errors.day && <p className="custom-error">{errors.day.message}</p>}
           </div>

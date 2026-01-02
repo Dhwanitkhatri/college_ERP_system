@@ -1,6 +1,6 @@
 //time-table routes
 import express from 'express';
-import { createTimetableEntry, getAllTimetableEntries, getTimetableByClass, getTimetableByFaculty, getAvailableTimeSlots, updateTimetableEntry, deleteTimetableEntry } from '../controllers/timetableController.js';
+import { createTimetableEntry, getAllTimetableEntries, getTimetableByClass, getTimetableByFaculty, getAvailableTimeSlots, updateTimetableEntry, deleteTimetableEntry , getCurrentYearClasses , getSubject , getFaculty} from '../controllers/timetableController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -25,6 +25,10 @@ router.put('/:id', authMiddleware, adminMiddleware, updateTimetableEntry);
 
 // Delete a timetable entry by ID (admins only)
 router.delete('/:id', authMiddleware, adminMiddleware, deleteTimetableEntry);
+router.get('/current-year-classes', authMiddleware, getCurrentYearClasses);
+router.get('/subjects', authMiddleware, getSubject);
+router.get('/faculties', authMiddleware, getFaculty);
+
 
 export default router;
 
