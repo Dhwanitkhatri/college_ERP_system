@@ -26,10 +26,13 @@ import StudentReportAdmin from "./Pages/Admin/StudentReportAdmin";
 import DatewiseReportAdmin from "./Pages/Admin/DatewiseReportAdmin";
 import ClasswiseReportAdmin from "./Pages/Admin/ClasswiseReportAdmin";
 import CheckFeeStatusAdmin from "./Pages/Admin/CheckFeeStatusAdmin";
+import NotAvailablePage from "./Pages/NotAvailablePage";
 import Classroom from "./Pages/Classroom";
 import NotificationPage from "./Pages/NotificationPage";
 import ManageSettingsAdmin from "./Pages/Admin/ManageSettingsAdmin";
 import Events from "./Pages/Events";
+import OverallClassReportAdmin from "./Pages/Admin/OverallClassReportAdmin";
+import PageNotFound from "./Pages/PageNotFound";
 
 const router = createBrowserRouter([
   {
@@ -124,6 +127,14 @@ const router = createBrowserRouter([
         path: "CheckFeeStatusAdmin",
         element: <CheckFeeStatusAdmin />,
       },
+      {
+        path: "OverallClassReportAdmin",
+        element: <OverallClassReportAdmin />,
+      },
+      {
+        path: "NotAvailablePage",
+        element: <NotAvailablePage />,
+      },
     ],
   },
   {
@@ -177,6 +188,10 @@ const router = createBrowserRouter([
   {
     path: "/KnowMore",
     element: <KnowMore />,
+  },
+  {
+    path: "*",
+    element: <PageNotFound />,
   },
 ]);
 function App() {

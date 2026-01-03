@@ -32,14 +32,15 @@ const AdminPanelDashboard = () => {
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Reports">
           <Link to="DatewiseReportAdmin"><ActionButtonDashboard title="Datewise Report" /></Link>
-          <Link to="StudentReportAdmin"><ActionButtonDashboard title="Studentwise Report" /></Link>
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Studentwise Report" /></Link>
           <Link to="ClasswiseReportAdmin"><ActionButtonDashboard title="Classwise Report" /></Link>
+          <Link to="OverallClassReportAdmin"><ActionButtonDashboard title="Overall Class Report" /></Link>
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Communication & Services">
           <Link to="SendNotificationAdmin"><ActionButtonDashboard title="Send Notifications" /></Link>
           <Link to="CheckFeeStatusAdmin"><ActionButtonDashboard title="Check Fee Status" /></Link>
-          <ActionButtonDashboard title="Live Classes" />
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
     </PanelTemplateDashboard>
