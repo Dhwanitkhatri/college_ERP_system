@@ -25,6 +25,7 @@ import ManageProfileAdmin from "./Pages/Admin/ManageProfileAdmin";
 import StudentReportAdmin from "./Pages/Admin/StudentReportAdmin";
 import DatewiseReportAdmin from "./Pages/Admin/DatewiseReportAdmin";
 import ClasswiseReportAdmin from "./Pages/Admin/ClasswiseReportAdmin";
+import CheckFeeStatusAdmin from "./Pages/Admin/CheckFeeStatusAdmin";
 import Classroom from "./Pages/Classroom";
 import NotificationPage from "./Pages/NotificationPage";
 import ManageSettingsAdmin from "./Pages/Admin/ManageSettingsAdmin";
@@ -118,6 +119,10 @@ const router = createBrowserRouter([
       {
         path: "ClasswiseReportAdmin",
         element: <ClasswiseReportAdmin />,
+      },
+      {
+        path: "CheckFeeStatusAdmin",
+        element: <CheckFeeStatusAdmin />,
       },
     ],
   },
