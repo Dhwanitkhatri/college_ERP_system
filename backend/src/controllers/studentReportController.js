@@ -52,7 +52,8 @@ export const getStudentDateWiseReport = async (req, res) => {
 
     // Verify the class
     const classRecord = await Class.findOne({
-      where: { id: studentRecord.class_pk, course_id }
+      where: { id: studentRecord.class_pk, course_id },
+      attributes:["id", "class_id", "academic_year"]
     });
     if (!classRecord) {
       return res.status(403).json({ message: "Student is not assigned to a valid class." });
