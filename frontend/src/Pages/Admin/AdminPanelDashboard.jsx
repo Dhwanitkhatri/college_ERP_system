@@ -33,7 +33,7 @@ const AdminPanelDashboard = () => {
         <ActionContainerDashboard title="Reports">
           <Link to="DatewiseReportAdmin"><ActionButtonDashboard title="Datewise Report" /></Link>
           <Link to="StudentReportAdmin"><ActionButtonDashboard title="Studentwise Report" /></Link>
-          <ActionButtonDashboard title="Classwise Report" />
+          <Link to="ClasswiseReportAdmin"><ActionButtonDashboard title="Classwise Report" /></Link>
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Communication & Services">
