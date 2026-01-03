@@ -217,3 +217,12 @@
   flex-direction: column;
   border-radius: 0.5rem;             /* rounded-lg */
 }
+
+/* this is for the fee summary in checkfeestatus admin */
+
+.fee-summary-box {
+  padding: 1rem;          
+  border-radius: 0.5rem;  
+  border-width: 1px;      
+  border-style: solid;
+}
