@@ -19,6 +19,7 @@ import { Feedback } from './Feedback.js';
 import { StudentPersonalDetails } from './StudentPersonalDetails.js';
 import { EmployeePersonalDetails } from './EmployeePersonalDetails.js'; // fixed typo
 import { Admin } from './Admin.js';
+import { FeatureFlag } from './FeatureFlag.js';
 
 /* -------------------------------------------------
    INITIALIZE ALL MODELS
@@ -195,5 +196,6 @@ export {
   Feedback,
   StudentPersonalDetails,
   EmployeePersonalDetails,
-  Admin  
+  Admin,
+  FeatureFlag  
 };

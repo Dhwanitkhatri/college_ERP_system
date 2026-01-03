@@ -49,9 +49,15 @@ const ClasswiseReportAdmin = () => {
 
   // this api is called for to get classes for classwise report
   useEffect(() => {
-    //select class api ahiya call karvi-------------------
+    // Fetch classes for datewise report
+    api
+      .get("api/reports/student/classes-for-datewise-report", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setClasses(res.data.data))
+      .catch((err) => console.error(err.response?.data || err.message));
   }, []);
-
+ 
   const selectedClass = watch("class");
   const selectedSubject = watch("subject");
   const selectedMonth = watch("month");
@@ -62,10 +68,19 @@ const ClasswiseReportAdmin = () => {
 
   // this api is called to get subjects based on class & semester
   useEffect(() => {
-    if (!selectedClass) return;
-    //ahiya api call karvi select subject ni-------------
-  }, [selectedClass]);
+   if (!selectedClass) return;
 
+    api
+      .get("/api/reports/student/subjects-and-students-for-datewise-report", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { class_id, semester },
+      })
+      .then((res) => {
+        setSubjectsByClass(res.data.subjects);
+      })
+      .catch((err) => console.error(err.response?.data || err.message));
+  }, [selectedClass]);
+console.log("Subjects by class:", subjectsByClass);
   useEffect(() => {
     setValue("subject", "");
     setValue("month", "");
@@ -78,7 +93,23 @@ const ClasswiseReportAdmin = () => {
   // onsubmit kaam kaaj
   const onSubmit = (data) => {
     console.log("Generating classwise report with data:", data);
-    // ahiya submit ni api call karvi
+    api.get("api/reports/student/class-wise-report", {
+      headers: { Authorization: `Bearer ${token}` },
+      params: {
+        class_id,
+        semester,
+        subject_id: data.subject,
+        month: data.month,
+      },
+    })
+    .then((res) => {
+      setReportData(res.data.report);
+      setIsReportGenerated(true);
+      console.log("Report data:", res.data.report);
+    })
+    .catch((err) => {
+      console.error("Error generating report:", err.response?.data || err.message);
+    });
   };
 
   return (
@@ -99,10 +130,21 @@ const ClasswiseReportAdmin = () => {
                   defaultValue=""
                   {...register("class", { required: "Please select a class" })}
                 >
-                  <option value="" disabled>
+                   <option value="" disabled>
                     Select a Class
                   </option>
-                  {/* class options ni mapping ahiya karo */}
+                  {classes.map(
+                    (
+                      cls //<--- class mapping ahiya karvi
+                    ) => (
+                      <option
+                        key={`${cls.id}|${cls.semester}`}
+                        value={`${cls.id}|${cls.semester}`}
+                      >
+                        {cls.class_id} semester {cls.semester}
+                      </option>
+                    )
+                  )}
                 </select>
                 {errors.class && (
                   <p className="custom-error">{errors.class.message}</p>
@@ -120,10 +162,18 @@ const ClasswiseReportAdmin = () => {
                     required: "Please select subject",
                   })}
                 >
-                  <option value="" disabled>
-                    Select Subject
+                 <option value="" disabled>
+                    Select a Subject
                   </option>
-                  {/* subject options ni mapping ahiya */}
+                  {subjectsByClass.map(
+                    (
+                      sub //<--- ahiya subject list map karvi
+                    ) => (
+                      <option key={sub.subject_id} value={sub.subject_id}>
+                        {sub.subject_name}
+                      </option>
+                    )
+                  )}
                 </select>
                 {errors.subject && (
                   <p className="custom-error">{errors.subject.message}</p>
