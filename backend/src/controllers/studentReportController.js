@@ -169,6 +169,7 @@ export const getClassWiseReport = async (req, res) => {
     const user_id = req.user.uid;
     const role = req.user.role;
     const course_id = req.user.course_id;
+    console.log(req.query);
 
     // Validate required fields
     if (!class_id || !subject_id) {
@@ -194,7 +195,7 @@ export const getClassWiseReport = async (req, res) => {
     // Verify that the class exists
     const classRecord = await Class.findOne({
       where: {
-        class_id : class_id,
+        id : Number(class_id),
         course_id
       }
     });

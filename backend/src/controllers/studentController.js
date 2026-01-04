@@ -12,6 +12,8 @@ export const createStudent = async (req, res) => {
     const t = await sequelize.transaction(); //start transaction
     const student_id = await generateEnrollmentId(req.user.course_id);
     const course_id = req.user.course_id; //assign course_id from admin creating 
+    console.log("Generated student_id:", student_id);
+    console.log("Admin's course_id:", req.user.course_id);
     console.log("Creating student for course_id:", course_id);
     try {
         const {
@@ -25,7 +27,7 @@ export const createStudent = async (req, res) => {
             admission_year,
             year_of_study,
         } = req.body;
-
+        console.log("Request body:", req.body);
         const course = await Course.findOne({ where: {course_id} });
         if (!course) {
             await t.rollback();
@@ -98,6 +100,7 @@ export const createStudent = async (req, res) => {
             },
             { transaction: t }
         );
+        console.log("Created user:", newUser.username);
 
         // Create the student record
         const newStudent = await Student.create(

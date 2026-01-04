@@ -97,15 +97,15 @@ console.log("Subjects by class:", subjectsByClass);
       headers: { Authorization: `Bearer ${token}` },
       params: {
         class_id,
-        semester,
+      //  semester,
         subject_id: data.subject,
         month: data.month,
       },
     })
     .then((res) => {
-      setReportData(res.data.report);
+      setReportData(res.data.student_reports);
       setIsReportGenerated(true);
-      console.log("Report data:", res.data.report);
+      console.log("Report data:", res.data.student_reports);
     })
     .catch((err) => {
       console.error("Error generating report:", err.response?.data || err.message);
@@ -245,7 +245,27 @@ console.log("Subjects by class:", subjectsByClass);
                     </tr>
                   </thead>
 
-                  <tbody>{/* ahiya data batavo maaping karine */}</tbody>
+                  <tbody>
+  {reportData.map((student, index) => (
+    <tr key={student.student_id} className="border-b">
+      <td>{index + 1}</td>
+      <td>{student.student_id}</td>
+      <td>{student.name}</td>
+      <td>
+        {student.total_attendance.total_present}
+      </td>
+      <td>
+        {student.total_attendance.total_absent}
+      </td>
+      <td>
+        {student.total_attendance.classes_conducted}
+      </td>
+      <td>
+        {student.total_attendance.attendance_percentage}%
+      </td>
+    </tr>
+  ))}
+</tbody>
                 </table>
               </div>
             </DashboardChildPageCard>
