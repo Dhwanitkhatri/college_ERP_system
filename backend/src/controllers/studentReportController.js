@@ -5,7 +5,7 @@ import { Op } from "sequelize";
 import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
 import { User } from "../model/User.js";
-import{getSemesterType} from "../services/academicYear.js";
+import { getSemesterType } from "../services/academicYear.js";
 
 // Get date wise attendance report for a student
 export const getStudentDateWiseReport = async (req, res) => {
@@ -21,12 +21,6 @@ export const getStudentDateWiseReport = async (req, res) => {
       return res.status(400).json({
         message: "student_id, class_id, subject_id, and month are required."
       });
-    }
-
-    // Convert month to number
-    const monthNum = Number(month);
-    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-      return res.status(400).json({ message: "Invalid month. Must be 1-12." });
     }
 
     // Check student existence
@@ -53,7 +47,7 @@ export const getStudentDateWiseReport = async (req, res) => {
     // Verify the class
     const classRecord = await Class.findOne({
       where: { id: studentRecord.class_pk, course_id },
-      attributes:["id", "class_id", "academic_year"]
+      attributes: ["id", "class_id", "academic_year"]
     });
     if (!classRecord) {
       return res.status(403).json({ message: "Student is not assigned to a valid class." });
@@ -66,23 +60,6 @@ export const getStudentDateWiseReport = async (req, res) => {
     if (!classRecord.academic_year || !classRecord.academic_year.includes("-")) {
       return res.status(500).json({ message: "Invalid academic year in class record." });
     }
-    const [yearStartStr, yearEndStr] = classRecord.academic_year.split("-");
-    const yearStart = Number(yearStartStr);
-    const yearEnd = Number(yearEndStr);
-
-    // Determine correct year for the month
-    let year;
-    if (monthNum >= 7) { // July-Dec → start year
-      year = yearStart;
-    } else {          // Jan-June → end year
-      year = yearEnd;
-    }
-
-    // Build start and end dates for the month
-    const startDate = new Date(year, monthNum - 1, 1);
-    const endDate = new Date(year, monthNum, 0);
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
 
     // Verify the subject
     const subjectRecord = await Subject.findOne({ where: { subject_id, course_id } });
@@ -90,12 +67,54 @@ export const getStudentDateWiseReport = async (req, res) => {
       return res.status(404).json({ message: "Subject not found." });
     }
 
+    let dateFillter = {};
+    let period = "ALL  AVAILABLE RECORSS";
+    if (month) {
+
+      // Convert month to number
+      const monthNum = Number(month);
+      if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+        return res.status(400).json({ message: "Invalid month. Must be 1-12." });
+      }
+      if (!classRecord.academic_year?.include("-")) {
+        return res.status(500).json({
+          message: "Invalid acedmic year"
+        })
+      }
+      const [yearStartStr, yearEndStr] = classRecord.academic_year.split("-");
+      const yearStart = Number(yearStartStr);
+      const yearEnd = Number(yearEndStr);
+
+      // Determine correct year for the month
+      let year;
+      if (monthNum >= 7) { // July-Dec → start year
+        year = yearStart;
+      } else {          // Jan-June → end year
+        year = yearEnd;
+      }
+
+      // Build start and end dates for the month
+      const startDate = new Date(year, monthNum - 1, 1);
+      const endDate = new Date(year, monthNum, 0);
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
+      dateFillter = {
+        date: { [Op.between]: [startDateStr, endDateStr] }
+      };
+
+      period = {
+        month: `${year}-${monthNum.toString().padStart(2, "0")}`,
+        from: startDateStr,
+        to: endDateStr
+      }
+    }
     // Build attendance query
     const whereClause = {
       student_id,
       class_id,
       subject_id,
-      date: { [Op.between]: [startDateStr, endDateStr] }
+      ...dateFillter
     };
     if (role === "Faculty" && faculty_id) {
       whereClause.faculty_id = faculty_id;
@@ -138,15 +157,14 @@ export const getStudentDateWiseReport = async (req, res) => {
       report_info: {
         generated_by: role,
         faculty_id: faculty_id,
-        month: `${year}-${monthNum.toString().padStart(2, "0")}`,
-        date_range: { from: startDateStr, to: endDateStr }
+        period
       },
       attendance_summary: {
         total_classes: totalClasses,
         total_present: totalPresent,
         total_absent: totalAbsent,
         attendance_percentage: attendancePercentage,
-        attendance_rating: attendancePercentage >= 50 ? "Good" : "Poor"
+        attendance_rating: attendancePercentage >= 75 ? "Good" : "Poor"
       },
       detailed_records: detailedRecords
     };
@@ -165,7 +183,7 @@ export const getStudentDateWiseReport = async (req, res) => {
 // Class-wise attendance report for all students in a class
 export const getClassWiseReport = async (req, res) => {
   try {
-    const { class_id, subject_id , month} = req.query;
+    const { class_id, subject_id, month } = req.query;
     const user_id = req.user.uid;
     const role = req.user.role;
     const course_id = req.user.course_id;
@@ -176,14 +194,15 @@ export const getClassWiseReport = async (req, res) => {
       return res.status(400).json({ message: "class_id and subject_id are required." });
     }
 
-    
+
     // Only Faculty and Admin can access
     if (!["Faculty", "Admin"].includes(role)) {
       return res.status(403).json({ message: "Access denied. Only Faculty and Admin can access this report." });
     }
-    
+
     // Get faculty username
     let faculty_id = null;
+    let admin_id = null;
     if (role === "Faculty") {
       const FacultyUser = await User.findOne({
         where: { user_id: user_id },
@@ -191,81 +210,88 @@ export const getClassWiseReport = async (req, res) => {
       });
       faculty_id = FacultyUser ? FacultyUser.username : null;
     }
-    
+    if (role === "Admin") {
+      const adminUser = await User.findOne({
+        where: { user_id: user_id },
+        attributes: ['username']
+      });
+
+      admin_id = adminUser ? adminUser.username : null;
+    }
+
     // Verify that the class exists
     const classRecord = await Class.findOne({
       where: {
-        id : Number(class_id),
+        id: Number(class_id),
         course_id
       }
     });
     if (!classRecord) {
       return res.status(404).json({ message: "Class not found." });
     }
-    
+
     // Extract academic year
     if (!classRecord.academic_year.includes("-")) {
       return res.status(500).json({
         message: "Invalid academic year in class record."
       });
     }
-    
-    
+
+
     // Subject existence check
-    const subjectRecord = await Subject.findOne({ 
-      where: { subject_id, course_id } 
+    const subjectRecord = await Subject.findOne({
+      where: { subject_id, course_id }
     });
     if (!subjectRecord) {
       return res.status(404).json({ message: "Subject not found." });
     }
-    
+
     // Get all students in the class
     const students = await Student.findAll({
       where: { class_pk: classRecord.id, course_id }
     });
-    
+
     if (students.length === 0) {
       return res.status(404).json({ message: "No students found in the specified class." });
     }
-    
+
     const studentIds = students.map(s => s.student_id);
-    
+
     let dateFillter = {};
     let period = "ALL AVAILABLE ATTENDANCE";
-    if(month){
-    const monthNum = Number(month);
-    if(isNaN(monthNum) || monthNum < 1 || monthNum > 12)
-    {
-      return res.status(400).json({
-        message:"Invalid month. MUST BE IN 1-12"
-      });
-    }
-  
-    const [yearStartStr, yearEndStr] = classRecord.academic_year.split("-");
-    const yearStart = Number(yearStartStr);
-    const yearEnd = Number(yearEndStr);
-    const year = monthNum >= 7 ? yearStart : yearEnd;
+    if (month) {
+      const monthNum = Number(month);
+      if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+        return res.status(400).json({
+          message: "Invalid month. MUST BE IN 1-12"
+        });
+      }
 
-    const startDate = new Date(year, monthNum - 1, 1);
-    const endDate = new Date(year, monthNum, 0)
-    
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
+      const [yearStartStr, yearEndStr] = classRecord.academic_year.split("-");
+      const yearStart = Number(yearStartStr);
+      const yearEnd = Number(yearEndStr);
+      const year = monthNum >= 7 ? yearStart : yearEnd;
 
-    dateFillter = {
-      date : { [Op.between]:[startDateStr,endDateStr]}
-    }
+      const startDate = new Date(year, monthNum - 1, 1);
+      const endDate = new Date(year, monthNum, 0)
 
-    period ={
-        from:startDateStr,
-        to:endDateStr
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
+      dateFillter = {
+        date: { [Op.between]: [startDateStr, endDateStr] }
+      }
+
+      period = {
+        from: startDateStr,
+        to: endDateStr
       };
     }
 
     // Build whereClause
     const whereClause = {
       student_id: { [Op.in]: studentIds },
-      class_id:classRecord.id,
+      class_id: classRecord.id,
       subject_id,
       ...dateFillter
     };
@@ -280,7 +306,7 @@ export const getClassWiseReport = async (req, res) => {
       where: whereClause,
       order: [['student_id', 'ASC'], ['date', 'ASC'], ['lecture_no', 'ASC']]
     });
-    
+
     const attendanceMap = {};
     attendanceRecords.forEach(r => {
       if (!attendanceMap[r.student_id]) {
@@ -322,9 +348,9 @@ export const getClassWiseReport = async (req, res) => {
       classTotalAbsent += Number.parseInt(report.total_attendance.total_absent, 10) || 0;
     }
 
-    const classAttendancePercentage = classTotalClasses > 0 ? 
+    const classAttendancePercentage = classTotalClasses > 0 ?
       ((classTotalPresent / classTotalClasses) * 100).toFixed(2) : "0.00";
-    
+
 
     // Prepare response
     const report = {
@@ -343,9 +369,9 @@ export const getClassWiseReport = async (req, res) => {
         subject_name: subjectRecord.subject_name,
       },
       report_info: {
-        generated_by: role, 
+        generated_by: role,
         faculty_id: faculty_id,
-        admin:role == "Admin" ? user_id : null,
+        admin: role == "Admin" ? admin_id : null,
         period,
       },
       class_summary: {
@@ -354,16 +380,16 @@ export const getClassWiseReport = async (req, res) => {
         total_present: classTotalPresent,
         total_absent: classTotalAbsent,
         class_attendance_percentage: `${classAttendancePercentage}%`,
-        rating :  classAttendancePercentage >= 75 ? "Good" : "Poor"
+        rating: classAttendancePercentage >= 75 ? "Good" : "Poor"
       },
       student_reports: studentReports
     };
-    
+
     return res.status(200).json(report);
-    
+
   } catch (error) {
     console.error("Error fetching class-wise report:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       message: "Internal server error.",
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
@@ -375,8 +401,8 @@ export const getClassesForDatewiseReport = async (req, res) => {
     const semesterType = getSemesterType();
     const semester = semesterType === "odd" ? ["1", "3", "5", "7"] : ["2", "4", "6", "8"];
     const classes = await Class.findAll({
-      where: { course_id , semester: { [Op.in]: semester } },
-      attributes: ['class_id',  'semester', 'id' ]
+      where: { course_id, semester: { [Op.in]: semester } },
+      attributes: ['class_id', 'semester', 'id']
     });
     return res.status(200).json({
       message: "Classes fetched successfully.",
@@ -426,9 +452,12 @@ export const getSubjectsAndStudentForDatewiseReport = async (req, res) => {
   }
 };
 
+
 export const getOverallClassAttendancereport = async (req, res) => {
   try {
-    const { class_id } = req.query;
+    const { class_id, month } = req.query;
+    const uid = req.user.uid;
+    const role = req.user.role;
 
     if (!class_id) {
       return res.status(400).json({
@@ -437,11 +466,11 @@ export const getOverallClassAttendancereport = async (req, res) => {
     }
 
     const classRecord = await Class.findOne({
-      where: { class_id },
+      where: { id: class_id },
       include: [{
         model: User,
         as: "mentor",
-        attributes: ["username"]
+        attributes: ["user_id", "username"]
       }]
     });
 
@@ -450,9 +479,17 @@ export const getOverallClassAttendancereport = async (req, res) => {
         message: "Class not found"
       });
     }
+    if (role === "Faculty") {
+      if (!classRecord.mentor || classRecord.mentor.user_id !== uid) {
+        return res.status(403).json({
+          message: "Access denied .. ONLY mentor can access..."
+        });
+      }
+    }
+
 
     const students = await Student.findAll({
-      where: { class_pk :classRecord.id },
+      where: { class_pk: classRecord.id },
       order: [["student_id", "ASC"]]
     });
 
@@ -464,10 +501,32 @@ export const getOverallClassAttendancereport = async (req, res) => {
 
     const studentIds = students.map(s => s.student_id);
 
+    const dateFillter = {};
+    if (month) {
+      const monthNum = Number(month);
+      if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+        return res.status(404).json({
+          message: "Month in range 1-12"
+        });
+      }
+      const [startYear, endYear] = classRecord.academic_year.split("-").map(Number);
+      const year = monthNum >= 7 ? startYear : endYear;
+
+      const startDate = new Date(year, monthNum - 1, 1);
+      const endDate = new Date(year, monthNum, 0);
+
+      dateFillter.date = {
+        [Op.between]: [
+          startDate.toISOString().split("T")[0],
+          endDate.toISOString().split("T")[0]
+        ]
+      };
+    }
     const attendanceRecords = await Attendance.findAll({
       where: {
-        class_id : classRecord.id,
-        student_id: { [Op.in]: studentIds }
+        class_id: classRecord.id,
+        student_id: { [Op.in]: studentIds },
+        ...dateFillter
       },
       include: [
         {
@@ -518,7 +577,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       student.total_classes++;
       r.status === "Present" ? student.present++ : student.absent++;
 
-      /* Subject-wise */
+      // Subject-wise 
       student.subject_wise[subjectId] ??= {
         subject_name: r.Subject.subject_name,
         total_classes: 0,
@@ -529,7 +588,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       sw.total_classes++;
       r.status === "Present" ? sw.present++ : sw.absent++;
 
-      /* Faculty-wise */
+      // Faculty-wise 
       student.faculty_wise[facultyName] ??= {
         total_classes: 0,
         present: 0,
@@ -539,7 +598,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       fw.total_classes++;
       r.status === "Present" ? fw.present++ : fw.absent++;
 
-      /* Monthly */
+      //Monthly 
       student.monthly_attendance[monthStr] ??= {
         total_classes: 0,
         present: 0,
@@ -549,7 +608,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       mw.total_classes++;
       r.status === "Present" ? mw.present++ : mw.absent++;
 
-       
+
       subjectSummary[subjectId] ??= {
         subject_name: r.Subject.subject_name,
         total_classes: 0,
