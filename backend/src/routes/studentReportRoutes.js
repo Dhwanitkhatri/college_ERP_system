@@ -9,7 +9,7 @@ const router = express.Router();
 router.get("/student/date-wise-report", authMiddleware, getStudentDateWiseReport);
 
 // Route to get class wise attendance report
-router.post("/student/class-wise-report", authMiddleware, getClassWiseReport);
+router.get("/student/class-wise-report", authMiddleware, getClassWiseReport);
 
 // Route to get classes for datewise report
 router.get("/student/classes-for-datewise-report", authMiddleware, getClassesForDatewiseReport);

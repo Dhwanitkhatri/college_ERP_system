@@ -165,7 +165,7 @@ export const getStudentDateWiseReport = async (req, res) => {
 // Class-wise attendance report for all students in a class
 export const getClassWiseReport = async (req, res) => {
   try {
-    const { class_id, subject_id } = req.body;
+    const { class_id, subject_id , month} = req.query;
     const user_id = req.user.uid;
     const role = req.user.role;
     const course_id = req.user.course_id;
@@ -175,11 +175,12 @@ export const getClassWiseReport = async (req, res) => {
       return res.status(400).json({ message: "class_id and subject_id are required." });
     }
 
+    
     // Only Faculty and Admin can access
     if (!["Faculty", "Admin"].includes(role)) {
       return res.status(403).json({ message: "Access denied. Only Faculty and Admin can access this report." });
     }
-
+    
     // Get faculty username
     let faculty_id = null;
     if (role === "Faculty") {
@@ -189,17 +190,25 @@ export const getClassWiseReport = async (req, res) => {
       });
       faculty_id = FacultyUser ? FacultyUser.username : null;
     }
-
+    
     // Verify that the class exists
     const classRecord = await Class.findOne({
       where: {
-        class_id,
+        class_id : class_id,
         course_id
       }
     });
     if (!classRecord) {
       return res.status(404).json({ message: "Class not found." });
     }
+    
+    // Extract academic year
+    if (!classRecord.academic_year.includes("-")) {
+      return res.status(500).json({
+        message: "Invalid academic year in class record."
+      });
+    }
+    
     
     // Subject existence check
     const subjectRecord = await Subject.findOne({ 
@@ -213,18 +222,51 @@ export const getClassWiseReport = async (req, res) => {
     const students = await Student.findAll({
       where: { class_pk: classRecord.id, course_id }
     });
-
+    
     if (students.length === 0) {
       return res.status(404).json({ message: "No students found in the specified class." });
     }
-
+    
     const studentIds = students.map(s => s.student_id);
+    
+    let dateFillter = {};
+    let period = "ALL AVAILABLE ATTENDANCE";
+    if(month){
+    const monthNum = Number(month);
+    if(isNaN(monthNum) || monthNum < 1 || monthNum > 12)
+    {
+      return res.status(400).json({
+        message:"Invalid month. MUST BE IN 1-12"
+      });
+    }
+  
+    const [yearStartStr, yearEndStr] = classRecord.academic_year.split("-");
+    const yearStart = Number(yearStartStr);
+    const yearEnd = Number(yearEndStr);
+    const year = monthNum >= 7 ? yearStart : yearEnd;
+
+    const startDate = new Date(year, monthNum - 1, 1);
+    const endDate = new Date(year, monthNum, 0)
+    
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+
+    dateFillter = {
+      date : { [Op.between]:[startDateStr,endDateStr]}
+    }
+
+    period ={
+        from:startDateStr,
+        to:endDateStr
+      };
+    }
 
     // Build whereClause
     const whereClause = {
       student_id: { [Op.in]: studentIds },
-      class_id,
+      class_id:classRecord.id,
       subject_id,
+      ...dateFillter
     };
 
     // If faculty, filter by faculty_id
@@ -237,26 +279,24 @@ export const getClassWiseReport = async (req, res) => {
       where: whereClause,
       order: [['student_id', 'ASC'], ['date', 'ASC'], ['lecture_no', 'ASC']]
     });
+    
+    const attendanceMap = {};
+    attendanceRecords.forEach(r => {
+      if (!attendanceMap[r.student_id]) {
+        attendanceMap[r.student_id] = [];
+      }
+      attendanceMap[r.student_id].push(r);
+    });
 
     // Prepare report data
     const studentReports = students.map(student => {
-      const studentAttendance = attendanceRecords.filter(record => record.student_id === student.student_id);
+      const studentAttendance = attendanceMap[student.student_id] || [];
 
       // Calculate totals
       const totalPresent = studentAttendance.filter(record => record.status === 'Present').length;
       const totalAbsent = studentAttendance.filter(record => record.status === 'Absent').length;
       const totalClasses = studentAttendance.length;
       const attendancePercentage = totalClasses > 0 ? ((totalPresent / totalClasses) * 100).toFixed(2) : "0.00";
-
-      // Get unique dates when attendance was taken 
-      const attendanceDatesSet = new Set();
-      for (const record of studentAttendance) {
-        attendanceDatesSet.add(record.date);
-      }
-      
-      const attendanceDates = Array.from(attendanceDatesSet).sort((dateA, dateB) => {
-        return new Date(dateA) - new Date(dateB);
-      });
 
       return {
         student_id: student.student_id,
@@ -266,8 +306,7 @@ export const getClassWiseReport = async (req, res) => {
           total_present: totalPresent,
           total_absent: totalAbsent,
           attendance_percentage: attendancePercentage,
-        },
-        attendance_dates: attendanceDates
+        }
       };
     });
 
@@ -285,20 +324,12 @@ export const getClassWiseReport = async (req, res) => {
     const classAttendancePercentage = classTotalClasses > 0 ? 
       ((classTotalPresent / classTotalClasses) * 100).toFixed(2) : "0.00";
     
-    // Get unique all dates 
-    const allDatesSet = new Set();
-    for (const record of attendanceRecords) {
-      allDatesSet.add(record.date);
-    }
-    
-    const allAttendanceDates = Array.from(allDatesSet).sort((dateA, dateB) => {
-      return new Date(dateA) - new Date(dateB);
-    });
 
     // Prepare response
     const report = {
       success: true,
       message: "Class-wise attendance report generated successfully.",
+
       class_info: {
         class_id: classRecord.class_id,
         year: classRecord.year,
@@ -313,8 +344,8 @@ export const getClassWiseReport = async (req, res) => {
       report_info: {
         generated_by: role, 
         faculty_id: faculty_id,
-        total_attendance_dates: allAttendanceDates.length,
-        attendance_dates: allAttendanceDates
+        admin:role == "Admin" ? user_id : null,
+        period,
       },
       class_summary: {
         total_students: students.length,
@@ -322,7 +353,7 @@ export const getClassWiseReport = async (req, res) => {
         total_present: classTotalPresent,
         total_absent: classTotalAbsent,
         class_attendance_percentage: `${classAttendancePercentage}%`,
-        rating :  classAttendancePercentage >= 50 ? "Good" : "Poor"
+        rating :  classAttendancePercentage >= 75 ? "Good" : "Poor"
       },
       student_reports: studentReports
     };
