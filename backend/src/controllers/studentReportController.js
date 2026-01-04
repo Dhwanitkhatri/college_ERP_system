@@ -460,11 +460,10 @@ export const getOverallClassAttendancereport = async (req, res) => {
     const role = req.user.role;
 
     if (!class_id) {
-      return res.status(400).json({
-        message: "class_id is required"
-      });
+      return res.status(400).json({ message: "class_id is required" });
     }
 
+    // Fetch class
     const classRecord = await Class.findOne({
       where: { id: class_id },
       include: [{
@@ -475,78 +474,70 @@ export const getOverallClassAttendancereport = async (req, res) => {
     });
 
     if (!classRecord) {
-      return res.status(404).json({
-        message: "Class not found"
-      });
+      return res.status(404).json({ message: "Class not found" });
     }
+
+    // Faculty access: ONLY mentor
     if (role === "Faculty") {
       if (!classRecord.mentor || classRecord.mentor.user_id !== uid) {
         return res.status(403).json({
-          message: "Access denied .. ONLY mentor can access..."
+          message: "Access denied. Only mentor can access this report."
         });
       }
     }
 
-
+    // Fetch students
     const students = await Student.findAll({
       where: { class_pk: classRecord.id },
       order: [["student_id", "ASC"]]
     });
 
     if (!students.length) {
-      return res.status(404).json({
-        message: "No students found in class"
-      });
+      return res.status(404).json({ message: "No students found in class" });
     }
 
     const studentIds = students.map(s => s.student_id);
 
-    const dateFillter = {};
+    // Month filter (optional)
+    const dateFilter = {};
     if (month) {
       const monthNum = Number(month);
       if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-        return res.status(404).json({
-          message: "Month in range 1-12"
-        });
+        return res.status(400).json({ message: "Month must be between 1-12" });
       }
+
       const [startYear, endYear] = classRecord.academic_year.split("-").map(Number);
       const year = monthNum >= 7 ? startYear : endYear;
 
       const startDate = new Date(year, monthNum - 1, 1);
       const endDate = new Date(year, monthNum, 0);
 
-      dateFillter.date = {
+      dateFilter.date = {
         [Op.between]: [
           startDate.toISOString().split("T")[0],
           endDate.toISOString().split("T")[0]
         ]
       };
     }
+
+    // Fetch attendance
     const attendanceRecords = await Attendance.findAll({
       where: {
         class_id: classRecord.id,
         student_id: { [Op.in]: studentIds },
-        ...dateFillter
+        ...dateFilter
       },
-      include: [
-        {
-          model: Subject,
-          as: "Subject",
-          attributes: ["subject_id", "subject_name"]
-        },
-        {
-          model: User,
-          as: "Faculty",
-          attributes: ["username"]
-        }
-      ],
+      include: [{
+        model: Subject,
+        as: "Subject",
+        attributes: ["subject_id", "subject_name"]
+      }],
       order: [["date", "ASC"], ["student_id", "ASC"]]
     });
 
+    // Initialize maps
     const studentMap = {};
     const subjectSummary = {};
-    const facultySummary = {};
-    const monthlySummary = {};
     const uniqueDates = new Set();
 
     students.forEach(s => {
@@ -556,91 +547,43 @@ export const getOverallClassAttendancereport = async (req, res) => {
         total_classes: 0,
         present: 0,
         absent: 0,
-        subject_wise: {},
-        faculty_wise: {},
-        monthly_attendance: {}
+        subject_wise: null
       };
     });
 
+    // Process attendance
     attendanceRecords.forEach(r => {
       const student = studentMap[r.student_id];
       if (!student) return;
 
-      const date = new Date(r.date);
-      const dateStr = date.toISOString().split("T")[0];
-      const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      const subjectId = r.Subject.subject_id;
-      const facultyName = r.Faculty.username;
-
+      const dateStr = new Date(r.date).toISOString().split("T")[0];
       uniqueDates.add(dateStr);
 
       student.total_classes++;
       r.status === "Present" ? student.present++ : student.absent++;
 
-      // Subject-wise 
-      student.subject_wise[subjectId] ??= {
-        subject_name: r.Subject.subject_name,
-        total_classes: 0,
-        present: 0,
-        absent: 0
-      };
-      const sw = student.subject_wise[subjectId];
-      sw.total_classes++;
-      r.status === "Present" ? sw.present++ : sw.absent++;
 
-      // Faculty-wise 
-      student.faculty_wise[facultyName] ??= {
-        total_classes: 0,
-        present: 0,
-        absent: 0
-      };
-      const fw = student.faculty_wise[facultyName];
-      fw.total_classes++;
-      r.status === "Present" ? fw.present++ : fw.absent++;
+      if (!student.subject_wise) {
+        student.subject_wise = {
+          subject_id: r.Subject.subject_id,
+          subject_name: r.Subject.subject_name,
+          total_classes: 0,
+          present: 0,
+          absent: 0
+        };
+      }
 
-      //Monthly 
-      student.monthly_attendance[monthStr] ??= {
-        total_classes: 0,
-        present: 0,
-        absent: 0
-      };
-      const mw = student.monthly_attendance[monthStr];
-      mw.total_classes++;
-      r.status === "Present" ? mw.present++ : mw.absent++;
-
-
-      subjectSummary[subjectId] ??= {
-        subject_name: r.Subject.subject_name,
-        total_classes: 0,
-        present: 0,
-        absent: 0
-      };
-      subjectSummary[subjectId].total_classes++;
+      student.subject_wise.total_classes++;
       r.status === "Present"
-        ? subjectSummary[subjectId].present++
-        : subjectSummary[subjectId].absent++;
+        ? student.subject_wise.present++
+        : student.subject_wise.absent++;
 
-      facultySummary[facultyName] ??= {
-        faculty: facultyName,
-        total_classes: 0,
-        present: 0,
-        absent: 0
+      // Subject-wise overall
+      subjectSummary[r.Subject.subject_id] ??= {
+        subject_id: r.Subject.subject_id,
+        subject_name: r.Subject.subject_name
       };
-      facultySummary[facultyName].total_classes++;
-      r.status === "Present"
-        ? facultySummary[facultyName].present++
-        : facultySummary[facultyName].absent++;
 
-      monthlySummary[monthStr] ??= {
-        month: monthStr,
-        total_classes: 0,
-        present: 0,
-        absent: 0
-      };
-      monthlySummary[monthStr].total_classes++;
-      r.status === "Present"
-        ? monthlySummary[monthStr].present++
-        : monthlySummary[monthStr].absent++;
     });
 
     return res.status(200).json({
@@ -654,15 +597,12 @@ export const getOverallClassAttendancereport = async (req, res) => {
         working_days: uniqueDates.size
       },
       students: Object.values(studentMap),
-      subject_wise_summary: Object.values(subjectSummary),
-      faculty_wise_summary: Object.values(facultySummary),
-      monthly_breakdown: Object.values(monthlySummary)
+      subject_wise_summary: Object.values(subjectSummary)
     });
 
   } catch (error) {
     console.error("Overall Attendance Error:", error);
-    return res.status(500).json({
-      message: "Internal server error"
-    });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
+
