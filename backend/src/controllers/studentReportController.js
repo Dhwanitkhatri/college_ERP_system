@@ -463,7 +463,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(400).json({ message: "class_id is required" });
     }
 
-    // Fetch class
+    //CLASS..
     const classRecord = await Class.findOne({
       where: { id: class_id },
       include: [{
@@ -477,7 +477,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(404).json({ message: "Class not found" });
     }
 
-    // Faculty access: ONLY mentor
+    // Faculty can see ONLY own class
     if (role === "Faculty") {
       if (!classRecord.mentor || classRecord.mentor.user_id !== uid) {
         return res.status(403).json({
@@ -486,7 +486,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       }
     }
 
-    // Fetch students
+    //STUDENTS.. 
     const students = await Student.findAll({
       where: { class_pk: classRecord.id },
       order: [["student_id", "ASC"]]
@@ -498,7 +498,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
 
     const studentIds = students.map(s => s.student_id);
 
-    // Month filter (optional)
+    //MONTH FILTERR
     const dateFilter = {};
     if (month) {
       const monthNum = Number(month);
@@ -506,7 +506,10 @@ export const getOverallClassAttendancereport = async (req, res) => {
         return res.status(400).json({ message: "Month must be between 1-12" });
       }
 
-      const [startYear, endYear] = classRecord.academic_year.split("-").map(Number);
+      const [startYear, endYear] = classRecord.academic_year
+        .split("-")
+        .map(Number);
+
       const year = monthNum >= 7 ? startYear : endYear;
 
       const startDate = new Date(year, monthNum - 1, 1);
@@ -520,7 +523,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       };
     }
 
-    // Fetch attendance
+    //ATTENDANCE
     const attendanceRecords = await Attendance.findAll({
       where: {
         class_id: classRecord.id,
@@ -535,11 +538,12 @@ export const getOverallClassAttendancereport = async (req, res) => {
       order: [["date", "ASC"], ["student_id", "ASC"]]
     });
 
-    // Initialize maps
+    // PROCESS DATAa 
     const studentMap = {};
     const subjectSummary = {};
     const uniqueDates = new Set();
 
+    // Init students
     students.forEach(s => {
       studentMap[s.student_id] = {
         student_id: s.student_id,
@@ -547,11 +551,10 @@ export const getOverallClassAttendancereport = async (req, res) => {
         total_classes: 0,
         present: 0,
         absent: 0,
-        subject_wise: null
+        subject_wise: {}
       };
     });
 
-    // Process attendance
     attendanceRecords.forEach(r => {
       const student = studentMap[r.student_id];
       if (!student) return;
@@ -562,10 +565,12 @@ export const getOverallClassAttendancereport = async (req, res) => {
       student.total_classes++;
       r.status === "Present" ? student.present++ : student.absent++;
 
+      const subjectId = r.Subject.subject_id;
 
-      if (!student.subject_wise) {
-        student.subject_wise = {
-          subject_id: r.Subject.subject_id,
+      //sUBJECT-WISE PER STUDENTT
+      if (!student.subject_wise[subjectId]) {
+        student.subject_wise[subjectId] = {
+          subject_id: subjectId,
           subject_name: r.Subject.subject_name,
           total_classes: 0,
           present: 0,
@@ -573,18 +578,23 @@ export const getOverallClassAttendancereport = async (req, res) => {
         };
       }
 
-      student.subject_wise.total_classes++;
+      student.subject_wise[subjectId].total_classes++;
       r.status === "Present"
-        ? student.subject_wise.present++
-        : student.subject_wise.absent++;
+        ? student.subject_wise[subjectId].present++
+        : student.subject_wise[subjectId].absent++;
 
-      // Subject-wise overall
-      subjectSummary[r.Subject.subject_id] ??= {
-        subject_id: r.Subject.subject_id,
+      // SUBJECT LIST (unique)
+      subjectSummary[subjectId] ??= {
+        subject_id: subjectId,
         subject_name: r.Subject.subject_name
       };
-
     });
+
+    
+    const formattedStudents = Object.values(studentMap).map(s => ({
+      ...s,
+      subject_wise: Object.values(s.subject_wise) // remove SUBBCA111 key
+    }));
 
     return res.status(200).json({
       success: true,
@@ -596,7 +606,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
         total_students: students.length,
         working_days: uniqueDates.size
       },
-      students: Object.values(studentMap),
+      students: formattedStudents,
       subjects: Object.values(subjectSummary)
     });
 
@@ -605,4 +615,3 @@ export const getOverallClassAttendancereport = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-
