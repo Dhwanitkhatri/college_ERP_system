@@ -76,7 +76,7 @@ export const getStudentDateWiseReport = async (req, res) => {
       if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
         return res.status(400).json({ message: "Invalid month. Must be 1-12." });
       }
-      if (!classRecord.academic_year?.include("-")) {
+      if (!classRecord.academic_year?.includes("-")) {
         return res.status(500).json({
           message: "Invalid acedmic year"
         })
@@ -597,7 +597,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
         working_days: uniqueDates.size
       },
       students: Object.values(studentMap),
-      subject_wise_summary: Object.values(subjectSummary)
+      subjects: Object.values(subjectSummary)
     });
 
   } catch (error) {

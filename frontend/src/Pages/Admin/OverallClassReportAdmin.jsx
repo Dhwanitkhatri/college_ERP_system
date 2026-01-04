@@ -62,7 +62,7 @@ const OverallClassReportAdmin = () => {
     console.log("Generating overall class report:", data);
     
     api
-      .get("/api/reports/student/overall-class-report", {
+      .get("api/reports/student/overall-class-wise", {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           class_id,
@@ -169,8 +169,9 @@ const OverallClassReportAdmin = () => {
                       {subjects.map((sub) => (
                         <th key={sub.subject_id}>{sub.subject_name}</th>
                       ))}
-
+                      <th>Total Absent</th>
                       <th>Total Present</th>
+                      <th>Total lectures</th>
                       <th>Attendance %</th>
                     </tr>
                   </thead>
@@ -179,11 +180,11 @@ const OverallClassReportAdmin = () => {
                     {students.map((stu, index) => (
                       <tr key={stu.student_id}>
                         <td>{index + 1}</td>
-                        <td>{stu.enrollment_no}</td>
+                        <td>{stu.student_id}</td>
                         <td>{stu.name}</td>
 
                         {/* subject data mapping */}
-                        {subjects.map((sub) => {
+                        {stu.subject_wise.map((sub) => {
                           const subData = stu.subjects?.[sub.subject_id];
                           return (
                             <td key={sub.subject_id}>
@@ -193,7 +194,7 @@ const OverallClassReportAdmin = () => {
                             </td>
                           );
                         })}
-
+                        
                         <td>{stu.total_present}</td>
                         <td>{stu.attendance_percentage}%</td>
                       </tr>

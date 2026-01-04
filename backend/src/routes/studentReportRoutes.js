@@ -16,5 +16,5 @@ router.get("/student/classes-for-datewise-report", authMiddleware, getClassesFor
 // Route to get subjects and students for datewise report
 router.get("/student/subjects-and-students-for-datewise-report", authMiddleware, getSubjectsAndStudentForDatewiseReport);
 
-router.get("/overall-class-wise" , authMiddleware ,getOverallClassAttendancereport )
+router.get("/student/overall-class-wise" , authMiddleware ,getOverallClassAttendancereport )
 export default router;

@@ -248,19 +248,19 @@ console.log("Subjects by class:", subjectsByClass);
                   <tbody>
   {reportData.map((student, index) => (
     <tr key={student.student_id} className="border-b">
-      <td>{index + 1}</td>
-      <td>{student.student_id}</td>
+      <td className="text-center">{index + 1}</td>
+      <td className="text-center">{student.student_id}</td>
       <td>{student.name}</td>
-      <td>
+      <td className="text-center">
         {student.total_attendance.total_present}
       </td>
-      <td>
+      <td className="text-center">
         {student.total_attendance.total_absent}
       </td>
-      <td>
+      <td className="text-center">
         {student.total_attendance.classes_conducted}
       </td>
-      <td>
+      <td className="text-center">
         {student.total_attendance.attendance_percentage}%
       </td>
     </tr>
