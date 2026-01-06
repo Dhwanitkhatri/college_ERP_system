@@ -22,8 +22,18 @@ const OverallClassReportAdmin = () => {
   });
 
   const monthsArray = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const months = monthsArray.map((name, index) => ({
@@ -60,7 +70,7 @@ const OverallClassReportAdmin = () => {
   // submit handler
   const onSubmit = (data) => {
     console.log("Generating overall class report:", data);
-    
+
     api
       .get("api/reports/student/overall-class-wise", {
         headers: { Authorization: `Bearer ${token}` },
@@ -76,7 +86,10 @@ const OverallClassReportAdmin = () => {
         setIsReportGenerated(true);
       })
       .catch((err) =>
-        console.error("Error generating report:", err.response?.data || err.message)
+        console.error(
+          "Error generating report:",
+          err.response?.data || err.message
+        )
       );
   };
 
@@ -99,7 +112,9 @@ const OverallClassReportAdmin = () => {
                   defaultValue=""
                   {...register("class", { required: "Please select a class" })}
                 >
-                  <option value="" disabled>Select Class</option>
+                  <option value="" disabled>
+                    Select Class
+                  </option>
                   {classes.map((cls) => (
                     <option
                       key={`${cls.id}|${cls.semester}`}
@@ -123,9 +138,13 @@ const OverallClassReportAdmin = () => {
                   disabled={!selectedClass}
                   {...register("month", { required: "Please select month" })}
                 >
-                  <option value="" disabled>Select Month</option>
+                  <option value="" disabled>
+                    Select Month
+                  </option>
                   {months.map((m) => (
-                    <option key={m.number} value={m.number}>{m.name}</option>
+                    <option key={m.number} value={m.number}>
+                      {m.name}
+                    </option>
                   ))}
                 </select>
                 {errors.month && (
@@ -185,18 +204,21 @@ const OverallClassReportAdmin = () => {
 
                         {/* subject data mapping */}
                         {stu.subject_wise.map((sub) => {
-                          const subData = stu.subjects?.[sub.subject_id];
+                          
+
                           return (
                             <td key={sub.subject_id}>
-                              {subData
-                                ? `${subData.present}/${subData.total}`
-                                : "0/0"}
+                              {sub.present}/{sub.total_classes}
                             </td>
                           );
                         })}
-                        
-                        <td>{stu.total_present}</td>
-                        <td>{stu.attendance_percentage}%</td>
+                        <td>{stu.absent}</td>
+                        <td>{stu.present}</td>
+                        <td>{stu.total_classes}</td>
+                        <td>
+                          {((stu.present / stu.total_classes) * 100).toFixed(2)}
+                          %
+                        </td>
                       </tr>
                     ))}
                   </tbody>
