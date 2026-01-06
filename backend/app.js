@@ -15,6 +15,7 @@ import dashboardRoutes from "./src/routes/dashboardRoutes.js";
 import { responseTimeLogger } from "./src/middleware/responseTimeLogger.js";
 import subjectRoutes from "./src/routes/subjectRoutes.js";
 import studentReportRoutes from "./src/routes/studentReportRoutes.js";
+import feeSatuseRoutes from "./src/routes/feeStatusRoutes.js"
 dotenv.config();
 const app = express();
 app.use(
@@ -49,6 +50,7 @@ app.use("/api/picture", profilePictureRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/reports", studentReportRoutes);
+app.use("/api/fee",feeSatuseRoutes)
 
 app.get("/", (req, res) => {
   res.send("College ERP System Backend is running");

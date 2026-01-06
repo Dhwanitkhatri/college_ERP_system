@@ -1,9 +1,8 @@
 // Fee-status Controllerr..
-import { FeePayment } from "../model/FeePayment";   
-import { StudentFee } from "../model/StudentFees";
-import { FeeStructure } from "../model/FeeStructure";
-import { Student } from "../model/Student";
-import { where } from "sequelize";
+import { FeePayment } from "../model/FeePayment.js";   
+import { StudentFee } from "../model/StudentFees.js";
+import { FeeStructure } from "../model/FeeStructure.js";
+import { Student } from "../model/Student.js";
 
 export const createFeeStructure = async(req , res) => {
     try{
@@ -11,22 +10,22 @@ export const createFeeStructure = async(req , res) => {
             course_id,
             semester,
             academic_year,
-            tution_fee,
+            tuition_fee,
             exam_fee = 0,
-            libarary_fee = 0,
+            library_fee = 0,
             lab_fee = 0,
             misc_fee = 0
         } = req.body;
 
-        if(!course_id || !semester || !academic_year || !tution_fee)
+        if(!course_id || !semester || !academic_year || !tuition_fee)
         {
             return res.status(404).json({message : "Reuired fields .."});
         }
 
         const total_fee = 
-        Number(tution_fee) + 
+        Number(tuition_fee) + 
         Number(exam_fee) + 
-        Number(libarary_fee) +
+        Number(library_fee) +
         Number(lab_fee) + 
         Number(misc_fee);
 
@@ -34,9 +33,9 @@ export const createFeeStructure = async(req , res) => {
             course_id,
             semester,
             academic_year,
-            tution_fee,
+            tuition_fee,
             exam_fee,
-            libarary_fee,
+            library_fee,
             lab_fee,
             misc_fee,
             total_fee
@@ -95,9 +94,9 @@ export const payFee = async (req,res) => {
             student_id,
             fee_structure_id,
             amount_paid,
-            paymant_mode,
+            payment_mode,
             reference_no,
-            paymant_date,
+            payment_date,
             remarks,
         } = req.body;
 
@@ -107,8 +106,8 @@ export const payFee = async (req,res) => {
             !student_id ||
             !fee_structure_id||
             !amount_paid||
-            !paymant_mode||
-            !paymant_date
+            !payment_mode||
+            !payment_date
         ){
             return res.status(400).json({
                 message : "Required Fields ."
@@ -122,9 +121,10 @@ export const payFee = async (req,res) => {
             });
         }
 
-        const alreadyPaid = (await FeePayment.sum(amount_paid,{
-            where:{student_id,fee_structure_id}
+        const alreadyPaid = (await FeePayment.sum("amount_paid", {
+            where: { student_id, fee_structure_id }
         })) || 0;
+
 
         const pending = Number(feeStructures.total_fee) - alreadyPaid;
 
@@ -139,9 +139,9 @@ export const payFee = async (req,res) => {
             student_id,
             fee_structure_id,
             amount_paid,
-            paymant_mode,
+            payment_mode,
             reference_no,
-            paymant_date,
+            payment_date,
             received_by,
             remarks,
         });
@@ -158,59 +158,67 @@ export const payFee = async (req,res) => {
     res.status(500).json({ error: error.message });
   }
 };
+export const adminCheckFeeStatus = async (req, res) => {
+  try {
+    const { student_id, academic_year } = req.query;
 
-export const adminCheckFeeStatus = async (req,res) => {
-    try{
-        const { student_id , academic_year} = req.body;
+    if (!student_id || !academic_year) {
+      return res.status(400).json({
+        message: "Required fields",
+      });
+    }
 
-        if(!student_id || !academic_year){
-            return res.status(400).json({
-                message : "Requires fields"
-            });
-        }
+    const studentFee = await StudentFee.findOne({
+      where: { student_id },
+      include: [
+        {
+          model: Student,
+          attributes: ["student_id", "name"],
+        },
+        {
+          model: FeeStructure,
+          as: "feeStructure",
+          where: { academic_year },
+        },
+      ],
+    });
 
-        const studentFee = await StudentFee.findOne({
-            where:{student_id},
-            include:[{
-                model : FeeStructure,
-                as:"feeStructure",
-                where:{academic_year},
-            }],
-        });
-        if(!studentFee){
-            return res.status(404).json({
-                message : "Fee not assigned to students"
-            });
-        }
+    if (!studentFee) {
+      return res.status(404).json({
+        message: "Fee not assigned to student",
+      });
+    }
 
-        const feeStructure = studentFee.feeStructure;
+    const feeStructure = studentFee.feeStructure;
+    const student = studentFee.Student;
 
-        const payments = await FeePayment.findAll({
-            where: {
-                student_id,
-                fee_structure_id : feeStructure.id,
-            },
-            order:[["payment_date" , "ASC"]]
-        });
+    const payments = await FeePayment.findAll({
+      where: {
+        student_id: student.student_id,
+        fee_structure_id: feeStructure.id,
+      },
+      order: [["payment_date", "ASC"]],
+    });
 
-        const paid_amount = payments.reduce(
-            (sum , p) => sum + Number(p.amount_paid),
-            0
-        );
+    const paid_amount = payments.reduce(
+      (sum, p) => sum + Number(p.amount_paid),
+      0
+    );
 
-        const remaining_amount = 
-        Number(feeStructure.total_fee) - paid_amount;
+    const remaining_amount =
+      Number(feeStructure.total_fee) - paid_amount;
 
-        const paymentHistory = payments.map((p,index) => ({
-            installment_no : index + 1 ,
-            amount_paid : p.amount_paid,
-            paymant_mode: p.paymant_mode,
-            paymant_date:p.paymant_date,
-        }));
+    const paymentHistory = payments.map((p, index) => ({
+      installment_no: index + 1,
+      amount_paid: p.amount_paid,
+      payment_mode: p.payment_mode,   
+      payment_date: p.payment_date,  
+    }));
 
-        res.json({
+    res.json({
       student: {
-        student_id,
+        student_id: student.student_id,
+        student_name: student.name,
         academic_year,
       },
       feeSummary: {
@@ -222,9 +230,7 @@ export const adminCheckFeeStatus = async (req,res) => {
       },
       paymentHistory,
     });
-
-
-    }catch (error) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
