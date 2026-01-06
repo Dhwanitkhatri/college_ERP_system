@@ -1,13 +1,14 @@
-import { sequelize } from "../config/db.js";
+// models/FeeStructure.js
 import { DataTypes } from "sequelize";
+import { sequelize } from "../config/db.js";
 
 export const FeeStructure = sequelize.define(
   "FeeStructure",
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
     },
 
     course_id: {
@@ -55,7 +56,8 @@ export const FeeStructure = sequelize.define(
       allowNull: false,
     },
   },
-    {
+  {
+    tableName: "feeStructures",
     timestamps: true,
 
     indexes: [

@@ -1,13 +1,15 @@
-import { sequelize } from "../config/db.js";
+// models/StudentFee.js
 import { DataTypes } from "sequelize";
+import { sequelize } from "../config/db.js";
+import { FeeStructure } from "./FeeStructure.js";
 
-export const StudentFees = sequelize.define(
-  "StudentFees",
+export const StudentFee = sequelize.define(
+  "StudentFee",
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
     },
 
     student_id: {
@@ -18,10 +20,6 @@ export const StudentFees = sequelize.define(
     fee_structure_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "fee_structures",
-        key: "id",
-      },
     },
 
     assigned_date: {
@@ -33,14 +31,22 @@ export const StudentFees = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-
-    status: {
-      type: DataTypes.ENUM("Paid", "Unpaid", "Partial"),
-      allowNull: false,
-      defaultValue: "Unpaid",
-    },
   },
   {
+    tableName: "studentFees",
     timestamps: true,
+
+    indexes: [
+      {
+        unique: true,
+        fields: ["student_id", "fee_structure_id"], // UNIQUE constraint
+      },
+    ],
   }
 );
+
+// Associations
+StudentFee.belongsTo(FeeStructure, {
+  foreignKey: "fee_structure_id",
+  as: "feeStructure",
+});
