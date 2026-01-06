@@ -180,42 +180,42 @@ const OverallClassReportAdmin = () => {
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 bg-[var(--bg-secondary)]">
                     <tr>
-                      <th>Sr. No</th>
-                      <th>Enrollment</th>
-                      <th>Name</th>
+                      <th className="table-row-style">Sr. No</th>
+                      <th className="table-row-style">Enrollment</th>
+                      <th className="table-row-style">Name</th>
 
                       {/* subject column ni mapping */}
                       {subjects.map((sub) => (
-                        <th key={sub.subject_id}>{sub.subject_name}</th>
+                        <th key={sub.subject_id} className="table-row-style">{sub.subject_name}</th>
                       ))}
-                      <th>Total Absent</th>
-                      <th>Total Present</th>
-                      <th>Total lectures</th>
-                      <th>Attendance %</th>
+                      <th className="table-row-style">Total Absent</th>
+                      <th className="table-row-style">Total Present</th>
+                      <th className="table-row-style">Total lectures</th>
+                      <th className="table-row-style">Attendance %</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {students.map((stu, index) => (
                       <tr key={stu.student_id}>
-                        <td>{index + 1}</td>
-                        <td>{stu.student_id}</td>
-                        <td>{stu.name}</td>
+                        <td className="table-row-style">{index + 1}</td>
+                        <td className="table-row-style">{stu.student_id}</td>
+                        <td className="table-row-style">{stu.name}</td>
 
                         {/* subject data mapping */}
                         {stu.subject_wise.map((sub) => {
                           
 
                           return (
-                            <td key={sub.subject_id}>
+                            <td key={sub.subject_id} className="table-row-style">
                               {sub.present}/{sub.total_classes}
                             </td>
                           );
                         })}
-                        <td>{stu.absent}</td>
-                        <td>{stu.present}</td>
-                        <td>{stu.total_classes}</td>
-                        <td>
+                        <td className="table-row-style">{stu.absent}</td>
+                        <td className="table-row-style">{stu.present}</td>
+                        <td className="table-row-style">{stu.total_classes}</td>
+                        <td className="table-row-style">
                           {((stu.present / stu.total_classes) * 100).toFixed(2)}
                           %
                         </td>

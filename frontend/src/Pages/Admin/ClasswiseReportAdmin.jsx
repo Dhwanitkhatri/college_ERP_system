@@ -235,32 +235,32 @@ console.log("Subjects by class:", subjectsByClass);
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 bg-[var(--bg-secondary)]">
                     <tr>
-                      <th>Sr. No</th>
-                      <th>Enrollment</th>
-                      <th>Student Name</th>
-                      <th>Total Present</th>
-                      <th>Total Absent</th>
-                      <th>Total Lectures</th>
-                      <th>Attendance %</th>
+                      <th className="table-row-style">Sr. No</th>
+                      <th className="table-row-style">Enrollment</th>
+                      <th className="table-row-style">Student Name</th>
+                      <th className="table-row-style">Total Present</th>
+                      <th className="table-row-style">Total Absent</th>
+                      <th className="table-row-style">Total Lectures</th>
+                      <th className="table-row-style">Attendance %</th>
                     </tr>
                   </thead>
 
                   <tbody>
   {reportData.map((student, index) => (
     <tr key={student.student_id} className="border-b">
-      <td className="text-center">{index + 1}</td>
-      <td className="text-center">{student.student_id}</td>
-      <td>{student.name}</td>
-      <td className="text-center">
+      <td className="text-center table-row-style">{index + 1}</td>
+      <td className="text-center table-row-style">{student.student_id}</td>
+      <td className="text-center table-row-style">{student.name}</td>
+      <td className="text-center table-row-style">
         {student.total_attendance.total_present}
       </td>
-      <td className="text-center">
+      <td className="text-center table-row-style">
         {student.total_attendance.total_absent}
       </td>
-      <td className="text-center">
+      <td className="text-center table-row-style">
         {student.total_attendance.classes_conducted}
       </td>
-      <td className="text-center">
+      <td className="text-center table-row-style">
         {student.total_attendance.attendance_percentage}%
       </td>
     </tr>
