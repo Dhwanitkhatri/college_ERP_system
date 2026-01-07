@@ -3,8 +3,29 @@ import { useForm } from "react-hook-form";
 import { Search } from "lucide-react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import api from "../../api/axios";
 
 export default function CheckFeeStatusAdmin() {
+  const token = localStorage.getItem("token"); // Get token from localStorage
+  const [students, setStudents] = useState([]);
+  useEffect(() => {
+     api.get("api/students/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      setStudents(res.data); // backend sends array
+      console.log("Fetched student:", res.data);
+    })
+    .catch((err) => {
+      console.error(
+        "Error fetching students:",
+        err.response?.data || err.message
+      );
+    });
+  },[]);
+  
   const { register, handleSubmit } = useForm();
 
   const onSearch = (data) => {
@@ -26,12 +47,17 @@ export default function CheckFeeStatusAdmin() {
             <div className="gridDiv grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="studentIdDiv">
                 <label className="custom-label">Student ID</label>
-                <input
+                {/* <input
                   type="text"
                   placeholder="enter student id"
                   className="custom-input theme-transition"
                   {...register("studentId")}
-                />
+                /> */}
+                <select name="" defaultValue="" id="" className="custom-input theme-transition" {...register("studentId")}>
+                  <option value="" disabled>Select Student</option>
+                  {/*student id mapping*/}
+                  
+                </select>
               </div>
               <div className="AcademicYearDiv">
                 <label className="custom-label">Academic Year</label>

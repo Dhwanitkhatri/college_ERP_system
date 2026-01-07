@@ -66,7 +66,7 @@ const ManageStudentAdmin = () => {
   ) : (
     students.map((student) => (
       <tr
-        key={student.faculty_id}
+        key={student.student_id}
         className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
       >
         <td className="table-row-style">{student.student_id}</td>
