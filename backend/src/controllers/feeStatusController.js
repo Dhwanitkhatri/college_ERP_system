@@ -234,3 +234,15 @@ export const adminCheckFeeStatus = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getAllStudents = async (req, res) => {
+  try {
+    const students = await Student.findAll({
+      attributes: ["student_id", "name"],
+    });
+
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

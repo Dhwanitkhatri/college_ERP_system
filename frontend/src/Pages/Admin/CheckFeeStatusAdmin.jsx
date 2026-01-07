@@ -3,33 +3,57 @@ import { useForm } from "react-hook-form";
 import { Search } from "lucide-react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import { useEffect, useState } from "react";
 import api from "../../api/axios";
 
 export default function CheckFeeStatusAdmin() {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [students, setStudents] = useState([]);
+  const [feeStatus, setFeeStatus] = useState([]);
   useEffect(() => {
-     api.get("api/students/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      setStudents(res.data); // backend sends array
-      console.log("Fetched student:", res.data);
-    })
-    .catch((err) => {
-      console.error(
-        "Error fetching students:",
-        err.response?.data || err.message
-      );
-    });
-  },[]);
-  
+    api
+      .get("api/fee/students", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setStudents(res.data); // backend sends array
+        console.log("Fetched student:", res.data);
+        
+      })
+      .catch((err) => {
+        console.error(
+          "Error fetching students:",
+          err.response?.data || err.message
+        );
+      });
+  }, []);
+
   const { register, handleSubmit } = useForm();
 
   const onSearch = (data) => {
-    console.log("Searching for:", data);
+    console.log("Searching fee status for:", data);
+    api
+      .get("api/fee/check-fee-status", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: {
+          student_id: data.studentId,
+          academic_year: data.academicYear,
+        },
+      })
+      .then((res) => {
+       setFeeStatus(res.data);
+        // Handle the response data as needed
+      })
+      .catch((err) => {
+        console.error(
+          "Error fetching fee status:",
+          err.response?.data || err.message
+        );
+      });
   };
 
   return (
@@ -53,10 +77,22 @@ export default function CheckFeeStatusAdmin() {
                   className="custom-input theme-transition"
                   {...register("studentId")}
                 /> */}
-                <select name="" defaultValue="" id="" className="custom-input theme-transition" {...register("studentId")}>
-                  <option value="" disabled>Select Student</option>
+                <select
+                  name=""
+                  defaultValue=""
+                  id=""
+                  className="custom-input theme-transition"
+                  {...register("studentId")}
+                >
+                  <option value="" disabled>
+                    Select Student
+                  </option>
                   {/*student id mapping*/}
-                  
+                  {students.map((student) => (
+                    <option key={student.student_id} value={student.student_id}>
+                      {student.student_id} - {student.name}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="AcademicYearDiv">
@@ -65,8 +101,8 @@ export default function CheckFeeStatusAdmin() {
                   className="custom-input theme-transition"
                   {...register("academicYear")}
                 >
-                  <option value="2024-2025">2024-2025</option>
-                  <option value="2023-2024">2023-2024</option>
+                  <option value="2024-25">2024-25</option>
+                  <option value="2023-24">2023-24</option>
                 </select>
               </div>
             </div>
@@ -96,7 +132,7 @@ export default function CheckFeeStatusAdmin() {
                 Student ID
               </p>
               <p className="font-medium text-[var(--text-primary)] theme-transition">
-                stu001
+                {feeStatus.student.student_id}
               </p>
             </div>
             <div className="studentNameDiv">
@@ -104,7 +140,7 @@ export default function CheckFeeStatusAdmin() {
                 Student Name
               </p>
               <p className="font-medium text-[var(--text-primary)] theme-transition">
-                will byers
+                {feeStatus.student.student_name}
               </p>
             </div>
             <div className="academicYearDiv">
@@ -112,7 +148,7 @@ export default function CheckFeeStatusAdmin() {
                 Academic Year
               </p>
               <p className="font-medium text-[var(--text-primary)] theme-transition">
-                2024-2025
+                {feeStatus.student.academic_year}
               </p>
             </div>
           </div>
@@ -128,7 +164,7 @@ export default function CheckFeeStatusAdmin() {
                 Total Fee
               </p>
               <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
-                ₹50,000
+                ₹{feeStatus.feeSummary?.total_fee || "0"}
               </p>
             </div>
 
@@ -137,7 +173,7 @@ export default function CheckFeeStatusAdmin() {
                 Paid Amount
               </p>
               <p className="text-xl font-bold text-green-700 dark:text-green-300">
-                ₹50,000
+                ₹{feeStatus.feeSummary?.paid_amount || "0"}
               </p>
             </div>
 
@@ -146,7 +182,7 @@ export default function CheckFeeStatusAdmin() {
                 Remaining Amount
               </p>
               <p className="text-xl font-bold text-orange-700 dark:text-orange-300">
-                ₹0
+                ₹{feeStatus.feeSummary?.remaining_amount || "0"}
               </p>
             </div>
 
@@ -155,7 +191,7 @@ export default function CheckFeeStatusAdmin() {
                 Payment Status
               </p>
               <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
-                Paid
+                {feeStatus.feeSummary?.payment_status || "N/A"}
               </span>
             </div>
           </div>
@@ -184,48 +220,32 @@ export default function CheckFeeStatusAdmin() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border-light)] theme-transition">
-                <tr className="transition-colors theme-transition">
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    Installment 1
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    ₹25,000
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    Online Transfer
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-secondary)] theme-transition">
-                    August 15, 2024
-                  </td>
-                </tr>
-                <tr className="transition-colors theme-transition">
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    Installment 2
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    ₹25,000
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    Cash
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-secondary)] theme-transition">
-                    August 15, 2024
-                  </td>
-                </tr>
-                <tr className="transition-colors theme-transition">
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    Installment 3
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    ₹25,000
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
-                    Check
-                  </td>
-                  <td className="py-3 px-4 text-[var(--text-secondary)] theme-transition">
-                    August 15, 2024
-                  </td>
-                </tr>
+                {feeStatus.paymentHistory?.map((pay, index) => (
+                  <tr
+                    key={index}
+                    className="transition-colors theme-transition"
+                  >
+                    <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
+                      Installment {pay.installment_no}
+                    </td>
+
+                    <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
+                      ₹{Number(pay.amount_paid).toLocaleString("en-IN")}
+                    </td>
+
+                    <td className="py-3 px-4 text-[var(--text-primary)] theme-transition">
+                      {pay.payment_mode}
+                    </td>
+
+                    <td className="py-3 px-4 text-[var(--text-secondary)] theme-transition">
+                      {new Date(pay.payment_date).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

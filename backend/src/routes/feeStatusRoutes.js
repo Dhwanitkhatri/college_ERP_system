@@ -3,7 +3,8 @@ import {
     createFeeStructure,
     payFee,
     adminCheckFeeStatus,
-    assignFeeToStudent }
+    assignFeeToStudent,
+  getAllStudents }
      from "../controllers/feeStatusController.js";
 import { 
     adminMiddleware ,
@@ -39,5 +40,10 @@ router.get(
   adminMiddleware,
   adminCheckFeeStatus
 );
-
+router.get(
+  "/students",
+  authMiddleware,
+  adminMiddleware,
+  getAllStudents
+);
 export default router;
