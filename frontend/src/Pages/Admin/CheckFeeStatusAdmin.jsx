@@ -9,7 +9,7 @@ import api from "../../api/axios";
 export default function CheckFeeStatusAdmin() {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [students, setStudents] = useState([]);
-  const [feeStatus, setFeeStatus] = useState([]);
+  const [feeStatus, setFeeStatus] = useState(null);
   useEffect(() => {
     api
       .get("api/fee/students", {
@@ -34,6 +34,7 @@ export default function CheckFeeStatusAdmin() {
 
   const onSearch = (data) => {
     console.log("Searching fee status for:", data);
+    if (!data.studentId) return;
     api
       .get("api/fee/check-fee-status", {
         headers: {
@@ -53,6 +54,7 @@ export default function CheckFeeStatusAdmin() {
           "Error fetching fee status:",
           err.response?.data || err.message
         );
+        setFeeStatus(null);
       });
   };
 
@@ -122,6 +124,8 @@ export default function CheckFeeStatusAdmin() {
           </form>
         </DashboardChildPageCard>
 
+        {feeStatus && (
+          <>
         <DashboardChildPageCard>
           <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-6 theme-transition">
             Student Information
@@ -132,7 +136,7 @@ export default function CheckFeeStatusAdmin() {
                 Student ID
               </p>
               <p className="font-medium text-[var(--text-primary)] theme-transition">
-                {feeStatus.student.student_id}
+                {feeStatus.student?.student_id}
               </p>
             </div>
             <div className="studentNameDiv">
@@ -140,7 +144,7 @@ export default function CheckFeeStatusAdmin() {
                 Student Name
               </p>
               <p className="font-medium text-[var(--text-primary)] theme-transition">
-                {feeStatus.student.student_name}
+                {feeStatus.student?.student_name}
               </p>
             </div>
             <div className="academicYearDiv">
@@ -148,7 +152,7 @@ export default function CheckFeeStatusAdmin() {
                 Academic Year
               </p>
               <p className="font-medium text-[var(--text-primary)] theme-transition">
-                {feeStatus.student.academic_year}
+                {feeStatus.student?.academic_year}
               </p>
             </div>
           </div>
@@ -250,6 +254,8 @@ export default function CheckFeeStatusAdmin() {
             </table>
           </div>
         </DashboardChildPageCard>
+        </>
+        )}
       </div>
     </DashboardChildPageTemplate>
   );
