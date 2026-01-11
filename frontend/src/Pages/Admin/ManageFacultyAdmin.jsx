@@ -8,28 +8,30 @@ import { useNavigate } from "react-router-dom";
 
 const ManageFacultyAdmin = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
+  const navigate = useNavigate(); //this is for navigating
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-     api.get("api/faculties/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      setFaculties(res.data); // backend sends array
-      setLoading(false);
-      console.log("Fetched faculties:", res.data);
-    })
-    .catch((err) => {
-      setLoading(false);
-      console.error(
-        "Error fetching faculties:",
-        err.response?.data || err.message
-      );
-    });
-  },[]);
+    api
+      .get("api/faculties/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setFaculties(res.data); // backend sends array
+        setLoading(false);
+        console.log("Fetched faculties:", res.data);
+      })
+      .catch((err) => {
+        setLoading(false);
+        console.error(
+          "Error fetching faculties:",
+          err.response?.data || err.message
+        );
+      });
+  }, []);
 
   return (
     <div>
@@ -50,35 +52,36 @@ const ManageFacultyAdmin = () => {
             </tr>
           </thead>
 
-         <tbody>
-  {loading ? (
-    <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
-      <td colSpan="5" className="table-row-style text-center">
-        Loading...
-      </td>
-    </tr>
-  ) : faculties.length === 0 ? (
-    <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
-      <td colSpan="5" className="table-row-style text-center">
-        No faculties found.
-      </td>
-    </tr>
-  ) : (
-    faculties.map((faculty) => (
-      <tr
-        key={faculty.faculty_id}
-        className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-      >
-        <td className="table-row-style">{faculty.name}</td>
-        <td className="table-row-style">{faculty.faculty_id}</td>
-        <td className="table-row-style">{faculty.email}</td>
-        <td className="table-row-style">{faculty.phone}</td>
-        <td className="table-row-style"><EditButton/> <DeleteButton/></td>
-      </tr>
-    ))
-  )}
-</tbody>
-
+          <tbody>
+            {loading ? (
+              <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
+                <td colSpan="5" className="table-row-style text-center">
+                  Loading...
+                </td>
+              </tr>
+            ) : faculties.length === 0 ? (
+              <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
+                <td colSpan="5" className="table-row-style text-center">
+                  No faculties found.
+                </td>
+              </tr>
+            ) : (
+              faculties.map((faculty) => (
+                <tr
+                  key={faculty.faculty_id}
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                >
+                  <td className="table-row-style">{faculty.name}</td>
+                  <td className="table-row-style">{faculty.faculty_id}</td>
+                  <td className="table-row-style">{faculty.email}</td>
+                  <td className="table-row-style">{faculty.phone}</td>
+                  <td className="table-row-style">
+                    <EditButton onClick={()=>navigate(`/admin/Dashboard/EditFacultyAdmin/${faculty.id}`)} /> <DeleteButton />
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
         </table>
       </ManageUserTemplateAdmin>
     </div>

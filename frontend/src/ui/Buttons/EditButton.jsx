@@ -1,10 +1,16 @@
 import React from "react";
 
-const EditButton = () => {
+const EditButton = ({ onClick }) => {
   return (
-    <button className="px-3 py-1 rounded bg-[var(--btn-primary-bg)] dark:bg-[var(--btn-primary-bg)] 
+    <button
+      onClick={onClick}
+      className="px-3 py-1 rounded 
+      bg-[var(--btn-primary-bg)] dark:bg-[var(--btn-primary-bg)] 
       text-[var(--btn-primary-text)] dark:text-[var(--btn-primary-text)]
-      hover-[var(--btn-primary-hover)] dark:hover-[var(--btn-primary-hover)]">Edit</button>
+      hover:bg-[var(--btn-primary-hover)] dark:hover:bg-[var(--btn-primary-hover)]"
+    >
+      Edit
+    </button>
   );
 };
 
