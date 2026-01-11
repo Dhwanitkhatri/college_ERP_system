@@ -90,6 +90,8 @@ Timetable.belongsTo(Class, {
   targetKey: 'id',         // primary key in Class table
   as: 'class'              // optional alias
 });
+Timetable.belongsTo(Subject, { foreignKey: "subject_id",targetKey: 'id', as: "subject" });
+
 
 
 // Subject ↔ Timetable

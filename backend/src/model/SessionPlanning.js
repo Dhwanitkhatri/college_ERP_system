@@ -12,6 +12,10 @@ export const SessionPlanning = sequelize.define("SessionPlanning", {
         allowNull: false,
         unique: true
     },
+    class_pk: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+    },
     subject_id: {
         type: DataTypes.STRING,
         allowNull: false
@@ -20,14 +24,19 @@ export const SessionPlanning = sequelize.define("SessionPlanning", {
         type: DataTypes.STRING,
         allowNull: false
     },
-    week_number: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
     topics: {
         type: DataTypes.TEXT,
         allowNull: false
     },
+    lecture_no: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+
+  date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
     status: {
         type: DataTypes.ENUM("Planned", "Completed", "Pending"),
         allowNull: false
