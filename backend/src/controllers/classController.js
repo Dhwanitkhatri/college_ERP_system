@@ -9,7 +9,7 @@ import { Op, fn, col } from 'sequelize';
 export const createClass = async (req, res) => {
   try {
     const  course_id  = req.user.course_id;
-    const {  year, semester, sections, academic_year } = req.body;
+    const {  year, semester, sections, academic_year, mentor_id } = req.body;
     
     // Validation
     const validSemesters = {
@@ -37,7 +37,8 @@ export const createClass = async (req, res) => {
         year,
         semester:Number(semester),
         section,
-        academic_year
+        academic_year,
+        mentor_id
       });
 
       created.push(cls);
