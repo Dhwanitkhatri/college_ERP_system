@@ -34,6 +34,7 @@ import ManageSettingsAdmin from "./Pages/Admin/ManageSettingsAdmin";
 import Events from "./Pages/Events";
 import OverallClassReportAdmin from "./Pages/Admin/OverallClassReportAdmin";
 import PageNotFound from "./Pages/PageNotFound";
+import CreateFeeStructureAdmin from "./Pages/Admin/CreateFeeStructureAdmin";
 
 const router = createBrowserRouter([
   {
@@ -139,6 +140,10 @@ const router = createBrowserRouter([
       {
         path: "NotAvailablePage",
         element: <NotAvailablePage />,
+      },
+      {
+        path: "CreateFeeStructureAdmin",
+        element: <CreateFeeStructureAdmin />,
       },
     ],
   },
