@@ -53,4 +53,5 @@ StudentFee.belongsTo(Student, {
 
 StudentFee.belongsTo(FeeStructure, {
   foreignKey: "fee_structure_id",
+   as: "feeStructure",
 });

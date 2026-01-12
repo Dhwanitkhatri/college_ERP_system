@@ -48,7 +48,9 @@ const AddClassAdmin = () => {
 
   const onSubmit = async (data) => {
     const token = localStorage.getItem("token");
+    console.log(data);
     try {
+      
       await api.post(
         "api/classes",
         {
@@ -56,6 +58,7 @@ const AddClassAdmin = () => {
           semester: data.semester,
           sections: data.section,
           academic_year: data.academicYear,
+          mentor_id :data.classMentor
         },
         {
           headers: {
@@ -188,7 +191,7 @@ const AddClassAdmin = () => {
                 Select Class Mentor
               </option>
               {faculties.map((faculty) => (
-                <option key={faculty.id} value={faculty.id}>
+                <option key={faculty.faculty_id} value={faculty.faculty_id}>
                   {faculty.name}
                 </option>
               ))}

@@ -10,7 +10,7 @@ export const createClass = async (req, res) => {
   try {
     const  course_id  = req.user.course_id;
     const {  year, semester, sections, academic_year, mentor_id } = req.body;
-    
+    console.log(req.body);
     // Validation
     const validSemesters = {
       'FY': [1, 2],

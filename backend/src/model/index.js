@@ -201,5 +201,8 @@ export {
   StudentPersonalDetails,
   EmployeePersonalDetails,
   Admin,
-  FeatureFlag  
+  FeatureFlag ,
+  FeeStructure,
+StudentFee,
+FeePayment
 };
