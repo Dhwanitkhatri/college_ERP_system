@@ -3,6 +3,7 @@ import { Class } from '../model/Class.js ';
 import {getCurrentAcademicYear , getSemesterType} from '../services/academicYear.js';
 import { sequelize } from "../config/db.js";
 import { Student } from '../model/Student.js ';
+import {Faculty}from '../model/Faculty.js';
 import { Op, fn, col } from 'sequelize';
 
 // Create a new class (admins only)
@@ -10,7 +11,7 @@ export const createClass = async (req, res) => {
   try {
     const  course_id  = req.user.course_id;
     const {  year, semester, sections, academic_year, mentor_id } = req.body;
-    console.log(req.body);
+    
     // Validation
     const validSemesters = {
       'FY': [1, 2],
@@ -120,8 +121,10 @@ export const deleteClass = async (req, res) => {
 };
 
 //to fetch the classes of current academic year
+
+
 export const getCurrentYearClasses = async (req, res) => {
- try {
+  try {
     const academic_year = getCurrentAcademicYear();
     const sem_type = getSemesterType();
 
@@ -140,19 +143,30 @@ export const getCurrentYearClasses = async (req, res) => {
         "year",
         "semester",
         "section",
-        [
-          fn("COUNT", col("Students.id")),
-          "total_students"
-        ]
+
+        // total students
+        [fn("COUNT", col("Students.id")), "total_students"],
+
+        // mentor name (NULL-safe)
+        [col("Faculty.name"), "mentor_name"]
       ],
       include: [
         {
           model: Student,
           attributes: [],
           required: false
+        },
+        {
+          model: Faculty,
+          attributes: [],
+          required: false   // LEFT JOIN → mentor optional
         }
       ],
-      group: ["Class.id"],
+      group: [
+        "Class.id",
+        "Faculty.faculty_id",
+        "Faculty.name"
+      ],
       order: [
         ["year", "ASC"],
         ["semester", "ASC"],
@@ -170,6 +184,3 @@ export const getCurrentYearClasses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-

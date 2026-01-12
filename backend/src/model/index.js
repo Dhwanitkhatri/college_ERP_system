@@ -168,14 +168,14 @@ Student.belongsTo(Department, {
 
 
 
-Class.belongsTo(User, {
+Class.belongsTo(Faculty, {
   foreignKey: "mentor_id",
-  targetKey: "username",
-  as: "mentor"
+  targetKey: "faculty_id",
+  
 });
-Attendance.belongsTo(User, {
+Attendance.belongsTo(Faculty, {
   foreignKey: "faculty_id",
-  targetKey: "username",
+  targetKey: "faculty_id",
   as: "Faculty"
 });
 
