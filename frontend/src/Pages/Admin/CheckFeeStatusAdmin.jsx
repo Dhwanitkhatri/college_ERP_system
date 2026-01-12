@@ -46,6 +46,7 @@ export default function CheckFeeStatusAdmin() {
         },
       })
       .then((res) => {
+        console.log("Fetched fee status:", res.data);
        setFeeStatus(res.data);
         // Handle the response data as needed
       })
@@ -104,7 +105,7 @@ export default function CheckFeeStatusAdmin() {
                   {...register("academicYear")}
                 >
                   <option value="2024-25">2024-25</option>
-                  <option value="2023-24">2023-24</option>
+                  <option value="2025-26">2025-26</option>
                 </select>
               </div>
             </div>

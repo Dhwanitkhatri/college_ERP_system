@@ -3,6 +3,7 @@ import { FeePayment } from "../model/FeePayment.js";
 import { StudentFee } from "../model/StudentFees.js";
 import { FeeStructure } from "../model/FeeStructure.js";
 import { Student } from "../model/Student.js";
+import { assignStudentFees } from "../services/assignStudentFeesService.js";
 
 export const createFeeStructure = async(req , res) => {
     try{
@@ -41,6 +42,7 @@ export const createFeeStructure = async(req , res) => {
             total_fee
         });
 
+         await assignStudentFees(feeStructures.id); //this is used to assign fee to student automatically
         res.status(201).json({
             message : "Fee Structure created succesfully",
             data : feeStructures,

@@ -5,6 +5,9 @@ import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import { Save } from "lucide-react";
 import ToggleButtonSettings from "../../ui/Buttons/ToggleButtonSettings";
+import { useEffect } from "react";
+import api from "../../api/axios.js"
+import { use } from "react";
 
 export default function ManageSettingsAdmin() {
   const {
@@ -12,7 +15,9 @@ export default function ManageSettingsAdmin() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+useEffect(() => {
 
+    }, []);
   const onSubmit = (data) => {
     console.log("Valid Form Data Submitted:", data);
   };

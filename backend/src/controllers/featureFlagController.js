@@ -24,7 +24,7 @@ export const toggleFeature = async (req, res) => {
       return res.status(404).json({ message: "Feature not found" });
     }
 
-    feature.is_active = !feature.is_active;
+    feature.is_active = feature.is_active === 1 ? 0 : 1;
     await feature.save();
 
     res.json({

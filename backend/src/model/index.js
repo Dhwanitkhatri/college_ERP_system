@@ -20,7 +20,9 @@ import { StudentPersonalDetails } from './StudentPersonalDetails.js';
 import { EmployeePersonalDetails } from './EmployeePersonalDetails.js'; // fixed typo
 import { Admin } from './Admin.js';
 import { FeatureFlag } from './FeatureFlag.js';
-
+import { FeeStructure } from './FeeStructure.js';
+import { StudentFee } from './StudentFees.js';
+import { FeePayment } from './FeePayment.js';
 /* -------------------------------------------------
    INITIALIZE ALL MODELS
    (assumes models are defined via sequelize.define)
