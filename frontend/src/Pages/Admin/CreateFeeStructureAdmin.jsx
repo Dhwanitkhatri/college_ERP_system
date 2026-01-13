@@ -4,6 +4,7 @@ import { IndianRupee } from "lucide-react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
+import api from "../../api/axios.js";
 
 export default function CreateFeeStructureAdmin() {
   const {
@@ -13,7 +14,31 @@ export default function CreateFeeStructureAdmin() {
   } = useForm();
 
   const onSubmit = (data) => {
+    const token = localStorage.getItem("token");
     console.log("Form Submitted :", data);
+    try {
+      api.post("api/fee/fee-structure/create", {
+        semester: data.semester,
+        academic_year: data.academicYear,
+        tuition_fee: data.tuitionFee,
+        exam_fee: data.examFee,
+        library_fee: data.libraryFee,
+        lab_fee: data.labFee,
+        misc_fee: data.miscFee,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        console.log("Fee Structure Created:", response.data);
+        alert("Fee Structure created successfully!");
+      })
+      .catch((error) => {
+        console.error("Error creating fee structure:", error.response?.data || error.message);
+        alert("Failed to create Fee Structure.");
+      });
+    } catch (error) {
+      
+    }
   };
 
   return (
@@ -40,14 +65,14 @@ export default function CreateFeeStructureAdmin() {
                   <option value="" disabled>
                     Select semester
                   </option>
-                  <option value="Semester 1">Semester 1</option>
-                  <option value="Semester 2">Semester 2</option>
-                  <option value="Semester 3">Semester 3</option>
-                  <option value="Semester 4">Semester 4</option>
-                  <option value="Semester 5">Semester 5</option>
-                  <option value="Semester 6">Semester 6</option>
-                  <option value="Semester 7">Semester 7</option>
-                  <option value="Semester 8">Semester 8</option>
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4">Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
                 </select>
                 {errors.semester && (
                   <p className="text-xs text-red-500 mt-1">
@@ -69,9 +94,9 @@ export default function CreateFeeStructureAdmin() {
                   <option value="" disabled>
                     Select academic year
                   </option>
-                  <option value="2024-2025">2024-2025</option>
-                  <option value="2025-2026">2025-2026</option>
-                  <option value="2026-2027">2026-2027</option>
+                  <option value="2024-25">2024-25</option>
+                  <option value="2025-26">2025-26</option>
+                  <option value="2026-27">2026-27</option>
                 </select>
                 {errors.academicYear && (
                   <p className="text-xs text-red-500 mt-1">

@@ -8,7 +8,7 @@ import { assignStudentFees } from "../services/assignStudentFeesService.js";
 export const createFeeStructure = async(req , res) => {
     try{
         const {
-            course_id,
+            
             semester,
             academic_year,
             tuition_fee,
@@ -17,7 +17,7 @@ export const createFeeStructure = async(req , res) => {
             lab_fee = 0,
             misc_fee = 0
         } = req.body;
-
+        const course_id = req.user.course_id;
         if(!course_id || !semester || !academic_year || !tuition_fee)
         {
             return res.status(404).json({message : "Reuired fields .."});
