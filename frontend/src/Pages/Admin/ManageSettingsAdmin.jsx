@@ -1,25 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import { Save } from "lucide-react";
 import ToggleButtonSettings from "../../ui/Buttons/ToggleButtonSettings";
-import { useEffect } from "react";
-import api from "../../api/axios.js"
-import { use } from "react";
 
 export default function ManageSettingsAdmin() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-useEffect(() => {
+  const { register, handleSubmit } = useForm();
 
-    }, []);
+  const [userPermissionsEnabled, setUserPermissionsEnabled] = useState(false);
+  const [addSettingsEnabled, setAddSettingsEnabled] = useState(false);
+  const [manageSettingsEnabled, setManageSettingsEnabled] = useState(false);
+  const [systemSettingsEnabled, setSystemSettingsEnabled] = useState(false);
+
   const onSubmit = (data) => {
-    console.log("Valid Form Data Submitted:", data);
+    console.log("Data:", data);
   };
 
   return (
@@ -32,11 +28,34 @@ useEffect(() => {
         <DashboardChildPageCard className="mb-6">
           {/* ================= USER PERMISSIONS ================= */}
           <div className="userPermissionsDiv">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              User Permissions
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                User Permissions
+              </h2>
 
-            <div className="divide-y divide-[var(--border-light)]">
+              <div
+                className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+                  userPermissionsEnabled
+                    ? "bg-[var(--btn-primary-bg)]"
+                    : "bg-gray-300 dark:bg-gray-600"
+                }`}
+                onClick={() =>
+                  setUserPermissionsEnabled(!userPermissionsEnabled)
+                }
+              >
+                <div
+                  className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
+                    userPermissionsEnabled ? "translate-x-6" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div
+              className={`divide-y divide-[var(--border-light)] ${
+                !userPermissionsEnabled ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
               <ToggleButtonSettings
                 title="Allow Students to Update Profile"
                 desc="Students can edit their personal information"
@@ -59,11 +78,32 @@ useEffect(() => {
 
           {/* ================= ADD SETTINGS ================= */}
           <div className="addSettingsDiv">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Add Settings
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                Add Settings
+              </h2>
 
-            <div className="divide-y divide-[var(--border-light)]">
+              <div
+                className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+                  addSettingsEnabled
+                    ? "bg-[var(--btn-primary-bg)]"
+                    : "bg-gray-300 dark:bg-gray-600"
+                }`}
+                onClick={() => setAddSettingsEnabled(!addSettingsEnabled)}
+              >
+                <div
+                  className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
+                    addSettingsEnabled ? "translate-x-6" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div
+              className={`divide-y divide-[var(--border-light)] ${
+                !addSettingsEnabled ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
               <ToggleButtonSettings
                 title="Allow Add Student"
                 desc="Admin can add new students"
@@ -99,13 +139,34 @@ useEffect(() => {
 
           <div className="wrapperDiv w-full h-px bg-[var(--border-light)] my-8" />
 
-          {/* ================= MANAGE SETTINGS ================= */}
+          {/* =================  MANAGE SETTINGS ================= */}
           <div className="manageSettingsDiv">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              Manage Settings
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                Manage Settings
+              </h2>
 
-            <div className="divide-y divide-[var(--border-light)]">
+              <div
+                className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+                  manageSettingsEnabled
+                    ? "bg-[var(--btn-primary-bg)]"
+                    : "bg-gray-300 dark:bg-gray-600"
+                }`}
+                onClick={() => setManageSettingsEnabled(!manageSettingsEnabled)}
+              >
+                <div
+                  className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
+                    manageSettingsEnabled ? "translate-x-6" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div
+              className={`divide-y divide-[var(--border-light)] ${
+                !manageSettingsEnabled ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
               <ToggleButtonSettings
                 title="Allow Edit Faculty"
                 desc="Admin can edit faculty details"
@@ -123,11 +184,32 @@ useEffect(() => {
 
           {/* ================= SYSTEM SETTINGS ================= */}
           <div className="systemSettingsDiv">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
-              System Settings
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                System Settings
+              </h2>
 
-            <div className="divide-y divide-[var(--border-light)]">
+              <div
+                className={`w-14 h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors ${
+                  systemSettingsEnabled
+                    ? "bg-[var(--btn-primary-bg)]"
+                    : "bg-gray-300 dark:bg-gray-600"
+                }`}
+                onClick={() => setSystemSettingsEnabled(!systemSettingsEnabled)}
+              >
+                <div
+                  className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
+                    systemSettingsEnabled ? "translate-x-6" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div
+              className={`divide-y divide-[var(--border-light)] ${
+                !systemSettingsEnabled ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
               <ToggleButtonSettings
                 title="Maintenance Mode"
                 desc="Enable to restrict system access for maintenance"
