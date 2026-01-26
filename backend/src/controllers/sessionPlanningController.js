@@ -1,4 +1,4 @@
-// Session Planning Controller rr
+// Session Planning Controller
 
 import { SessionPlanning } from "../model/SessionPlanning.js";
 import { Timetable } from "../model/Timetable.js";
@@ -59,12 +59,12 @@ export const createSessionPlan = async (req, res) => {
 
         let subject_name = null;
         const sub = await Subject.findOne({
-            where:{subject_id},
-            attributes:['subject_name']
+            where: { subject_id },
+            attributes: ['subject_name']
         })
 
-        subject_name = sub.subject_name; 
-        
+        subject_name = sub.subject_name;
+
         const dateObj = new Date(date);
         const dayOfWeek = getDayOfWeekFromDate(dateObj);
 
@@ -79,12 +79,10 @@ export const createSessionPlan = async (req, res) => {
             include: [
                 {
                     model: Subject,
-                    as: "subject",
                     attributes: ['subject_id', 'subject_name']
                 },
                 {
                     model: Class,
-                    as: "class",
                     attributes: ['class_id']
                 }
             ],
@@ -170,7 +168,7 @@ export const createSessionPlan = async (req, res) => {
                 faculty_id: sessionPlan.faculty_id,
                 class: {
                     class_pk: sessionPlan.class_pk,
-                    class_id: timetableEntry.class?.class_id || '',
+                    class_id: timetableEntry.Class?.class_id || '',
                 },
                 subject: {
                     id: subject_id,
@@ -178,7 +176,7 @@ export const createSessionPlan = async (req, res) => {
                 },
                 date: sessionPlan.date,
                 lecture_no: sessionPlan.lecture_no,
-                time_slot: specificTimetableEntry ? 
+                time_slot: specificTimetableEntry ?
                     `${specificTimetableEntry.start_time} - ${specificTimetableEntry.end_time}` : 'Unknown',
                 topics: sessionPlan.topics,
                 status: sessionPlan.status,
@@ -338,7 +336,29 @@ export const getFacultyTechInfo = async (req, res) => {
 // GET - Get all session plans for faculty
 export const getAllSessionPlans = async (req, res) => {
     try {
-        const faculty_id = req.user.uid;
+        const user_id = req.user.uid;
+
+        if (role !== "Faculty") {
+            return res.status(400).json({
+                success: false,
+                message: "Access denied. Only faculty can access this information."
+            });
+        }
+
+        // Get faculty ID from user
+        const facultyUser = await User.findOne({
+            where: { user_id: user_id },
+            attributes: ['username']
+        });
+
+        if (!facultyUser) {
+            return res.status(404).json({
+                success: false,
+                message: "Faculty user not found"
+            });
+        }
+
+        const faculty_id = facultyUser.username;
 
         // Get all session plans for this faculty
         const sessionPlans = await SessionPlanning.findAll({
@@ -371,7 +391,7 @@ export const getAllSessionPlans = async (req, res) => {
         const formattedPlans = sessionPlans.map(plan => ({
             plan_id: plan.plan_id,
             class_id: plan.class_id,
-            subject_name: plan.subject?.subject_name || 'Unknown',
+            subject_name: plan.Subject?.subject_name || 'Unknown',
             date: plan.date,
             lecture_no: plan.lecture_no,
             topics: plan.topics,
@@ -404,6 +424,413 @@ export const getAllSessionPlans = async (req, res) => {
             success: false,
             message: "Internal server error",
             error: error.message
+        });
+    }
+};
+export const getFacultyScheduleForDate = async (req, res) => {
+    try {
+        const role = req.user.role;
+        const user_id = req.user.uid;
+        const { date } = req.query;
+
+        if (role !== "Faculty") {
+            return res.status(400).json({
+                success: false,
+                message: "Access denied. Only faculty can access this information."
+            });
+        }
+
+        // Get faculty ID from user
+        const facultyUser = await User.findOne({
+            where: { user_id: user_id },
+            attributes: ['username']
+        });
+
+        if (!facultyUser) {
+            return res.status(404).json({
+                success: false,
+                message: "Faculty user not found"
+            });
+        }
+
+        const faculty_id = facultyUser.username;
+
+        if (!date) {
+            return res.status(400).json({
+                success: false,
+                message: "Date is required"
+            });
+        }
+
+        const dateObj = new Date(date);
+        const dayOfWeek = getDayOfWeekFromDate(dateObj);
+
+        // Get the academic year FROM THE DATE (not current year)
+        const year = dateObj.getFullYear();
+        let academicYear;
+        
+        // Assuming academic year runs from June to May
+        if (dateObj.getMonth() >= 5) { // June to December
+            academicYear = `${year}-${year + 1}`;
+        } else { // January to May
+            academicYear = `${year - 1}-${year}`;
+        }
+        
+
+        // Get faculty timetable for that day AND academic year
+        const timetableEntries = await Timetable.findAll({
+            where: {
+                faculty_id,
+                day_of_week: dayOfWeek
+            },
+            include: [
+                {
+                    model: Subject,
+                    attributes: ['subject_id', 'subject_name']
+                },
+                {
+                    model: Class,
+                    where: {
+                        academic_year: academicYear
+                    },
+                    required: false, 
+                    attributes: ['class_id', 'semester', 'academic_year']
+                }
+            ],
+            order: [
+                ['class_pk', 'ASC'],
+                ['start_time', 'ASC']
+            ]
+        });
+
+
+        // Get existing plans for this date
+        const existingPlans = await SessionPlanning.findAll({
+            where: {
+                faculty_id,
+                date: date
+            },
+            include: [
+                {
+                    model: Subject,
+                    attributes: ['subject_name']
+                },
+                {
+                    model: Class,
+                    attributes: ['class_id', 'academic_year']
+                }
+            ]
+        });
+
+
+        // If no timetable entries
+        if (timetableEntries.length === 0) {
+            // Check if plans exist without timetable
+            const plansWithoutTimetable = existingPlans.filter(plan => {
+                return !timetableEntries.some(entry => 
+                    entry.class_pk === plan.class_pk && 
+                    entry.subject_id === plan.subject_id
+                );
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "No timetable entries found for this date",
+                data: {
+                    date: date,
+                    day_of_week: dayOfWeek,
+                    academic_year: academicYear,
+                    note: "No classes scheduled in timetable",
+                    existing_plans: plansWithoutTimetable.length > 0 ? {
+                        count: plansWithoutTimetable.length,
+                        plans: plansWithoutTimetable.map(plan => ({
+                            plan_id: plan.plan_id,
+                            class_id: plan.Class?.class_id,
+                            subject_name: plan.Subject?.subject_name,
+                            lecture_no: plan.lecture_no,
+                            topics: plan.topics,
+                            status: plan.status
+                        }))
+                    } : null,
+                    suggestion: plansWithoutTimetable.length > 0 ? 
+                        "Session plans exist but timetable may have changed" : 
+                        "No session plans found"
+                }
+            });
+        }
+
+        // Group subject and class (same as before)
+        const scheduleByClassSubject = {};
+
+        timetableEntries.forEach(entry => {
+            const key = `${entry.class_pk}_${entry.subject_id}`;
+
+            if (!scheduleByClassSubject[key]) {
+                scheduleByClassSubject[key] = {
+                    class_pk: entry.class_pk,
+                    class_id: entry.Class?.class_id || '',
+                    semester: entry.Class?.semester || 1,
+                    academic_year: entry.Class?.academic_year || academicYear,
+                    subject_id: entry.subject_id,
+                    subject_name: entry.Subject?.subject_name || '',
+                    lecture_slots: []
+                };
+            }
+            
+            const lectureNo = scheduleByClassSubject[key].lecture_slots.length + 1;
+            scheduleByClassSubject[key].lecture_slots.push({
+                schedule_id: entry.schedule_id,
+                start_time: entry.start_time,
+                end_time: entry.end_time,
+                lecture_no: lectureNo,
+                time_slot: `${entry.start_time} - ${entry.end_time}`
+            });
+        });
+
+        // Create plan map
+        const planMap = {};
+        existingPlans.forEach(plan => {
+            const key = `${plan.class_pk}_${plan.subject_id}_${plan.lecture_no}`;
+            planMap[key] = plan;
+        });
+
+        // Format response
+        const formattedSchedule = Object.values(scheduleByClassSubject).map(item => {
+            const updatedLectureSlots = item.lecture_slots.map(slot => {
+                const key = `${item.class_pk}_${item.subject_id}_${slot.lecture_no}`;
+                const existingPlan = planMap[key];
+
+                return {
+                    ...slot,
+                    has_plan: !!existingPlan,
+                    plan_details: existingPlan ? {
+                        plan_id: existingPlan.plan_id,
+                        topics: existingPlan.topics,
+                        status: existingPlan.status
+                    } : null
+                };
+            });
+
+            const plannedLectures = updatedLectureSlots.filter(s => s.has_plan).length;
+
+            return {
+                class: {
+                    class_pk: item.class_pk,
+                    class_id: item.class_id,
+                    semester: item.semester,
+                    academic_year: item.academic_year
+                },
+                subject: {
+                    subject_id: item.subject_id,
+                    subject_name: item.subject_name,
+                },
+                lecture_slots: updatedLectureSlots,
+                total_lectures: updatedLectureSlots.length,
+                planned_lectures: plannedLectures
+            };
+        });
+
+        // Calculate summary
+        const totalLectures = timetableEntries.length;
+        const totalPlannedLectures = existingPlans.length;
+        const pendingLectures = Math.max(0, totalLectures - totalPlannedLectures);
+
+        return res.status(200).json({
+            success: true,
+            message: "Faculty schedule retrieved successfully",
+            data: {
+                date: date,
+                day_of_week: dayOfWeek,
+                academic_year: academicYear,
+                schedule: formattedSchedule,
+                summary: {
+                    total_classes: formattedSchedule.length,
+                    total_lectures: totalLectures,
+                    planned_lectures: totalPlannedLectures,
+                    pending_lectures: pendingLectures
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Get faculty schedule error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
+    }
+};
+
+//update session plan status
+export const updateSessionPlan = async (req,res) => {
+    try{
+        const { plan_id } = req.params;
+        const user_id = req.user.uid;
+
+        if( role !== "Faculty"){
+            return res.status(400).json({
+                success:false,
+                message:"Access denied. Only faculty can access this information."
+            });
+        }
+        
+        const facultyUser = await User.findOne({
+            where: { user_id: user_id },
+            attributes: ['username']
+        });
+
+        if (!facultyUser) {
+            return res.status(404).json({
+                success:false,
+                message:"Faculty user not found"
+            });
+        }
+
+        const faculty_id = facultyUser.username;
+
+        // find session plan
+        const sessionPlan = await sessionPlanning.findOne({
+            where:{
+                plan_id,
+                faculty_id
+            }
+        });
+        if(!sessionPlan){
+            return res.status(404).json({
+                success:false,
+                message:"Session plan not found"
+            });
+        }
+        const {
+            topics,
+            lecture_no,
+            date,
+            status
+        } = req.body;
+
+        const updatedLectureNo = sessionPlan.lecture_no;
+        const updateDate = sessionPlan.date;
+
+        if(lecture_no || date){
+            const dateObj = new Date(updateDate);
+            const dayOfWeek = getDayOfWeekFromDate(dateObj);
+
+            const timetableEntries = await Timetable.findAll({
+                where:{
+                    faculty_id,
+                    class_pk: sessionPlan.class_pk,
+                    subject_id:sessionPlan.subject_id,
+                    day_of_week:dayOfWeek
+                },
+                order:[['start_time','ASC']]
+            });
+
+            if(!timetableEntries.length){
+                return res.status(400).json({
+                    success:false,
+                    message:"No lectures scheduled for the updated date"
+                });
+            }
+
+            if(updatedLectureNo < 1 || updatedLectureNo > timetableEntries.length){
+                return res.status(400).json({
+                    success:false,
+                    message:`Invalid lecture number for the updated date. You have ${timetableEntries.length} lecture(s) of this subject for this class on ${dayOfWeek}`
+                });
+            }
+        }
+
+        // Update Fields
+        await sessionPlan.update({
+            topics: topics || sessionPlan.topics,
+            lecture_no: updatedLectureNo,
+            date: updateDate,
+            status: status || sessionPlan.status
+        });
+        return res.status(200).json({
+            success:true,
+            message:"Session plan updated successfully",
+            data:{
+                plan_id:sessionPlan.plan_id,
+                topics:sessionPlan.topics,
+                lecture_no:sessionPlan.lecture_no,
+                date:sessionPlan.date,
+                status:sessionPlan.status
+            }
+        });
+    }catch(error){
+        console.error("Update session plan error:", error);
+        return res.status(500).json({
+            success:false,
+            message:"Internal server error",
+            error:error.message
+        });
+    }
+};
+
+// Delete session plan
+export const deleteSessionPlan = async (req , res) => {
+    try{
+        const role = req.user.role;
+        const user_id = req.user.uid;
+        const { plan_id} = req.params;
+
+        if(role !== "Faculty"){
+            return res.status(400).json({
+                success:false,
+                message:"Access denied. Only faculty can access this information."
+            });
+        }
+        // Get faculty ID from user
+        const facultyUser = await User.findOne({
+            where: { user_id: user_id },
+            attributes: ['username']
+        });
+        if (!facultyUser) {
+            return res.status(404).json({
+                success:false,
+                message:"Faculty user not found"
+            });
+        }
+        const faculty_id = facultyUser.username;
+
+        // Find session plan
+        const sessionPlan = await SessionPlanning.findOne({
+            where:{
+                plan_id,
+                faculty_id
+            }
+        });
+        if(!sessionPlan){
+            return res.status(404).json({
+                success:false,
+                message:"Session plan not found"
+            });
+        }
+
+        const deletedData = {
+            plan_id:sessionPlan.plan_id,
+            class_pk:sessionPlan.class_pk,
+            subject_id:sessionPlan.subject_id,
+            lecture_no:sessionPlan.lecture_no,
+            date:sessionPlan.date,
+            topics:sessionPlan.topics,
+            status:sessionPlan.status
+        };
+        await sessionPlan.destroy();
+        return res.status(200).json({
+            success:true,
+            message:"Session plan deleted successfully",
+            data:deletedData
+        });
+    }
+    catch(error){
+        console.error("Delete session plan error:", error);
+        return res.status(500).json({
+            success:false,
+            message:"Internal server error",
+            error:error.message
         });
     }
 };

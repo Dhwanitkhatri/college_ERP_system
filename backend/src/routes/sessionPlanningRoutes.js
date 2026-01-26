@@ -1,4 +1,4 @@
-import { createSessionPlan , getFacultyTechInfo , getAllSessionPlans } from "../controllers/sessionPlanningController.js";
+import { createSessionPlan , getFacultyTechInfo , getAllSessionPlans , getFacultyScheduleForDate } from "../controllers/sessionPlanningController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import express from "express";
 
@@ -13,5 +13,8 @@ router.get('/teaching-info',authMiddleware, getFacultyTechInfo);
 
 // Get all session plans for faculty
 router.get('/all',authMiddleware, getAllSessionPlans);
+
+// get session plan by date
+router.get('/date', authMiddleware, getFacultyScheduleForDate)
 
 export default router;
