@@ -61,7 +61,14 @@ export const createSessionPlan = async (req, res) => {
         const sub = await Subject.findOne({
             where: { subject_id },
             attributes: ['subject_name']
-        })
+        });
+        
+        if (!sub) {
+            return res.status(404).json({
+                success: false,
+                message: "Subject not found"
+            });
+        }
 
         subject_name = sub.subject_name;
 
@@ -336,6 +343,7 @@ export const getFacultyTechInfo = async (req, res) => {
 // GET - Get all session plans for faculty
 export const getAllSessionPlans = async (req, res) => {
     try {
+        const role = req.user.role;
         const user_id = req.user.uid;
 
         if (role !== "Faculty") {
@@ -390,7 +398,7 @@ export const getAllSessionPlans = async (req, res) => {
         // Simple response format
         const formattedPlans = sessionPlans.map(plan => ({
             plan_id: plan.plan_id,
-            class_id: plan.class_id,
+            class_id: plan.Class?.class_id || 'Unknown',
             subject_name: plan.Subject?.subject_name || 'Unknown',
             date: plan.date,
             lecture_no: plan.lecture_no,
@@ -468,14 +476,14 @@ export const getFacultyScheduleForDate = async (req, res) => {
         // Get the academic year FROM THE DATE (not current year)
         const year = dateObj.getFullYear();
         let academicYear;
-        
+
         // Assuming academic year runs from June to May
         if (dateObj.getMonth() >= 5) { // June to December
             academicYear = `${year}-${year + 1}`;
         } else { // January to May
             academicYear = `${year - 1}-${year}`;
         }
-        
+
 
         // Get faculty timetable for that day AND academic year
         const timetableEntries = await Timetable.findAll({
@@ -493,7 +501,7 @@ export const getFacultyScheduleForDate = async (req, res) => {
                     where: {
                         academic_year: academicYear
                     },
-                    required: false, 
+                    required: false,
                     attributes: ['class_id', 'semester', 'academic_year']
                 }
             ],
@@ -527,8 +535,8 @@ export const getFacultyScheduleForDate = async (req, res) => {
         if (timetableEntries.length === 0) {
             // Check if plans exist without timetable
             const plansWithoutTimetable = existingPlans.filter(plan => {
-                return !timetableEntries.some(entry => 
-                    entry.class_pk === plan.class_pk && 
+                return !timetableEntries.some(entry =>
+                    entry.class_pk === plan.class_pk &&
                     entry.subject_id === plan.subject_id
                 );
             });
@@ -552,8 +560,8 @@ export const getFacultyScheduleForDate = async (req, res) => {
                             status: plan.status
                         }))
                     } : null,
-                    suggestion: plansWithoutTimetable.length > 0 ? 
-                        "Session plans exist but timetable may have changed" : 
+                    suggestion: plansWithoutTimetable.length > 0 ?
+                        "Session plans exist but timetable may have changed" :
                         "No session plans found"
                 }
             });
@@ -576,7 +584,7 @@ export const getFacultyScheduleForDate = async (req, res) => {
                     lecture_slots: []
                 };
             }
-            
+
             const lectureNo = scheduleByClassSubject[key].lecture_slots.length + 1;
             scheduleByClassSubject[key].lecture_slots.push({
                 schedule_id: entry.schedule_id,
@@ -663,18 +671,19 @@ export const getFacultyScheduleForDate = async (req, res) => {
 };
 
 //update session plan status
-export const updateSessionPlan = async (req,res) => {
-    try{
+export const updateSessionPlan = async (req, res) => {
+    try {
+        const role = req.user.role;
         const { plan_id } = req.params;
         const user_id = req.user.uid;
 
-        if( role !== "Faculty"){
+        if (role !== "Faculty") {
             return res.status(400).json({
-                success:false,
-                message:"Access denied. Only faculty can access this information."
+                success: false,
+                message: "Access denied. Only faculty can access this information."
             });
         }
-        
+
         const facultyUser = await User.findOne({
             where: { user_id: user_id },
             attributes: ['username']
@@ -682,24 +691,24 @@ export const updateSessionPlan = async (req,res) => {
 
         if (!facultyUser) {
             return res.status(404).json({
-                success:false,
-                message:"Faculty user not found"
+                success: false,
+                message: "Faculty user not found"
             });
         }
 
         const faculty_id = facultyUser.username;
 
         // find session plan
-        const sessionPlan = await sessionPlanning.findOne({
-            where:{
+        const sessionPlan = await SessionPlanning.findOne({
+            where: {
                 plan_id,
                 faculty_id
             }
         });
-        if(!sessionPlan){
+        if (!sessionPlan) {
             return res.status(404).json({
-                success:false,
-                message:"Session plan not found"
+                success: false,
+                message: "Session plan not found"
             });
         }
         const {
@@ -709,77 +718,95 @@ export const updateSessionPlan = async (req,res) => {
             status
         } = req.body;
 
-        const updatedLectureNo = sessionPlan.lecture_no;
-        const updateDate = sessionPlan.date;
+        const updatedLectureNo = lecture_no ?? sessionPlan.lecture_no;
+        const updateDate = date ?? sessionPlan.date;
 
-        if(lecture_no || date){
+        if (lecture_no || date) {
             const dateObj = new Date(updateDate);
             const dayOfWeek = getDayOfWeekFromDate(dateObj);
 
             const timetableEntries = await Timetable.findAll({
-                where:{
+                where: {
                     faculty_id,
                     class_pk: sessionPlan.class_pk,
-                    subject_id:sessionPlan.subject_id,
-                    day_of_week:dayOfWeek
+                    subject_id: sessionPlan.subject_id,
+                    day_of_week: dayOfWeek
                 },
-                order:[['start_time','ASC']]
+                order: [['start_time', 'ASC']]
             });
 
-            if(!timetableEntries.length){
+            if (!timetableEntries.length) {
                 return res.status(400).json({
-                    success:false,
-                    message:"No lectures scheduled for the updated date"
+                    success: false,
+                    message: "No lectures scheduled for the updated date"
+                });
+            }
+            const duplicatePlan = await SessionPlanning.findOne({
+                where: {
+                    faculty_id,
+                    class_pk: sessionPlan.class_pk,
+                    subject_id: sessionPlan.subject_id,
+                    lecture_no: updatedLectureNo,
+                    date: updateDate,
+                    plan_id: { [Op.ne]: plan_id }
+                }
+            });
+
+            if (duplicatePlan) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Another session plan already exists for this lecture and date"
                 });
             }
 
-            if(updatedLectureNo < 1 || updatedLectureNo > timetableEntries.length){
+
+            if (updatedLectureNo < 1 || updatedLectureNo > timetableEntries.length) {
                 return res.status(400).json({
-                    success:false,
-                    message:`Invalid lecture number for the updated date. You have ${timetableEntries.length} lecture(s) of this subject for this class on ${dayOfWeek}`
+                    success: false,
+                    message: `Invalid lecture number for the updated date. You have ${timetableEntries.length} lecture(s) of this subject for this class on ${dayOfWeek}`
                 });
             }
         }
 
         // Update Fields
         await sessionPlan.update({
-            topics: topics || sessionPlan.topics,
+            topics: topics ?? sessionPlan.topics,
             lecture_no: updatedLectureNo,
             date: updateDate,
-            status: status || sessionPlan.status
+            status: status ?? sessionPlan.status
         });
         return res.status(200).json({
-            success:true,
-            message:"Session plan updated successfully",
-            data:{
-                plan_id:sessionPlan.plan_id,
-                topics:sessionPlan.topics,
-                lecture_no:sessionPlan.lecture_no,
-                date:sessionPlan.date,
-                status:sessionPlan.status
+            success: true,
+            message: "Session plan updated successfully",
+            data: {
+                plan_id: sessionPlan.plan_id,
+                topics: sessionPlan.topics,
+                lecture_no: sessionPlan.lecture_no,
+                date: sessionPlan.date,
+                status: sessionPlan.status
             }
         });
-    }catch(error){
+    } catch (error) {
         console.error("Update session plan error:", error);
         return res.status(500).json({
-            success:false,
-            message:"Internal server error",
-            error:error.message
+            success: false,
+            message: "Internal server error",
+            error: error.message
         });
     }
 };
 
 // Delete session plan
-export const deleteSessionPlan = async (req , res) => {
-    try{
+export const deleteSessionPlan = async (req, res) => {
+    try {
         const role = req.user.role;
         const user_id = req.user.uid;
-        const { plan_id} = req.params;
+        const { plan_id } = req.params;
 
-        if(role !== "Faculty"){
+        if (role !== "Faculty") {
             return res.status(400).json({
-                success:false,
-                message:"Access denied. Only faculty can access this information."
+                success: false,
+                message: "Access denied. Only faculty can access this information."
             });
         }
         // Get faculty ID from user
@@ -789,48 +816,48 @@ export const deleteSessionPlan = async (req , res) => {
         });
         if (!facultyUser) {
             return res.status(404).json({
-                success:false,
-                message:"Faculty user not found"
+                success: false,
+                message: "Faculty user not found"
             });
         }
         const faculty_id = facultyUser.username;
 
         // Find session plan
         const sessionPlan = await SessionPlanning.findOne({
-            where:{
+            where: {
                 plan_id,
                 faculty_id
             }
         });
-        if(!sessionPlan){
+        if (!sessionPlan) {
             return res.status(404).json({
-                success:false,
-                message:"Session plan not found"
+                success: false,
+                message: "Session plan not found"
             });
         }
 
         const deletedData = {
-            plan_id:sessionPlan.plan_id,
-            class_pk:sessionPlan.class_pk,
-            subject_id:sessionPlan.subject_id,
-            lecture_no:sessionPlan.lecture_no,
-            date:sessionPlan.date,
-            topics:sessionPlan.topics,
-            status:sessionPlan.status
+            plan_id: sessionPlan.plan_id,
+            class_pk: sessionPlan.class_pk,
+            subject_id: sessionPlan.subject_id,
+            lecture_no: sessionPlan.lecture_no,
+            date: sessionPlan.date,
+            topics: sessionPlan.topics,
+            status: sessionPlan.status
         };
         await sessionPlan.destroy();
         return res.status(200).json({
-            success:true,
-            message:"Session plan deleted successfully",
-            data:deletedData
+            success: true,
+            message: "Session plan deleted successfully",
+            data: deletedData
         });
     }
-    catch(error){
+    catch (error) {
         console.error("Delete session plan error:", error);
         return res.status(500).json({
-            success:false,
-            message:"Internal server error",
-            error:error.message
+            success: false,
+            message: "Internal server error",
+            error: error.message
         });
     }
 };
