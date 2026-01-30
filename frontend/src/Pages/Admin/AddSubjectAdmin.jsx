@@ -49,9 +49,7 @@ const AddSubjectAdmin = () => {
       const res = await api.post(
         "/api/subjects/",
         {
-          subject_id: data.subjectId,
           subject_name: data.subjectName,
-          faculty_id: data.facultyId,
           semester: data.semester,
           lecture_per_week: data.lecturePerWeek,
           credit: data.credit,
@@ -64,9 +62,7 @@ const AddSubjectAdmin = () => {
         },
       );
       setAddedSubject({
-        subject_id: data.subjectId,
         subject_name: data.subjectName,
-        faculty_id: data.facultyId,
         semester: data.semester,
         lecture_per_week: data.lecturePerWeek,
         credit: data.credit,
@@ -85,33 +81,6 @@ const AddSubjectAdmin = () => {
     >
       <DashboardChildPageCard>
         <form className="" onSubmit={handleSubmit(onSubmit)}>
-          {/* this is for the subject id input field*/}
-          <div className="CourseDiv form-field">
-            <label className="custom-label">Subject Id</label>
-            <input
-              type="text"
-              placeholder="Enter Subject ID"
-              className="custom-input"
-              {...register("subjectId", {
-                required: "Please Fill This Field",
-                minLength: {
-                  value: 3,
-                  message: "Minimum 3 Characters are Required",
-                },
-                maxLength: {
-                  value: 12,
-                  message: "Maximum Character Limit is 10",
-                },
-                pattern: {
-                  value: /^[A-Za-z0-9]+$/,
-                  message: "Only Alphabets and Numbers are Allowed",
-                },
-              })}
-            />
-            {errors.subjectId && (
-              <p className="custom-error">{errors.subjectId.message}</p>
-            )}
-          </div>
 
           {/* // this is for the subject Name input field*/}
           <div className="CourseDiv form-field">
@@ -141,35 +110,6 @@ const AddSubjectAdmin = () => {
             )}
           </div>
 
-          {/* this is for the faculty Id input field*/}
-          <div className="wrapperDiv3 form-field">
-            <label className="custom-label">Faculty</label>
-
-            <select
-              defaultValue=""
-              className="custom-input"
-              {...register("facultyId", {
-                required: "Please Fill This Field",
-              })}
-            >
-              <option value="" disabled>
-                Select Faculty
-              </option>
-              {faculties.map((f) => (
-                <option key={f.faculty_id} value={f.faculty_id}>
-                  {f.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={16}
-              className="absolute right-3 top-3 pointer-events-none text-gray-500 dark:text-gray-400"
-            />
-          </div>
-
-          {errors.facultyId && (
-            <p className="custom-error">{errors.facultyId.message}</p>
-          )}
           {/* this is for the semester input field*/}
           <div className="CourseDiv form-field">
             <label className="custom-label">Semester</label>
@@ -238,13 +178,7 @@ const AddSubjectAdmin = () => {
           <h2 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">Subject Added Successfully!</h2>
           <div className="space-y-1 text-sm text-[var(--text-secondary)]">
             <p>
-              <span className="font-medium">Subject ID:</span> {addedSubject.subject_id}
-            </p>
-            <p>
               <span className="font-medium">Subject Name:</span> {addedSubject.subject_name}
-            </p>
-            <p>
-              <span className="font-medium">Faculty ID:</span> {addedSubject.faculty_id}
             </p>
             <p>
               <span className="font-medium">Semester:</span> {addedSubject.semester}
