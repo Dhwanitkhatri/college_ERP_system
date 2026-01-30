@@ -187,6 +187,11 @@ Attendance.belongsTo(Faculty, {
   targetKey: "faculty_id",
 });
 
+StudentFee.belongsTo(Student, { foreignKey: "student_id" });
+StudentFee.belongsTo(FeeStructure, { foreignKey: "fee_structure_id" });
+FeePayment.belongsTo(Student, { foreignKey: "student_id" });
+FeePayment.belongsTo(FeeStructure, { foreignKey: "fee_structure_id" });
+
 /* -------------------------------------------------
    EXPORT MODELS & SEQUELIZE
 --------------------------------------------------*/

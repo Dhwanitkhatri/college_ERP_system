@@ -58,8 +58,4 @@ export const FeePayment = sequelize.define(
   }
 );
 
-// Associations
-FeePayment.belongsTo(FeeStructure, {
-  foreignKey: "fee_structure_id",
-  as: "feeStructure",
-});
+

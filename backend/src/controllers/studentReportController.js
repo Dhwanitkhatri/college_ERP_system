@@ -6,6 +6,7 @@ import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
 import { User } from "../model/User.js";
 import { getSemesterType } from "../services/academicYear.js";
+import { Faculty } from "../model/Faculty.js";
 
 // Get date wise attendance report for a student
 export const getStudentDateWiseReport = async (req, res) => {
@@ -463,13 +464,15 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(400).json({ message: "class_id is required" });
     }
 
-    //CLASS..
+    // ✅ Get Class with Faculty and User (NO alias used)
     const classRecord = await Class.findOne({
       where: { id: class_id },
       include: [{
-        model: User,
-        as: "mentor",
-        attributes: ["user_id", "username"]
+        model: Faculty,
+        include: [{
+          model: User,
+          attributes: ["user_id", "username"]
+        }]
       }]
     });
 
@@ -477,16 +480,19 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(404).json({ message: "Class not found" });
     }
 
-    // Faculty can see ONLY own class
+    // ✅ Faculty can only access their own class
     if (role === "Faculty") {
-      if (!classRecord.mentor || classRecord.mentor.user_id !== uid) {
+      if (
+        !classRecord.Faculty ||
+        classRecord.Faculty.user_id !== uid
+      ) {
         return res.status(403).json({
           message: "Access denied. Only mentor can access this report."
         });
       }
     }
 
-    //STUDENTS.. 
+    // ✅ Get Students
     const students = await Student.findAll({
       where: { class_pk: classRecord.id },
       order: [["student_id", "ASC"]]
@@ -498,7 +504,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
 
     const studentIds = students.map(s => s.student_id);
 
-    //MONTH FILTERR
+    // ✅ Month Filter
     const dateFilter = {};
     if (month) {
       const monthNum = Number(month);
@@ -523,7 +529,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       };
     }
 
-    //ATTENDANCE
+    // ✅ Attendance Records with Subject
     const attendanceRecords = await Attendance.findAll({
       where: {
         class_id: classRecord.id,
@@ -532,18 +538,16 @@ export const getOverallClassAttendancereport = async (req, res) => {
       },
       include: [{
         model: Subject,
-        as: "Subject",
         attributes: ["subject_id", "subject_name"]
       }],
       order: [["date", "ASC"], ["student_id", "ASC"]]
     });
 
-    // PROCESS DATAa 
+    // ✅ Process Data
     const studentMap = {};
     const subjectSummary = {};
     const uniqueDates = new Set();
 
-    // Init students
     students.forEach(s => {
       studentMap[s.student_id] = {
         student_id: s.student_id,
@@ -567,7 +571,6 @@ export const getOverallClassAttendancereport = async (req, res) => {
 
       const subjectId = r.Subject.subject_id;
 
-      //sUBJECT-WISE PER STUDENTT
       if (!student.subject_wise[subjectId]) {
         student.subject_wise[subjectId] = {
           subject_id: subjectId,
@@ -583,24 +586,22 @@ export const getOverallClassAttendancereport = async (req, res) => {
         ? student.subject_wise[subjectId].present++
         : student.subject_wise[subjectId].absent++;
 
-      // SUBJECT LIST (unique)
       subjectSummary[subjectId] ??= {
         subject_id: subjectId,
         subject_name: r.Subject.subject_name
       };
     });
 
-    
     const formattedStudents = Object.values(studentMap).map(s => ({
       ...s,
-      subject_wise: Object.values(s.subject_wise) // remove SUBBCA111 key
+      subject_wise: Object.values(s.subject_wise)
     }));
 
     return res.status(200).json({
       success: true,
       class_info: {
         class_id: classRecord.class_id,
-        mentor: classRecord.mentor?.username
+        mentor: classRecord.Faculty?.User?.username || null
       },
       summary: {
         total_students: students.length,

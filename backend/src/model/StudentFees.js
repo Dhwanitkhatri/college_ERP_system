@@ -46,12 +46,4 @@ export const StudentFee = sequelize.define(
   }
 );
 
-StudentFee.belongsTo(Student, {
-  foreignKey: "student_id",
-  targetKey: "student_id",   // 🔥 IMPORTANT
-});
 
-StudentFee.belongsTo(FeeStructure, {
-  foreignKey: "fee_structure_id",
-   as: "feeStructure",
-});
