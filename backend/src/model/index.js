@@ -24,9 +24,9 @@ import { FeeStructure } from './FeeStructure.js';
 import { StudentFee } from './StudentFees.js';
 import { FeePayment } from './FeePayment.js';
 
-/* -------------------------------------------------
-   DEFINE RELATIONSHIPS
---------------------------------------------------*/
+/* =====================================================
+   BASIC RELATIONSHIPS
+===================================================== */
 
 // Role ↔ User
 Role.hasMany(User, { foreignKey: 'role_id', sourceKey: 'role_id' });
@@ -40,44 +40,112 @@ Faculty.belongsTo(User, { foreignKey: 'user_id', targetKey: 'user_id' });
 User.hasMany(Student, { foreignKey: 'user_id', sourceKey: 'user_id' });
 Student.belongsTo(User, { foreignKey: 'user_id', targetKey: 'user_id' });
 
-// Course ↔ Student
-Course.hasMany(Student, { foreignKey: 'course_id', sourceKey: 'course_id' });
-Student.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
-
 // Department ↔ Course
 Department.hasMany(Course, { foreignKey: 'department_id', sourceKey: 'department_id' });
 Course.belongsTo(Department, { foreignKey: 'department_id', targetKey: 'department_id' });
 
-// Faculty ↔ Subject
-Faculty.hasMany(Subject, { foreignKey: 'faculty_id', sourceKey: 'faculty_id' });
-Subject.belongsTo(Faculty, { foreignKey: 'faculty_id', targetKey: 'faculty_id' });
+// Course ↔ Student
+Course.hasMany(Student, { foreignKey: 'course_id', sourceKey: 'course_id' });
+Student.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
 
 // Course ↔ Subject
 Course.hasMany(Subject, { foreignKey: 'course_id', sourceKey: 'course_id' });
 Subject.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
 
+// Faculty ↔ Subject
+Faculty.hasMany(Subject, { foreignKey: 'faculty_id', sourceKey: 'faculty_id' });
+Subject.belongsTo(Faculty, { foreignKey: 'faculty_id', targetKey: 'faculty_id' });
+
 // Course ↔ Class
 Course.hasMany(Class, { foreignKey: 'course_id', sourceKey: 'course_id' });
 Class.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
 
-// Student ↔ Attendance
-Student.hasMany(Attendance, { foreignKey: 'student_id', sourceKey: 'student_id' });
-Attendance.belongsTo(Student, { foreignKey: 'student_id', targetKey: 'student_id' });
+/* =====================================================
+   CLASS RELATIONSHIPS
+===================================================== */
 
-// Student ↔ Result
-Student.hasMany(Result, { foreignKey: 'student_id', sourceKey: 'student_id' });
-Result.belongsTo(Student, { foreignKey: 'student_id', targetKey: 'student_id' });
-
-// Student ↔ Feedback
-Student.hasMany(Feedback, { foreignKey: 'student_id', sourceKey: 'student_id' });
-Feedback.belongsTo(Student, { foreignKey: 'student_id', targetKey: 'student_id' });
-
-// Student ↔ Personal Details
-Student.hasOne(StudentPersonalDetails, { foreignKey: 'student_id', sourceKey: 'student_id' });
-StudentPersonalDetails.belongsTo(Student, { foreignKey: 'student_id', targetKey: 'student_id' });
+// Class ↔ Faculty (Mentor)
+Class.belongsTo(Faculty, {
+  foreignKey: "mentor_id",
+  targetKey: "faculty_id"
+});
+Faculty.hasMany(Class, {
+  foreignKey: "mentor_id",
+  sourceKey: "faculty_id"
+});
 
 /* =====================================================
-   🔥 CORRECTED FEE MODULE ASSOCIATIONS
+   STUDENT RELATED
+===================================================== */
+
+// Student ↔ Attendance
+Student.hasMany(Attendance, {
+  foreignKey: 'student_id',
+  sourceKey: 'student_id'
+});
+Attendance.belongsTo(Student, {
+  foreignKey: 'student_id',
+  targetKey: 'student_id'
+});
+
+// Student ↔ Result
+Student.hasMany(Result, {
+  foreignKey: 'student_id',
+  sourceKey: 'student_id'
+});
+Result.belongsTo(Student, {
+  foreignKey: 'student_id',
+  targetKey: 'student_id'
+});
+
+// Student ↔ Feedback
+Student.hasMany(Feedback, {
+  foreignKey: 'student_id',
+  sourceKey: 'student_id'
+});
+Feedback.belongsTo(Student, {
+  foreignKey: 'student_id',
+  targetKey: 'student_id'
+});
+
+// Student ↔ Personal Details
+Student.hasOne(StudentPersonalDetails, {
+  foreignKey: 'student_id',
+  sourceKey: 'student_id'
+});
+StudentPersonalDetails.belongsTo(Student, {
+  foreignKey: 'student_id',
+  targetKey: 'student_id'
+});
+
+/* =====================================================
+   ATTENDANCE MODULE
+===================================================== */
+
+// Attendance ↔ Subject
+Attendance.belongsTo(Subject, {
+  foreignKey: "subject_id",
+  targetKey: "subject_id"   // ✅ correct
+});
+
+Subject.hasMany(Attendance, {
+  foreignKey: "subject_id",
+  sourceKey: "subject_id"   // ✅ correct
+});
+
+
+// Attendance ↔ Faculty (who marked attendance)
+Attendance.belongsTo(Faculty, {
+  foreignKey: "faculty_id",
+  targetKey: "faculty_id"
+});
+Faculty.hasMany(Attendance, {
+  foreignKey: "faculty_id",
+  sourceKey: "faculty_id"
+});
+
+/* =====================================================
+   FEE MODULE
 ===================================================== */
 
 // Student ↔ StudentFee
@@ -85,7 +153,6 @@ Student.hasMany(StudentFee, {
   foreignKey: "student_id",
   sourceKey: "student_id"
 });
-
 StudentFee.belongsTo(Student, {
   foreignKey: "student_id",
   targetKey: "student_id"
@@ -96,7 +163,6 @@ FeeStructure.hasMany(StudentFee, {
   foreignKey: "fee_structure_id",
   sourceKey: "id"
 });
-
 StudentFee.belongsTo(FeeStructure, {
   foreignKey: "fee_structure_id",
   targetKey: "id"
@@ -107,7 +173,6 @@ Student.hasMany(FeePayment, {
   foreignKey: "student_id",
   sourceKey: "student_id"
 });
-
 FeePayment.belongsTo(Student, {
   foreignKey: "student_id",
   targetKey: "student_id"
@@ -118,15 +183,14 @@ FeeStructure.hasMany(FeePayment, {
   foreignKey: "fee_structure_id",
   sourceKey: "id"
 });
-
 FeePayment.belongsTo(FeeStructure, {
   foreignKey: "fee_structure_id",
   targetKey: "id"
 });
 
-/* -------------------------------------------------
+/* =====================================================
    EXPORT
---------------------------------------------------*/
+===================================================== */
 
 export {
   sequelize,
@@ -148,7 +212,7 @@ export {
   EmployeePersonalDetails,
   Admin,
   FeatureFlag,
-  FeeStructure ,
+  FeeStructure,
   StudentFee,
   FeePayment
 };
