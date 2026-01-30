@@ -104,8 +104,8 @@ export default function CheckFeeStatusAdmin() {
                   className="custom-input theme-transition"
                   {...register("academicYear")}
                 >
-                  <option value="2024-25">2024-25</option>
-                  <option value="2025-26">2025-26</option>
+                  <option value="2024-2025">2024-2025</option>
+                  <option value="2025-2026">2025-2026</option>
                 </select>
               </div>
             </div>
