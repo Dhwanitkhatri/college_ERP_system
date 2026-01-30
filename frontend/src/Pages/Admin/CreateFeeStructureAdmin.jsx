@@ -5,14 +5,22 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import api from "../../api/axios.js";
+import { useState } from "react";
 
 export default function CreateFeeStructureAdmin() {
+  const [totalFee, setTotalFee] = useState(0);
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
-
+  const tutionFee= watch("tuitionFee") || 0;
+  const examFee= watch("examFee") || 0;
+  const libraryFee= watch("libraryFee") || 0;
+  const labFee= watch("labFee") || 0;
+  const miscFee= watch("miscFee") || 0;
+  const totalFeeAmount = Number(tutionFee) + Number(examFee) + Number(libraryFee) + Number(labFee) + Number(miscFee);
   const onSubmit = (data) => {
     const token = localStorage.getItem("token");
     console.log("Form Submitted :", data);
@@ -212,7 +220,7 @@ export default function CreateFeeStructureAdmin() {
                 <span className="font-semibold text-lg">Total Fee Amount</span>
               </div>
               <span className="text-xl font-bold text-blue-700 dark:text-blue-300">
-                ₹0
+                {totalFeeAmount}
               </span>
             </div>
             <div className="buttonDiv form-actions">
