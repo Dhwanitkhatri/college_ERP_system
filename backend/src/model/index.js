@@ -57,8 +57,8 @@ Course.hasMany(Subject, { foreignKey: 'course_id', sourceKey: 'course_id' });
 Subject.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
 
 // Faculty ↔ Subject
-Faculty.hasMany(Subject, { foreignKey: 'faculty_id', sourceKey: 'faculty_id' });
-Subject.belongsTo(Faculty, { foreignKey: 'faculty_id', targetKey: 'faculty_id' });
+//Faculty.hasMany(Subject, { foreignKey: 'faculty_id', sourceKey: 'faculty_id' });
+//Subject.belongsTo(Faculty, { foreignKey: 'faculty_id', targetKey: 'faculty_id' });
 
 // Course ↔ Class
 Course.hasMany(Class, { foreignKey: 'course_id', sourceKey: 'course_id' });
