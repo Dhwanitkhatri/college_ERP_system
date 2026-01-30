@@ -38,10 +38,10 @@ const ManageStudentAdmin = () => {
         searchDesc="Search by name or roll no.."
         addLink="/admin/dashboard/AddStudentAdmin"
       >
-        <table className="theme-transition w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+        <table className="table-wrapper theme-transition w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead className="theme-transition bg-gray-100 dark:bg-gray-800">
             <tr>
-              <th className="table-row-style font-semibold">Roll No</th>
+              <th className="table-row-style font-semibold sticky-col">Roll No</th>
               <th className="table-row-style font-semibold">Name</th>
               <th className="table-row-style font-semibold">Class</th>
               <th className="table-row-style font-semibold">Year</th>
@@ -69,7 +69,7 @@ const ManageStudentAdmin = () => {
         key={student.student_id}
         className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
       >
-        <td className="table-row-style">{student.student_id}</td>
+        <td className="table-row-style sticky-col">{student.student_id}</td>
         <td className="table-row-style">{student.name}</td>
         <td className="table-row-style">{student.class_id}</td>
         <td className="table-row-style">{student.year_of_study}</td>

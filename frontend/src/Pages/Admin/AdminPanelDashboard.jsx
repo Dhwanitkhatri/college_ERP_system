@@ -25,6 +25,7 @@ const AdminPanelDashboard = () => {
           <Link to="ManageFacultyAdmin"><ActionButtonDashboard title="Manage Faculty" /></Link>
           <Link to="ManageStudentAdmin"><ActionButtonDashboard title="Manage Student" /></Link>
           <Link to="ManageSettingsAdmin"><ActionButtonDashboard title="Manage Settings" /></Link>
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Manage Subjects" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
 
@@ -40,6 +41,7 @@ const AdminPanelDashboard = () => {
         <ActionContainerDashboard title="Communication & Services">
           <Link to="SendNotificationAdmin"><ActionButtonDashboard title="Send Notifications" /></Link>
           <Link to="CheckFeeStatusAdmin"><ActionButtonDashboard title="Check Fee Status" /></Link>
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Pay Fee" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
           <Link to="CreateFeeStructureAdmin"><ActionButtonDashboard title="Create Fee Structure" /></Link>
         </ActionContainerDashboard>

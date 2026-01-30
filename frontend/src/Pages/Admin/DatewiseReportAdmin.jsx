@@ -337,7 +337,7 @@ const DatewiseReportAdmin = () => {
                     <div className="month text-[var(--text-muted)]">
                       Month:{" "}
                       <span className="text-[var(--text-primary)]">
-                        {reportData.data.report_info.month}
+                        {getMonthName(selectedMonth)}
                       </span>
                     </div>
                   </div>

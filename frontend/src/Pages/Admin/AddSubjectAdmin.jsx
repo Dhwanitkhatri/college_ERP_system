@@ -7,11 +7,12 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 
 import api from "../../api/axios.js";
 
 const AddSubjectAdmin = () => {
+  const [addedSubject, setAddedSubject] = useState(null)
   const {
     register,
     handleSubmit,
@@ -62,6 +63,14 @@ const AddSubjectAdmin = () => {
           },
         },
       );
+      setAddedSubject({
+        subject_id: data.subjectId,
+        subject_name: data.subjectName,
+        faculty_id: data.facultyId,
+        semester: data.semester,
+        lecture_per_week: data.lecturePerWeek,
+        credit: data.credit,
+      });
       alert("Subject Added Successfully");
     } catch (error) {
       console.log("Backend error:", error.response?.data);
@@ -224,6 +233,31 @@ const AddSubjectAdmin = () => {
           </div>
         </form>
       </DashboardChildPageCard>
+      {addedSubject && (
+        <DashboardChildPageCard className="mt-3">
+          <h2 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">Subject Added Successfully!</h2>
+          <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+            <p>
+              <span className="font-medium">Subject ID:</span> {addedSubject.subject_id}
+            </p>
+            <p>
+              <span className="font-medium">Subject Name:</span> {addedSubject.subject_name}
+            </p>
+            <p>
+              <span className="font-medium">Faculty ID:</span> {addedSubject.faculty_id}
+            </p>
+            <p>
+              <span className="font-medium">Semester:</span> {addedSubject.semester}
+            </p>
+            <p>
+              <span className="font-medium">Lectures Per Week:</span> {addedSubject.lecture_per_week}
+            </p>
+            <p>
+              <span className="font-medium">Credit:</span> {addedSubject.credit}
+            </p>
+          </div>
+        </DashboardChildPageCard>
+      )}
     </DashboardChildPageTemplate>
   );
 };

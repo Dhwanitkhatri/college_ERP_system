@@ -5,8 +5,10 @@ import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import api from "../../api/axios.js";
+import { useState } from "react";
 
 const AddStudentAdmin = () => {
+  const [addedStudent, setAddedStudent] = useState(null);
   const {
     register,
     handleSubmit,
@@ -50,6 +52,16 @@ const AddStudentAdmin = () => {
           },
         },
       );
+      setAddedStudent({
+        name: data.fullName,
+        phone: data.phoneNo,
+        email: data.email,
+        dob: data.dob,
+        gender: data.gender,
+        admission_year: data.admissionYear,
+        year_of_study: data.yearOfStudying,
+        student_id: data.student_id,
+      });
       alert("Student Added Successfully");
     } catch (error) {
       console.log(error);
@@ -202,6 +214,41 @@ const AddStudentAdmin = () => {
           </div>
         </form>
       </DashboardChildPageCard>
+      {addedStudent && (
+        <DashboardChildPageCard className="mt-3">
+          
+            <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
+              Student Added Successfully
+            </h3>
+
+            <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+              <p>
+                <span className="font-medium">Name:</span> {addedStudent.name}
+              </p>
+              <p>
+                <span className="font-medium">Phone:</span> {addedStudent.phone}
+              </p>
+              <p>
+                <span className="font-medium">Email:</span> {addedStudent.email}
+              </p>
+              <p>
+                <span className="font-medium">Student ID:</span> {addedStudent.faculty_id}
+              </p>
+              <p>
+                <span className="font-medium">Date of Birth:</span> {addedStudent.dob}
+              </p>
+              <p>
+                <span className="font-medium">Gender:</span> {addedStudent.gender}
+              </p>
+              <p>
+                <span className="font-medium">Admission Year:</span> {addedStudent.admission_year}
+              </p>
+              <p>
+                <span className="font-medium">Year of Studying:</span> {addedStudent.year_of_study}
+              </p>
+            </div>
+        </DashboardChildPageCard>
+      )}
     </DashboardChildPageTemplate>
   );
 };

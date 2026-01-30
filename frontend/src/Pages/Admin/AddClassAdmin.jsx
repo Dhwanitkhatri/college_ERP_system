@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import api from "../../api/axios.js";
 
 const AddClassAdmin = () => {
+  const [addedClass, setAddedClass] = useState(null);
   const {
     register,
     handleSubmit,
@@ -85,7 +86,13 @@ const AddClassAdmin = () => {
           },
         },
       );
-
+      setAddedClass({
+        year: data.year,
+        semester: data.semester,
+        section: data.section,
+        academic_year: data.academicYear,
+        mentor_id: data.classMentor,
+      });
       alert("Class created successfully");
     } catch (error) {
       console.error("Error creating class:", error);
@@ -223,6 +230,27 @@ const AddClassAdmin = () => {
           </div>
         </form>
       </DashboardChildPageCard>
+      {addedClass && (
+        <DashboardChildPageCard className="mt-3">
+          <h2 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">Class Added Successfully!</h2>
+          <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+            <p>
+              <span className="font-medium">Year:</span> {addedClass.year}
+            </p>
+            <p>
+              <span className="font-medium">Semester:</span> {addedClass.semester}
+            </p>
+            <p>
+              <span className="font-medium">Section:</span> {addedClass.section}
+            </p>
+            <p>
+              <span className="font-medium">Academic Year:</span> {addedClass.academic_year}
+            </p>
+            <p>
+              <span className="font-medium">Class Mentor ID:</span> {addedClass.mentor_id}
+            </p>
+          </div>
+        </DashboardChildPageCard>)}
     </DashboardChildPageTemplate>
   );
 };
