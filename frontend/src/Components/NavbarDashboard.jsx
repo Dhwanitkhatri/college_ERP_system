@@ -2,6 +2,7 @@ import React from "react";
 import { X, Bell, CircleUserRound, Menu } from "lucide-react";
 import ThemeButton from "../ui/Buttons/ThemeButton";
 import { useSidebar } from "../context/SidebarContext";
+import { Link } from "react-router-dom";
 
 const NavbarDashboard = ({ userRole, userName }) => {
   const { sidebarOpen, toggleSidebar } = useSidebar();
@@ -41,17 +42,19 @@ const NavbarDashboard = ({ userRole, userName }) => {
         <ThemeButton />
 
         {/* User Info */}
-        <div className="navUserInfoDiv border-l-[0.8px] dark:border-gray-700 flex items-center gap-4 pl-4">
-          <div>
-            <p className="text-right font-medium text-black dark:text-white">
-              {userName}
-            </p>
-            <p className="text-right text-gray-600 dark:text-gray-300">
-              {userRole}
-            </p>
+        <Link to="ManageProfileAdmin">
+          <div className="navUserInfoDiv border-l-[0.8px] dark:border-gray-700 flex items-center gap-4 pl-4 hover:bg-[var(--bg-hover)] rounded-md">
+            <div>
+              <p className="text-right font-medium text-black dark:text-white">
+                {userName}
+              </p>
+              <p className="text-right text-gray-600 dark:text-gray-300">
+                {userRole}
+              </p>
+            </div>
+            <CircleUserRound className="text-black dark:text-white" />
           </div>
-          <CircleUserRound className="text-black dark:text-white" />
-        </div>
+        </Link>
       </div>
     </div>
   );
