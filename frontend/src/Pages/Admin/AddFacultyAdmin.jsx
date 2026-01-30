@@ -14,8 +14,13 @@ const AddFacultyAdmin = () => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm();
+
+  const handleCancel = () => {
+    reset();
+  };
 
   async function onSubmit(data) {
     try {
@@ -125,19 +130,31 @@ const AddFacultyAdmin = () => {
 
           <div className="form-actions">
             <AddButton />
-            <CancelButton />
+            <CancelButton onClick={handleCancel} />
           </div>
         </form>
       </DashboardChildPageCard>
       {addedFaculty && (
-        <DashboardChildPageCard>
-          <div className="addedFacultyInfo">
-            <h3>Added Faculty Information:</h3>
-            <p>Name: {addedFaculty.name}</p>
-            <p>Phone: {addedFaculty.phone}</p>
-            <p>Email: {addedFaculty.email}</p>
-            <p>Faculty Id: {addedFaculty.faculty_id}</p>
-          </div>
+        <DashboardChildPageCard className="mt-3">
+          
+            <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
+              Faculty Added Successfully
+            </h3>
+
+            <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+              <p>
+                <span className="font-medium">Name:</span> {addedFaculty.name}
+              </p>
+              <p>
+                <span className="font-medium">Phone:</span> {addedFaculty.phone}
+              </p>
+              <p>
+                <span className="font-medium">Email:</span> {addedFaculty.email}
+              </p>
+              <p>
+                <span className="font-medium">Faculty ID:</span> {addedFaculty.faculty_id}
+              </p>
+            </div>
         </DashboardChildPageCard>
       )}
     </DashboardChildPageTemplate>

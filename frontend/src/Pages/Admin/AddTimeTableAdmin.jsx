@@ -4,8 +4,8 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
-import api from "../../api/axios.js"
-import { useEffect , useState} from "react";
+import api from "../../api/axios.js";
+import { useEffect, useState } from "react";
 import { Watch } from "react-hook-form";
 
 const AddTimetableAdmin = () => {
@@ -13,87 +13,103 @@ const AddTimetableAdmin = () => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
   } = useForm();
+
+  const handleCancel = () => {
+    reset();
+  };
 
   const token = localStorage.getItem("token");
   const selectedClass = watch("class");
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
-  const [faculties , setFaculties] = useState([]);
+  const [faculties, setFaculties] = useState([]);
 
- // api to fetch classes for current academic year
+  // api to fetch classes for current academic year
   useEffect(() => {
-    api.get('api/timetables/current-year-classes', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then(response => {
-      setClasses(response.data.data);
-    })
-    .catch(error => {
-      console.error("Error fetching classes:", error);
-    }); 
-  },[]);
+    api
+      .get("api/timetables/current-year-classes", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setClasses(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching classes:", error);
+      });
+  }, []);
 
   //this is api is use to get the subject as per the selected class
-const [classId , classSemester] = selectedClass ? selectedClass.split("|") : [null, null];
-console.log("Selected Class ID:", classId);
+  const [classId, classSemester] = selectedClass
+    ? selectedClass.split("|")
+    : [null, null];
+  console.log("Selected Class ID:", classId);
   useEffect(() => {
     if (selectedClass) {
-      api.get('api/timetables/subjects', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          semester:classSemester
-        }
-      })
-      .then(response => {
-        setSubjects(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching subjects:", error);
-      });
-    }}, [selectedClass]);
+      api
+        .get("api/timetables/subjects", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            semester: classSemester,
+          },
+        })
+        .then((response) => {
+          setSubjects(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching subjects:", error);
+        });
+    }
+  }, [selectedClass]);
 
-    useEffect(() => {
-      api.get('api/timetables/faculties', {
+  useEffect(() => {
+    api
+      .get("api/timetables/faculties", {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .then(response => {
+      .then((response) => {
         setFaculties(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching faculties:", error);
       });
-    }, []);
+  }, []);
 
   const onSubmit = (data) => {
     console.log("Timetable Data:", data);
     console.log("Class ID for submission:", classId);
-    api.post('api/timetables', {
-      class_id: classId,
-      subject_id: data.subject,
-      faculty_id: data.faculty,
-      start_time: data.startTime,
-      end_time: data.endTime,
-      day_of_week: data.day
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then(response => {
-      alert("Timetable entry created successfully");
-    })
-    .catch(error => {
-      console.error("Error creating timetable entry:", error);
-      alert(error);
-    });
+    api
+      .post(
+        "api/timetables",
+        {
+          class_id: classId,
+          subject_id: data.subject,
+          faculty_id: data.faculty,
+          start_time: data.startTime,
+          end_time: data.endTime,
+          day_of_week: data.day,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+      .then((response) => {
+        alert("Timetable entry created successfully");
+      })
+      .catch((error) => {
+        console.error("Error creating timetable entry:", error);
+        alert(error);
+      });
   };
 
   return (
@@ -112,7 +128,10 @@ console.log("Selected Class ID:", classId);
             >
               <option value="">Select class</option>
               {classes.map((cls) => (
-                <option key={`${cls.id}|${cls.semester}`} value={`${cls.id}|${cls.semester}`}>
+                <option
+                  key={`${cls.id}|${cls.semester}`}
+                  value={`${cls.id}|${cls.semester}`}
+                >
                   {`${cls.class_id} - Sem ${cls.semester}`}
                 </option>
               ))}
@@ -211,7 +230,7 @@ console.log("Selected Class ID:", classId);
           {/* Button nu kaam kaaj*/}
           <div className="form-actions">
             <AddButton type="submit" />
-            <CancelButton type="button" />
+            <CancelButton type="button" onClick={handleCancel} />
           </div>
         </form>
       </DashboardChildPageCard>

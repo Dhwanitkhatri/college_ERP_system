@@ -12,8 +12,28 @@ const AddClassAdmin = () => {
     register,
     handleSubmit,
     watch,
+    reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      year: "",
+      semester: "",
+      section: "",
+      academicYear: "",
+      classMentor: "",
+    },
+  });
+
+  const handleCancel = () => {
+    reset({
+      year: "",
+      semester: "",
+      section: "",
+      academicYear: "",
+      classMentor: "",
+    });
+  };
+
   const token = localStorage.getItem("token"); // Get token from localStorage
   const selectedYear = watch("year");
 
@@ -41,7 +61,7 @@ const AddClassAdmin = () => {
       .catch((err) => {
         console.error(
           "Error fetching faculties:",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       });
   }, []);
@@ -50,7 +70,6 @@ const AddClassAdmin = () => {
     const token = localStorage.getItem("token");
     console.log(data);
     try {
-      
       await api.post(
         "api/classes",
         {
@@ -58,13 +77,13 @@ const AddClassAdmin = () => {
           semester: data.semester,
           sections: data.section,
           academic_year: data.academicYear,
-          mentor_id :data.classMentor
+          mentor_id: data.classMentor,
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       alert("Class created successfully");
@@ -73,7 +92,7 @@ const AddClassAdmin = () => {
 
       alert(
         error.response?.data?.message ||
-          "Failed to create class. Please try again."
+          "Failed to create class. Please try again.",
       );
     }
   };
@@ -92,7 +111,7 @@ const AddClassAdmin = () => {
               className="custom-input"
               {...register("year", { required: "Year is required" })}
             >
-              <option value="" selected disabled>
+              <option value="" disabled>
                 Select year
               </option>
               <option value="FY">First Year</option>
@@ -200,7 +219,7 @@ const AddClassAdmin = () => {
           {/* button */}
           <div className="form-actions">
             <AddButton type="submit" />
-            <CancelButton type="button" />
+            <CancelButton type="button" onClick={handleCancel} />
           </div>
         </form>
       </DashboardChildPageCard>

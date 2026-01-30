@@ -38,6 +38,10 @@ const DatewiseReportAdmin = () => {
     "November",
     "December",
   ];
+  const getMonthName = (monthNumber) => {
+    if (!monthNumber) return "";
+    return monthsArray[monthNumber - 1];
+  };
   const months = monthsArray.map((name, index) => ({
     name,
     number: index + 1,
@@ -46,7 +50,7 @@ const DatewiseReportAdmin = () => {
   const [classes, setClasses] = useState([]);
   const [subjectsByClass, setSubjectsByClass] = useState([]);
   const [studentsByClassAndSubject, setStudentsByClassAndSubject] = useState(
-    []
+    [],
   );
   const [reportData, setReportData] = useState([]);
 
@@ -158,7 +162,7 @@ const DatewiseReportAdmin = () => {
                   </option>
                   {classes.map(
                     (
-                      cls //<--- class mapping ahiya karvi
+                      cls, //<--- class mapping ahiya karvi
                     ) => (
                       <option
                         key={`${cls.id}|${cls.semester}`}
@@ -166,7 +170,7 @@ const DatewiseReportAdmin = () => {
                       >
                         {cls.class_id} semester {cls.semester}
                       </option>
-                    )
+                    ),
                   )}
                 </select>
                 {errors.class && (
@@ -192,12 +196,12 @@ const DatewiseReportAdmin = () => {
                   </option>
                   {subjectsByClass.map(
                     (
-                      sub //<--- ahiya subject list map karvi
+                      sub, //<--- ahiya subject list map karvi
                     ) => (
                       <option key={sub.subject_id} value={sub.subject_id}>
                         {sub.subject_name}
                       </option>
-                    )
+                    ),
                   )}
                 </select>
                 {errors.subject && (
@@ -486,7 +490,7 @@ const DatewiseReportAdmin = () => {
                                 </span>
                               </td>
                             </tr>
-                          )
+                          ),
                         )}
                       </tbody>
                     </table>
