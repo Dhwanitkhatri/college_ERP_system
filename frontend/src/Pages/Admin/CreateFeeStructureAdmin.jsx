@@ -94,9 +94,9 @@ export default function CreateFeeStructureAdmin() {
                   <option value="" disabled>
                     Select academic year
                   </option>
-                  <option value="2024-25">2024-25</option>
-                  <option value="2025-26">2025-26</option>
-                  <option value="2026-27">2026-27</option>
+                  <option value="2024-2025">2024-2025</option>
+                  <option value="2025-2026">2025-2026</option>
+                  <option value="2026-2027">2026-2027</option>
                 </select>
                 {errors.academicYear && (
                   <p className="text-xs text-red-500 mt-1">
