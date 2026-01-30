@@ -44,9 +44,15 @@ Student.belongsTo(User, { foreignKey: 'user_id', targetKey: 'user_id' });
 Department.hasMany(Course, { foreignKey: 'department_id', sourceKey: 'department_id' });
 Course.belongsTo(Department, { foreignKey: 'department_id', targetKey: 'department_id' });
 
+<<<<<<< Updated upstream
 // Course ↔ Student
 Course.hasMany(Student, { foreignKey: 'course_id', sourceKey: 'course_id' });
 Student.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
+=======
+// Faculty ↔ Subject
+//Faculty.hasMany(Subject, { foreignKey: 'faculty_id' ,sourceKey:'faculty_id'});
+//Subject.belongsTo(Faculty, { foreignKey: 'faculty_id',targetKey:'faculty_id' });
+>>>>>>> Stashed changes
 
 // Course ↔ Subject
 Course.hasMany(Subject, { foreignKey: 'course_id', sourceKey: 'course_id' });

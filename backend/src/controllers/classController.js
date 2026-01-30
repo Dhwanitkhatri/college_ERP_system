@@ -134,7 +134,8 @@ export const getCurrentYearClasses = async (req, res) => {
     const classes = await Class.findAll({
       where: {
         academic_year,
-        semester: { [Op.in]: semesterCondition }
+        semester: { [Op.in]: semesterCondition },
+        course_id:req.user.course_id
       },
       attributes: [
         "id",

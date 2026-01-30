@@ -91,7 +91,7 @@ export const createTimetableEntry = async (req, res) => {
       return res.status(400).json({ message: "Faculty has a conflicting lecture" });
     }
 
-    // ✅ Create timetable entry
+    //  Create timetable entry
     const newEntry = await Timetable.create({
       schedule_id,
       class_pk: Number(class_id),
@@ -296,6 +296,7 @@ export const getCurrentYearClasses = async (req, res) => {
       where: {
         academic_year,
         semester: { [Op.in]: semesterCondition },
+        course_id : req.user.course_id
       },
       attributes: ["id", "class_id", "semester"],
     });

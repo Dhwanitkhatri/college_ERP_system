@@ -12,10 +12,10 @@ export const Subject = sequelize.define("Subject",{
         unique:false,
         allowNull:false
     },
-    faculty_id:{
+   /* faculty_id:{
         type:DataTypes.STRING,
         allowNull:false
-    },
+    },*/
     course_id:{
         type:DataTypes.STRING,
         allowNull:false
