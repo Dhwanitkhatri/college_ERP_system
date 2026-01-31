@@ -60,8 +60,9 @@ const AddStudentAdmin = () => {
         gender: data.gender,
         admission_year: data.admissionYear,
         year_of_study: data.yearOfStudying,
-        student_id: data.student_id,
+        student_id: res.data.student.student_id,
       });
+      console.log(res.data.student);
       alert("Student Added Successfully");
     } catch (error) {
       console.log(error);
@@ -70,7 +71,7 @@ const AddStudentAdmin = () => {
   }
 
   return (
-    <DashboardChildPageTemplate
+    <DashboardChildPageTemplate 
       title="Add New Student"
       desc="Enter student details to add them to the system"
     >
@@ -232,7 +233,7 @@ const AddStudentAdmin = () => {
                 <span className="font-medium">Email:</span> {addedStudent.email}
               </p>
               <p>
-                <span className="font-medium">Student ID:</span> {addedStudent.faculty_id}
+                <span className="font-medium">Student ID:</span> {addedStudent.student_id}
               </p>
               <p>
                 <span className="font-medium">Date of Birth:</span> {addedStudent.dob}
