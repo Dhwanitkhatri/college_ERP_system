@@ -187,7 +187,7 @@ export const getUserNotifications = async (req, res) => {
       user_id: user_id,
       course_id: course_id,
     },
-    attributes: ["class_id"],
+    attributes: ["class_pk"],
     include: [
       {
         model: User,

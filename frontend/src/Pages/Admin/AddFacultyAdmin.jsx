@@ -45,7 +45,7 @@ const AddFacultyAdmin = () => {
         name: data.fullName,
         phone: data.phoneNo,
         email: data.email,
-        faculty_id: data.faculty_id,
+        faculty_id: res.data.faculty.faculty_id,
       });
       alert("Faculty Added Successfully");
     } catch (error) {

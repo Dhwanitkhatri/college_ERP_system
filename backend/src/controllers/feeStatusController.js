@@ -288,6 +288,7 @@ export const getAllStudents = async (req, res) => {
   try {
     const students = await Student.findAll({
       attributes: ["student_id", "name"],
+      where:{course_id:req.user.course_id}
     });
 
     res.json(students);

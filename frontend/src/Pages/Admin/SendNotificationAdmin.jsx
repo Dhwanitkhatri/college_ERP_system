@@ -138,7 +138,7 @@ async function onSubmit(data) {
                   })}
                 >
                   <option value="" disabled>
-                    Select subject
+                    Select send to
                   </option>
                   <option value="Course">All Users</option>
                   <option value="Student">All Students</option>

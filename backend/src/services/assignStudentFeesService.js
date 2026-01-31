@@ -27,7 +27,7 @@ export const assignStudentFees = async (new_fee_structure_id) => {
       include: [
         {
           model: FeeStructure,
-          as: "feeStructure" //  MUST match alias
+         
         }
       ]
     });
