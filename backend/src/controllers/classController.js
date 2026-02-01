@@ -85,7 +85,7 @@ export const updateClass = async (req, res) => {
     const cls = await Class.findByPk(req.params.id);
     if (!cls) return res.status(404).json({ message: "Class not found" });
 
-    const allowedFields = ["section", "academic_year"];
+    const allowedFields = ["section", "academic_year","mentor_id"];
     const updates = {};
 
     for (const key of allowedFields) {

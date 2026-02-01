@@ -282,3 +282,26 @@ export const deleteStudentById = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+export const activeInactiveFaculty = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle status correctly
+    user.status = user.status === "active" ? "inactive" : "active";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      status: user.status,
+      message: `User is now ${user.status}`
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};

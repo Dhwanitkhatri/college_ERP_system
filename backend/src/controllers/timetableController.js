@@ -180,7 +180,11 @@ export const getTimetableByFaculty = async (req, res) => {
 //get available time slots for a class on a specific day
 export const getAvailableTimeSlots = async (req, res) => {
   try {
-    const { class_id, day_of_week } = req.params;
+    let { class_id, day_of_week } = req.params;
+
+    // 🔧 fix day_of_week
+    day_of_week = day_of_week.replace(/"/g, "");
+
     const allTimeSlots = [
       "09:00",
       "10:00",
@@ -192,27 +196,48 @@ export const getAvailableTimeSlots = async (req, res) => {
       "16:00",
       "17:00",
     ];
+
     const occupiedSlots = await Timetable.findAll({
-      where: { class_id, day_of_week },
+      where: { class_pk: class_id, day_of_week },
       attributes: ["start_time", "end_time"],
     });
-    const occupiedTimes = occupiedSlots.flatMap((slot) => {
-      const start = parseInt(slot.start_time.split(":")[0], 10);
-      const end = parseInt(slot.end_time.split(":")[0], 10);
-      const times = [];
-      for (let i = start; i < end; i++) {
-        times.push(`${i.toString().padStart(2, "0")}:00`);
+
+    const occupiedTimes = new Set();
+
+    occupiedSlots.forEach((slot) => {
+      const startHour = parseInt(slot.start_time.split(":")[0], 10);
+      const endHour = parseInt(slot.end_time.split(":")[0], 10);
+      const endMinute = parseInt(slot.end_time.split(":")[1], 10);
+
+      // mark start hour as occupied
+      occupiedTimes.add(`${startHour.toString().padStart(2, "0")}:00`);
+
+      // if class spans to next hour
+      if (endMinute > 0 && endHour > startHour) {
+        for (let h = startHour + 1; h <= endHour; h++) {
+          occupiedTimes.add(`${h.toString().padStart(2, "0")}:00`);
+        }
       }
-      return times;
     });
-    const availableSlots = allTimeSlots.filter(
-      (time) => !occupiedTimes.includes(time)
-    );
-    res.status(200).json({ availableSlots });
+
+    const slotsWithStatus = allTimeSlots.map((time) => ({
+      time,
+      status: occupiedTimes.has(time) ? "occupied" : "available",
+    }));
+
+    return res.status(200).json({
+      class_id,
+      day_of_week,
+      slots: slotsWithStatus,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
+
 
 // Update a timetable entry(admin only)
 export const updateTimetableEntry = async (req, res) => {

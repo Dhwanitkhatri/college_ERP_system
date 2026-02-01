@@ -5,7 +5,8 @@ import {
     getAllFaculties,
     getFacultyById,
     updateFacultyById,
-    deleteFacultyById
+    deleteFacultyById,
+    activeInactiveFaculty
 } from "../controllers/facultyController.js";
 import { authMiddleware , adminMiddleware } from "../middleware/authMiddleware.js";
 
@@ -25,4 +26,8 @@ router.put("/:id", authMiddleware,adminMiddleware, updateFacultyById);
 
 //delete faculty by id
 router.delete("/:id", authMiddleware,adminMiddleware, deleteFacultyById);
+
+//to active and inactive the faculty
+
+router.put("/active-inactive/:user_id",authMiddleware,adminMiddleware,activeInactiveFaculty)
 export default router;

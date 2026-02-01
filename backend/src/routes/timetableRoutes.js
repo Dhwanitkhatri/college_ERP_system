@@ -12,7 +12,7 @@ router.post('/', authMiddleware, adminMiddleware, createTimetableEntry);
 router.get('/', authMiddleware, adminMiddleware, getAllTimetableEntries);
 
 // Get timetable by class ID (authenticated users)
-router.get('/class/:class_id', authMiddleware,adminMiddleware, getTimetableByClass);
+router.get('/class/:class_pk', authMiddleware,adminMiddleware, getTimetableByClass);
 
 // Get timetable by faculty ID (authenticated users)
 router.get('/faculty/:faculty_id', authMiddleware,adminMiddleware, getTimetableByFaculty);

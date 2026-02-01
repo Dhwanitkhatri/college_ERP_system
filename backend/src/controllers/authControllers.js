@@ -10,7 +10,7 @@ export const login = async (req, res) => {
     // Fetch user + role in one optimized query
     const user = await User.findOne({
       where: { username },
-      attributes: ["user_id", "username", "password", "role_id"],
+      attributes: ["user_id", "username", "password", "role_id" , "status"],
       include: [
         {
           model: Role,
@@ -24,7 +24,9 @@ export const login = async (req, res) => {
     // Verify password BEFORE more DB calls
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return res.status(401).json({ message: "Invalid credentials" });
-
+    if(user.status === 'inactive'){
+      return res.status(403).json({message :'Access Denied'});
+    }
     //  Fetch course_id based on role — only ONE query
     let courseData = null;
     const role = user.Role.role_name;
