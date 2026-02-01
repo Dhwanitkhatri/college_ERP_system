@@ -1,11 +1,24 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useEffect , useState } from "react";
 import { User, Mail, Phone, Calendar, MapPin, Edit2 } from "lucide-react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import api from "../../api/axios";
 
 export default function ManageProfileAdmin() {
   const { register } = useForm();
+  const [admininfo, setadminInfo]=useState([]);
+  const token = localStorage.getItem('token');
+  useEffect(()=>{
+    api.get('api/profile/admininfo',{
+      headers:{Authorization:`Bearer ${token}`}
+    }).then((res)=>{
+      setadminInfo(res.data.admin);
+    }).catch((err)=>{
+      alert("error loading the admin ",err);
+    })
+  },[])
 
   return (
     <DashboardChildPageTemplate
@@ -19,7 +32,7 @@ export default function ManageProfileAdmin() {
               <User size={48} strokeWidth={0.5} />
             </div>
             <div className="titleTextDiv text-white">
-              <h2 className="text-2xl font-bold">Dr. Sarah Johnson</h2>
+              <h2 className="text-2xl font-bold">{admininfo.name}</h2>
               <p className="text-blue-100 mt-1 text-lg">Administrator</p>
             </div>
           </div>
@@ -34,10 +47,11 @@ export default function ManageProfileAdmin() {
           <div className="formDiv space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-[#374151] dark:text-[#D1D5DB]">
               <User size={16} className="text-[#6B7280] dark:text-[#6B7280]" />
-              Full Name
+              Full name
             </label>
             <input
               type="text"
+              value={admininfo.name}
               placeholder="Enter full name"
               {...register("fullName")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280]"
@@ -51,6 +65,7 @@ export default function ManageProfileAdmin() {
             <input
               type="email"
               placeholder="Enter email address"
+              value={admininfo.email}
               {...register("email")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280]"
             />
@@ -63,6 +78,7 @@ export default function ManageProfileAdmin() {
             <input
               type="tel"
               placeholder="Enter phone number"
+              value={admininfo.contact_number}
               {...register("phoneNumber")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280]"
             />
@@ -78,6 +94,7 @@ export default function ManageProfileAdmin() {
             <input
               type="text"
               placeholder="Enter date of birth"
+              value={admininfo?.DOB ||" - "}
               {...register("dob")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280]"
             />
@@ -89,6 +106,7 @@ export default function ManageProfileAdmin() {
             <input
               type="text"
               placeholder="Enter admin ID"
+              value={admininfo.admin_id}
               {...register("adminId")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280]"
             />
@@ -100,6 +118,7 @@ export default function ManageProfileAdmin() {
             <input
               type="text"
               placeholder="Enter department"
+              value={admininfo.course_id}
               {...register("department")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280]"
             />
@@ -114,6 +133,7 @@ export default function ManageProfileAdmin() {
             </label>
             <textarea
               placeholder="Enter address"
+              value={admininfo?.address ||"-"}
               {...register("address")}
               className="w-full px-4 py-3 bg-[#F9FAFB] dark:bg-[#030712] border border-[#D1D5DB] dark:border-[#374151] rounded-lg text-[#111827] dark:text-[#FFFFFF] focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-[#6B7280] dark:placeholder-[#6B7280] min-h-[100px] resize-none"
             />

@@ -1,11 +1,12 @@
 // src/routes/profilePictureRoutes.js
 import express from "express";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { adminMiddleware, authMiddleware } from "../middleware/authMiddleware.js";
 import { profileUpload } from "../middleware/profileUpload.js";
 import {
     uploadProfilePicture,
     getProfilePicture,
-    deleteProfilePicture
+    deleteProfilePicture,
+    profileInfoAdmin
 } from "../controllers/profilePictureController.js";
 
 const router = express.Router();
@@ -22,5 +23,7 @@ router.get("/get", authMiddleware, getProfilePicture);
 
 // Delete Profile Picture
 router.delete("/delete", authMiddleware, deleteProfilePicture);
+
+router.get("/adminInfo",authMiddleware,profileInfoAdmin);
 
 export default router;

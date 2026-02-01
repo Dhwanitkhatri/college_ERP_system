@@ -1,3 +1,4 @@
+import { date } from "zod";
 import {sequelize} from "../config/db.js";
 import { DataTypes } from "sequelize";
 
@@ -38,7 +39,10 @@ export const EmployeePersonalDetails = sequelize.define("EmployeePersonalDetails
         allowNull: false,
         validate:{
             is: /^(\+91)?\d{10}$/ 
-        }
+        },
+    DOB:{
+        type :DataTypes.DATE
+    },
     },
     alternate_email: {
         type: DataTypes.STRING,

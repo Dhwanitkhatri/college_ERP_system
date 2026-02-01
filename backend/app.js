@@ -47,7 +47,7 @@ app.use("/api/faculties", facultyRoutes);
 app.use("/api/timetables", timetableRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/picture", profilePictureRoutes);
+app.use("/api/profile", profilePictureRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/reports", studentReportRoutes);

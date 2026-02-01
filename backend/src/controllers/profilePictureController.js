@@ -6,6 +6,9 @@ import fs from 'fs';
 import { Student } from "../model/Student.js";
 import { Faculty } from "../model/Faculty.js";
 import { Admin } from "../model/Admin.js";
+import {EmployeePersonalDetails} from '../model/EmployeePersonalDetails.js';
+import Sequelize from 'sequelize';
+import { sequelize } from '../config/db.js';
 
 const roleModelMap = {
     student: Student,
@@ -186,3 +189,42 @@ export const deleteProfilePicture = async (req, res) => {
         });
     }
 };
+
+export const profileInfoAdmin = async(req,res)=>{
+   try {
+     const user_id = req.user.uid;
+    const admin = await sequelize.query(
+  `
+  SELECT 
+    a.user_id,
+    a.email,
+    a.name,
+    a.contact_number,
+    a.course_id,
+    a.admin_id,
+    e.address,
+    e.DOB
+  FROM Admins a
+  LEFT JOIN EmployeePersonalDetails e
+    ON a.user_id = e.user_id
+  WHERE a.user_id = :user_id
+  `,
+  {
+    replacements: { user_id },
+    type: Sequelize.QueryTypes.SELECT,
+    plain: true
+  }
+);
+
+    if(!admin){
+        return res.status(404).json({message :'admin details not found'})
+    }
+    return res.status(200).json({admin:admin});
+   } catch (error) {
+        console.error("Error fetching admin profile:", error);
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+   }
+}
