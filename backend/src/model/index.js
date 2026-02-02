@@ -137,6 +137,19 @@ Subject.hasMany(Attendance, {
   sourceKey: "subject_id"   // ✅ correct
 });
 
+// Timetable ↔ Subject
+Subject.hasMany(Timetable, {
+  foreignKey: "subject_id",
+  sourceKey: "subject_id"
+});
+
+Timetable.belongsTo(Subject, {
+  foreignKey: "subject_id",
+  targetKey: "subject_id"
+});
+
+
+
 
 // Attendance ↔ Faculty (who marked attendance)
 Attendance.belongsTo(Faculty, {
