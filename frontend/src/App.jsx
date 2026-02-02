@@ -36,6 +36,7 @@ import OverallClassReportAdmin from "./Pages/Admin/OverallClassReportAdmin";
 import PageNotFound from "./Pages/PageNotFound";
 import CreateFeeStructureAdmin from "./Pages/Admin/CreateFeeStructureAdmin";
 import TakeAttendanceFaculty from "./Pages/Faculty/TakeAttendanceFaculty";
+import CreateEventAdmin from "./Pages/Admin/CreateEventAdmin";
 
 const router = createBrowserRouter([
   {
@@ -146,6 +147,10 @@ const router = createBrowserRouter([
         path: "CreateFeeStructureAdmin",
         element: <CreateFeeStructureAdmin />,
       },
+      {
+        path: "CreateEventAdmin",
+        element: <CreateEventAdmin />,
+      },
     ],
   },
   {
@@ -156,7 +161,7 @@ const router = createBrowserRouter([
         index: true,
         element: <FacultyPanelDashboard />,
       },
-       {
+      {
         path: "notifications",
         element: <NotificationPage />,
       },
