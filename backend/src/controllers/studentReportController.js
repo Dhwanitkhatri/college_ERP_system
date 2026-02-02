@@ -89,11 +89,11 @@ export const getStudentDateWiseReport = async (req, res) => {
       // Determine correct year for the month
       let year;
       if (monthNum >= 7) { // July-Dec → start year
-        year = yearStart;
+        year = yearStart + 2000;
       } else {          // Jan-June → end year
-        year = yearEnd;
+        year = yearEnd + 2000;
       }
-
+      console.log(year);
       // Build start and end dates for the month
       const startDate = new Date(year, monthNum - 1, 1);
       const endDate = new Date(year, monthNum, 0);
