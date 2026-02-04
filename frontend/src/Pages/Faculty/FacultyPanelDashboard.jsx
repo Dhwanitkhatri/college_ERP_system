@@ -8,9 +8,7 @@ import { useOutletContext, Link } from "react-router-dom";
 const AdminPanelDashboard = () => {
   const { username } = useOutletContext();
   return (
-    <PanelTemplateDashboard
-      username={username}
-    >
+    <PanelTemplateDashboard username={username}>
       {/* ROW 1 */}
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Class Management">
@@ -21,9 +19,13 @@ const AdminPanelDashboard = () => {
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Attendance & Planning">
-          <Link to="TakeAttendanceFaculty"><ActionButtonDashboard title="Take Attendance" /></Link>
+          <Link to="TakeAttendanceFaculty">
+            <ActionButtonDashboard title="Take Attendance" />
+          </Link>
           <ActionButtonDashboard title="Add Extra Attendance" />
-          <ActionButtonDashboard title="Session Planning" />
+          <Link to="SessionPlanningFaculty">
+            <ActionButtonDashboard title="Session Planning" />
+          </Link>
           <ActionButtonDashboard title="Update Session Planning" />
         </ActionContainerDashboard>
       </DashContentPanelDashboard>

@@ -37,6 +37,7 @@ import PageNotFound from "./Pages/PageNotFound";
 import CreateFeeStructureAdmin from "./Pages/Admin/CreateFeeStructureAdmin";
 import TakeAttendanceFaculty from "./Pages/Faculty/TakeAttendanceFaculty";
 import CreateEventAdmin from "./Pages/Admin/CreateEventAdmin";
+import SessionPlanningFaculty from "./Pages/Faculty/SessionPlanningFaculty";
 
 const router = createBrowserRouter([
   {
@@ -172,6 +173,10 @@ const router = createBrowserRouter([
       {
         path: "TakeAttendanceFaculty",
         element: <TakeAttendanceFaculty />,
+      },
+      {
+        path: "SessionPlanningFaculty",
+        element: <SessionPlanningFaculty />,
       },
     ],
   },
