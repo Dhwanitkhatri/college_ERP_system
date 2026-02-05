@@ -18,6 +18,7 @@ import studentReportRoutes from "./src/routes/studentReportRoutes.js";
 import feeSatuseRoutes from "./src/routes/feeStatusRoutes.js"
 import sessionPlanningRoutes from "./src/routes/sessionPlanningRoutes.js"
 import attdanceRoutes from "./src/routes/attendanceRoutes.js";
+import eventsRoutes from "./src/routes/eventsRouts.js";
 
 dotenv.config();
 const app = express();
@@ -54,9 +55,9 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/reports", studentReportRoutes);
 app.use("/api/fee",feeSatuseRoutes);
-app.use("/api/plan",sessionPlanningRoutes);
+app.use("/api/session",sessionPlanningRoutes);
 app.use("/api/attendance",attdanceRoutes);
-
+app.use("/api/event", eventsRoutes);
 app.get("/", (req, res) => {
   res.send("College ERP System Backend is running");
 });

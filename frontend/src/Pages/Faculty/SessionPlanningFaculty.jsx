@@ -3,17 +3,61 @@ import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { Plus, BookOpen, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import api from "../../api/axios.js";
 
 export default function SessionPlanningFaculty() {
+  const token = localStorage.getItem("token");
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const [data, setData] = useState([]);
 
+  useEffect(() => {
+    api
+      .get("/api/session/teaching-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setData([res.data.data.teaching_info]);
+      })
+      .catch((error) => {
+        console.log("error", error.response?.status, error.response?.data);
+      });
+  }, [token]);
+  const classes = data.flat().map((item) => item.class);
+  const subjects = data.flat().flatMap((item) => item.subjects);
+
+  console.log(classes);
   const onFormSubmit = (data) => {
+     console.log(data);
     alert("Validation Successful");
-    console.log(data);
+    api.post(
+  "/api/session/",
+  {
+    class_pk: Number(data.selectedClass),
+    subject_id: data.subject,
+    lecture_no: Number(data.lectureNumber),
+    date: data.date,
+    topics: "hello world"
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+).then((res)=>{
+  alert("created session")
+}).catch((error)=>{
+  console.log(error.response?.data);
+});
+
+
+   
   };
 
   return (
@@ -39,13 +83,15 @@ export default function SessionPlanningFaculty() {
                     required: "Please select a class",
                   })}
                 >
-                  <option value="">Choose class</option>
-                  <option value="CS - Semester 1">SY - BCA - A</option>
-                  <option value="CS - Semester 3">SY - BCA - B</option>
-                  <option value="CS - Semester 3">SY - BCA - C</option>
-                  <option value="CS - Semester 3">SY - BCA - D</option>
-                  <option value="CS - Semester 3">SY - BCA - E</option>
-                  <option value="CS - Semester 3">SY - BCA - F</option>
+                  <option value="">Select class</option>
+                  {classes.map((cls) => (
+                    <option
+                      key={`${cls.class_pk}|${cls.semester}`}
+                      value={`${cls.class_pk}`}
+                    >
+                      {`${cls.class_id} - Sem ${cls.semester}`}
+                    </option>
+                  ))}
                 </select>
                 {errors.selectedClass && (
                   <p className="text-red-500 text-xs mt-1">
@@ -65,12 +111,14 @@ export default function SessionPlanningFaculty() {
                     required: "Please select a subject",
                   })}
                 >
-                  <option value="">Choose subject</option>
-                  <option value="STQA">STQA</option>
-                  <option value="IOT">IOT</option>
-                  <option value="DSA">CC</option>
-                  <option value="CN">SM</option>
-                  <option value="DBMS">SMM</option>
+                  <option value="" disabled>
+                    Choose subject
+                  </option>
+                  {subjects.map((sub) => (
+                    <option key={sub.subject_id} value={sub.subject_id}>
+                      {sub.subject_name}
+                    </option>
+                  ))}
                 </select>
                 {errors.subject && (
                   <p className="text-red-500 text-xs mt-1">

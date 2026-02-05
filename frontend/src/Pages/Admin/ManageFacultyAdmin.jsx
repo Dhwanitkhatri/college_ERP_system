@@ -77,7 +77,8 @@ const ManageFacultyAdmin = () => {
                   <td className="table-row-style">{faculty.email}</td>
                   <td className="table-row-style">{faculty.phone}</td>
                   <td className="table-row-style">
-                    <EditButton onClick={()=>navigate(`/admin/Dashboard/EditFacultyAdmin/${faculty.id}`)} /> <ActivateDeactivateButton /> <DeleteButton />
+                    <EditButton onClick={()=>navigate(`/admin/Dashboard/EditFacultyAdmin/${faculty.id}`)} /> 
+                      <ActivateDeactivateButton /> <DeleteButton />
                   </td>
                 </tr>
               ))

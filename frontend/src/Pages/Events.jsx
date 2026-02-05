@@ -1,6 +1,7 @@
 import React from "react";
 import DashboardChildPageTemplate from "../ui/Templates/DashboardChildPageTemplate";
 import EventCard from "../ui/Cards/EventCard";
+import api from "../api/axios.js"
 
 export default function Events() {
   return (

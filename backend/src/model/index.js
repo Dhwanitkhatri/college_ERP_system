@@ -23,6 +23,7 @@ import { FeatureFlag } from './FeatureFlag.js';
 import { FeeStructure } from './FeeStructure.js';
 import { StudentFee } from './StudentFees.js';
 import { FeePayment } from './FeePayment.js';
+import {Event} from './Event.js'
 
 /* =====================================================
    BASIC RELATIONSHIPS
@@ -63,6 +64,17 @@ Subject.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
 // Course ↔ Class
 Course.hasMany(Class, { foreignKey: 'course_id', sourceKey: 'course_id' });
 Class.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
+
+//events belong to course
+Course.hasMany(Event, {
+  foreignKey: "course_id",
+  sourceKey: "course_id",
+});
+
+Event.belongsTo(Course, {
+  foreignKey: "course_id",
+  targetKey: "course_id",
+});
 
 /* =====================================================
    CLASS RELATIONSHIPS
@@ -210,6 +222,18 @@ Student.belongsTo(Class, {
 Class.hasMany(Student, {
   foreignKey: 'class_pk'
 });
+
+//timetable -> class
+Class.hasMany(Timetable, {
+  foreignKey: "class_pk",
+  sourceKey: "id"
+});
+
+Timetable.belongsTo(Class, {
+  foreignKey: "class_pk",
+  targetKey: "id"
+});
+
 
 /* =====================================================
    EXPORT

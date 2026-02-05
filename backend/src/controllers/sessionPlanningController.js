@@ -47,9 +47,10 @@ export const createSessionPlan = async (req, res) => {
             topics,
             lecture_no,
             date,
-            status = "Pending",
+           
         } = req.body;
-
+        console.log(req.body);
+         const status = "Pending";
         if (!class_pk || !subject_id || !topics || !lecture_no || !date) {
             return res.status(400).json({
                 success: false,
@@ -74,12 +75,12 @@ export const createSessionPlan = async (req, res) => {
 
         const dateObj = new Date(date);
         const dayOfWeek = getDayOfWeekFromDate(dateObj);
-
+        console.log(dayOfWeek);
         // Check if faculty has lecture on this date
         const timetableEntry = await Timetable.findOne({
             where: {
                 faculty_id,
-                class_pk,
+                class_pk:class_pk,
                 subject_id,
                 day_of_week: dayOfWeek
             },
