@@ -5,6 +5,7 @@ import api from "../../api/axios.js";
 import EditButton from "../../ui/Buttons/EditButton.jsx";
 import DeleteButton from "../../ui/Buttons/DeleteButton.jsx";
 import { useNavigate } from "react-router-dom";
+import ActivateDeactivateButton from "../../ui/Buttons/ActivateDeactivateButton.jsx";
 
 const ManageFacultyAdmin = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
@@ -76,7 +77,7 @@ const ManageFacultyAdmin = () => {
                   <td className="table-row-style">{faculty.email}</td>
                   <td className="table-row-style">{faculty.phone}</td>
                   <td className="table-row-style">
-                    <EditButton onClick={()=>navigate(`/admin/Dashboard/EditFacultyAdmin/${faculty.id}`)} /> <DeleteButton />
+                    <EditButton onClick={()=>navigate(`/admin/Dashboard/EditFacultyAdmin/${faculty.id}`)} /> <ActivateDeactivateButton /> <DeleteButton />
                   </td>
                 </tr>
               ))

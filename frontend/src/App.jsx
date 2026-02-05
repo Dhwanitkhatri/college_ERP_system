@@ -178,6 +178,10 @@ const router = createBrowserRouter([
         path: "SessionPlanningFaculty",
         element: <SessionPlanningFaculty />,
       },
+      {
+        path: "SendNotification",
+        element: <SendNotificationAdmin />,
+      },
     ],
   },
   {
