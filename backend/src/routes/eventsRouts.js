@@ -1,4 +1,5 @@
 import express from "express";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 import {
   createEvent,
   getEventsByCourse,
@@ -9,15 +10,15 @@ import {
 const router = express.Router();
 
 // CREATE event
-router.post("/", createEvent);
+router.post("/",authMiddleware, createEvent);
 
 // READ events by course
-router.get("/course/:course_id", getEventsByCourse);
+router.get("/course/",  authMiddleware,getEventsByCourse);
 
 // UPDATE event
-router.put("/:id", updateEvent);
+router.put("/:id",authMiddleware, updateEvent);
 
 // DELETE event
-router.delete("/:id", deleteEvent);
+router.delete("/:id", authMiddleware,deleteEvent);
 
 export default router;

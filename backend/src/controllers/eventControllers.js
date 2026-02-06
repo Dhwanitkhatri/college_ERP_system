@@ -11,11 +11,18 @@ export const createEvent = async (req, res) => {
       event_date,
       event_time,
       location,
-      attendees=0
+      attendees = 0,
     } = req.body;
     const course_id = req.user.course_id;
     // Validate required fields
-    if (!course_id || !category || !title || !event_date || !event_time || !location) {
+    if (
+      !course_id ||
+      !category ||
+      !title ||
+      !event_date ||
+      !event_time ||
+      !location
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -33,7 +40,7 @@ export const createEvent = async (req, res) => {
       event_date,
       event_time,
       location,
-      attendees
+      attendees,
     });
 
     res.status(201).json(event);
@@ -42,26 +49,27 @@ export const createEvent = async (req, res) => {
   }
 };
 
-
-
 // get events by course
 export const getEventsByCourse = async (req, res) => {
   try {
-    const { course_id } = req.params;
-
+    const course_id = req.user.course_id;
+    console.log(course_id);
     const events = await Event.findAll({
       where: { course_id },
-      include: [Course],
       order: [["event_date", "ASC"]],
+      attributes: {
+        exclude: ["course_id", "createdAt", "updatedAt"],
+      },
     });
 
-    res.json(events);
+    res.status(200).json(events);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };
 
-//update events 
+//update events
 export const updateEvent = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);

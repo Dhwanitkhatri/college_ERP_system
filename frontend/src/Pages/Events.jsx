@@ -1,9 +1,30 @@
 import React from "react";
 import DashboardChildPageTemplate from "../ui/Templates/DashboardChildPageTemplate";
 import EventCard from "../ui/Cards/EventCard";
+import { useEffect,useState } from "react";
 import api from "../api/axios.js"
 
 export default function Events() {
+const [events , setEvents] = useState([]);//fetched events will be store here
+
+useEffect(() => {
+  const token = localStorage.getItem("token"); // or wherever you stored it
+
+  api.get("/api/event/course/", {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then((res) => {
+    setEvents(res.data);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+}, []);
+
+console.log(events);
   return (
     <DashboardChildPageTemplate
       title="Event Schedule"
@@ -11,47 +32,19 @@ export default function Events() {
       width="max-w-7xl"
     >
       <div className="gridDiv grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
-        <EventCard
-          title="Annual College Day Celebration"
-          description="Join us for the annual college day celebration featuring cultural performances, awards ceremony, and guest speakers."
-          date="December 28, 2025"
-          time="10:00 AM - 4:00 PM"
-          location="Main Auditorium"
-          attendees="500"
-        />
-        <EventCard
-          title="Tech Symposium 2025"
-          description="A technical symposium featuring workshops on AI, Machine Learning, and Cloud Computing by industry experts."
-          date="December 28, 2025"
-          time="10:00 AM - 4:00 PM"
-          location="Main Auditorium"
-          attendees="500"
-        />
-        <EventCard
-          title="Sports Day"
-          description="Inter-college sports competition including cricket, football, basketball, and athletics."
-          date="December 28, 2025"
-          time="10:00 AM - 4:00 PM"
-          location="Main Auditorium"
-          attendees="500"
-        />
-        <EventCard
-          title="Career Counseling Workshop"
-          description="Career guidance session for final year students with industry professionals and alumni."
-          date="December 28, 2025"
-          time="10:00 AM - 4:00 PM"
-          location="Main Auditorium"
-          attendees="500"
-        />
-        <EventCard
-          title="Science Exhibition"
-          description="Student projects and innovations on display. Open to all departments."
-          date="December 28, 2025"
-          time="10:00 AM - 4:00 PM"
-          location="Main Auditorium"
-          attendees="500"
-        />
-      </div>
+  {events.map((event, index) => (
+    <EventCard
+      key={event.event_id}
+      title={event.title}
+      description={event.description}
+      date={event.event_date}
+      time={event.event_time}
+      location={event.location}
+      attendees={event.attendees_count}
+    />
+  ))}
+</div>
+
     </DashboardChildPageTemplate>
   );
 }
