@@ -11,6 +11,12 @@ const ClassroomCard = ({ name, dept, students, mentor }) => {
         <p className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-light)]">
           {dept}
         </p>
+        <button
+    className="text-sm px-3 py-1 rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
+    onClick={() => console.log("Edit classroom:", name)}
+  >
+    Edit
+  </button>
       </div>
       <div className="componentDiv space-y-4">
         <div className="totalStudentsDiv flex items-center p-3 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-100 dark:border-blue-800">
