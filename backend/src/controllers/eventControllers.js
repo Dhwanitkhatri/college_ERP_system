@@ -11,8 +11,9 @@ export const createEvent = async (req, res) => {
       event_date,
       event_time,
       location,
-      attendees = 0,
+      attendees,
     } = req.body;
+    console.log(req.body)
     const course_id = req.user.course_id;
     // Validate required fields
     if (

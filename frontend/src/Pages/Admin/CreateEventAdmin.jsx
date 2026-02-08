@@ -3,29 +3,41 @@ import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
+import { useEffect,useState } from "react";
 import { Save } from "lucide-react";
+import api  from "../../api/axios.js"
 
 export default function CreateEventAdmin() {
-  {
-    /*this is the react hook form part */
-  }
+  
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm();
-
-  {
-    /*this part is handle form submission */
-  }
+  const token = localStorage.getItem("token");
+  
   const onSubmit = (data) => {
     console.log(data);
-    alert("Event Created!");
+
+    api.post("api/event/",{
+      category :data.category,
+      title : data.title,
+      description:data.description,
+      location : data.location,
+      event_time : data.time,
+      event_date : data.date,
+      attendees:data.attendees
+    },{
+      headers:{Authorization:`Bearer ${token}`}
+    }).then((res)=>{
+      alert("event created");
+    }).catch((errors)=>{
+      console.log(errors);
+      alert("not created");
+    })
   };
-  {
-    /*the main designing part start here */
-  }
+ 
   return (
     <DashboardChildPageTemplate
       title="Create Event"
@@ -62,10 +74,9 @@ export default function CreateEventAdmin() {
                   {...register("category", { required: "Select a category" })}
                 >
                   <option value="">Select Category</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Cultural">Cultural</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Workshop">Workshop</option>
+                  <option value="academic">Academic</option>
+                  <option value="cultural">Cultural</option>
+                  <option value="sports">Sports</option>
                 </select>
                 {errors.category && (
                   <p className="custom-error">{errors.category.message}</p>
