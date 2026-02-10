@@ -94,14 +94,20 @@ export const getAllFaculties = async (req, res) => {
     const faculties = await Faculty.findAll({
       where: { course_id: req.user.course_id },
       attributes: { exclude: ["createdAt", "updatedAt"] },
+      include: [
+        {
+          model: User,
+          attributes: ["status"], // fetch status from users table
+        },
+      ],
     });
+
     res.json(faculties);
   } catch (error) {
     console.error("Error fetching faculties:", error);
     res.status(500).json({ message: "Internal server error", error });
   }
 };
-
 //get faculty by id
 export const getFacultyById = async (req, res) => {
   try {
