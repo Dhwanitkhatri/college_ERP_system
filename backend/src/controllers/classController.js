@@ -185,3 +185,27 @@ export const getCurrentYearClasses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+//fetch the class using the id 
+export const getClassById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const cls = await Class.findByPk(id, {
+      include: [
+        {
+          model: Faculty,
+          attributes: ["faculty_id", "name"],
+          required: false
+        }
+      ]
+    });
+
+    if (!cls) {
+      return res.status(404).json({ message: "Class not found" });
+    }
+
+    res.json(cls);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
