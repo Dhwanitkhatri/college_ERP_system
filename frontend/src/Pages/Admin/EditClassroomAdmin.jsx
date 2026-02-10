@@ -3,9 +3,14 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
 import CancelButton from "../../ui/Buttons/CancelButton";
-import EditButton from "../../ui/Buttons/EditButton";
+import SaveButton from "../../ui/Buttons/SaveButton";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import api from "../../api/axios";
 
 const ManageClassroomAdmin = () => {
+  const { id } = useParams();
+const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -21,7 +26,7 @@ const ManageClassroomAdmin = () => {
 
   return (
     <DashboardChildPageTemplate
-      title="Manage Classrooms"
+      title="Edit Classroom"
       desc="Add, edit, or remove classrooms and assign mentors to classes"
       width="max-w-4xl"
     >
@@ -76,7 +81,7 @@ const ManageClassroomAdmin = () => {
           {/* action buttons */}
           <div className="form-actions">
             <CancelButton />
-            <EditButton />
+            <SaveButton />
           </div>
         </form>
       </DashboardChildPageCard>

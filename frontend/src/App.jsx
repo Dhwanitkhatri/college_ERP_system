@@ -39,7 +39,7 @@ import TakeAttendanceFaculty from "./Pages/Faculty/TakeAttendanceFaculty";
 import CreateEventAdmin from "./Pages/Admin/CreateEventAdmin";
 import SessionPlanningFaculty from "./Pages/Faculty/SessionPlanningFaculty";
 import PayFeeAdmin from "./Pages/Admin/PayFeeAdmin";
-import ManageClassroomAdmin from "./Pages/Admin/ManageClassroomAdmin";
+import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin"
 
 const router = createBrowserRouter([
   {
@@ -159,8 +159,8 @@ const router = createBrowserRouter([
         element: <PayFeeAdmin />,
       },
       {
-        path: "ManageClassroomAdmin",
-        element: <ManageClassroomAdmin />,
+        path: "EditClassroomAdmin",
+        element: <EditClassroomAdmin />,
       },
     ],
   },
