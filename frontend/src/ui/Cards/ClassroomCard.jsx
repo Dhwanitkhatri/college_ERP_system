@@ -6,14 +6,14 @@ const ClassroomCard = ({ name, dept, students, mentor, id }) => {
   const navigate = useNavigate();
   const handleEdit = () => {
     console.log("Edit classroom ID:", id);
-    navigate(`/admin/EditClassroomAdmin/${id}`)
+    navigate(`/admin/Dashboard/EditClassroomAdmin/${id}`)
   }
   return (
     <div className="wrapperDiv bg-[var(--card-bg)] border border-[var(--border-light)] rounded-xl p-6 shadow-sm hover:shadow-md theme-transition">
       <div className="headerDiv flex justify-between items-start mb-6">
         <div className="nameDiv">
           <p className="text-lg font-bold text-[var(--text-primary)]">
-            {name}-id={id}
+            {name}
           </p>
         </div>
         <p className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--bg-hover)] text-[var(--text-secondary)] border border-[var(--border-light)]">

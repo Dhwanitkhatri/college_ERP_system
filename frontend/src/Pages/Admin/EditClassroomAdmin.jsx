@@ -5,12 +5,16 @@ import { useForm } from "react-hook-form";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import SaveButton from "../../ui/Buttons/SaveButton";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import api from "../../api/axios";
 
 const ManageClassroomAdmin = () => {
+  const token = localStorage.getItem("token");
+  const [classroom, setClassroom] = useState(null);
+  const [faculties, setFaculties] = useState([]);
+  const [mentorChanged, setMentorChanged] = useState(false);
   const { id } = useParams();
-const navigate = useNavigate();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -18,10 +22,39 @@ const navigate = useNavigate();
     reset,
     watch,
   } = useForm();
+  useEffect(() => {
+    const fetchData = async () => {
+      const classRes = await api.get(`/api/classes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-  /* function to handle form submit */
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
+      const facultyRes = await api.get("/api/faculties", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("Classroom API response:", classRes.data);
+      console.log("Faculties API response:", facultyRes.data);
+
+      setClassroom(classRes.data);
+      setFaculties(facultyRes.data);
+
+      reset({
+        mentor_id: classRes.data.mentor_id,
+      });
+    };
+
+    fetchData();
+  }, [id]);
+
+  const onSubmit = async (data) => {
+    alert("Mentor Updated");
+
+    await api.put(
+      `/api/classes/${id}`,
+      { mentor_id: data.mentor_id },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    navigate("/admin/Dashboard/Classroom");
   };
 
   return (
@@ -32,54 +65,98 @@ const navigate = useNavigate();
     >
       <DashboardChildPageCard>
         {/* form wrapper */}
-        <form onSubmit={handleSubmit(onSubmit)}>
-          
-          {/* div for class id */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Classroom Info (Read-only) */}
+          {classroom && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-field">
+                <label className="custom-label">Class ID</label>
+                <input
+                  className="custom-input cursor-not-allowed"
+                  disabled
+                  value={classroom.class_id}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="custom-label">Course ID</label>
+                <input
+                  className="custom-input cursor-not-allowed"
+                  disabled
+                  value={classroom.course_id}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="custom-label">Year</label>
+                <input
+                  className="custom-input cursor-not-allowed"
+                  disabled
+                  value={classroom.year}
+                />
+              </div>
+
+              <div className="form-field">
+                <label className="custom-label">Semester</label>
+                <input
+                  className="custom-input cursor-not-allowed"
+                  disabled
+                  value={classroom.semester}
+                />
+              </div>
+
+              <div className="form-field md:col-span-2">
+                <label className="custom-label">Section</label>
+                <input
+                  className="custom-input cursor-not-allowed"
+                  disabled
+                  value={classroom.section}
+                />
+              </div>
+
+              <div className="form-field md:col-span-2">
+                <label className="custom-label">Current Mentor</label>
+                <input
+                  className="custom-input cursor-not-allowed"
+                  disabled
+                  value={
+                    faculties.find((f) => f.faculty_id === classroom.mentor_id)
+                      ?.name || "Not Assigned"
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Mentor Change Section */}
           <div className="form-field">
-            <label className="custom-label">Class ID</label>
-            <input
-              type="text"
+            <label className="custom-label">Change Class Mentor</label>
+            <select
               className="custom-input"
-              {...register("classId", {
-                required: "Class ID is required",
-              })}
-            />
-            {errors.classId && (
-              <p className="custom-error">{errors.classId.message}</p>
+              {...register("mentor_id", { required: "Mentor is required" })}
+              onChange={() => setMentorChanged(true)}
+            >
+              <option value="">Select Mentor</option>
+              {faculties.map((f) => (
+                <option key={f.id} value={f.faculty_id}>
+                  {f.name} - {f.faculty_id}
+                </option>
+              ))}
+            </select>
+            {errors.mentor_id && (
+              <p className="custom-error">{errors.mentor_id.message}</p>
             )}
           </div>
 
-          {/* div for class mentor */}
-          <div className="form-field">
-            <label className="custom-label">Class Mentor</label>
-            <input
-              type="text"
-              className="custom-input"
-              {...register("mentor", {
-                required: "Class Mentor is required",
-              })}
-            />
-            {errors.mentor && (
-              <p className="custom-error">{errors.mentor.message}</p>
-            )}
-          </div>
-              {/* div for academic year */}
-          <div className="form-field">
-            <label className="custom-label">academic year</label>
-            <input
-              type="text"
-                className="custom-input"
-                {...register("academicYear", {
-                    required: "Academic Year is required",
-                })}
-            />
-            {errors.academicYear && (
-              <p className="custom-error">{errors.academicYear.message}</p>
-            )}
-          </div>
+          {/* Alert when mentor changes */}
+          {mentorChanged && (
+            <div className="p-3 rounded-md bg-yellow-50 border border-yellow-300 text-yellow-700 text-sm">
+              Mentor has been changed. Click <b>Save</b> to apply changes.
+            </div>
+          )}
 
-          {/* action buttons */}
-          <div className="form-actions">
+          {/* Action buttons */}
+          <div className="form-actions flex justify-end gap-3">
             <CancelButton />
             <SaveButton />
           </div>

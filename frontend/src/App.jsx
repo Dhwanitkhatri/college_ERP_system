@@ -159,7 +159,7 @@ const router = createBrowserRouter([
         element: <PayFeeAdmin />,
       },
       {
-        path: "EditClassroomAdmin",
+        path: "EditClassroomAdmin/:id",
         element: <EditClassroomAdmin />,
       },
     ],
