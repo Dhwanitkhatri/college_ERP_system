@@ -1,9 +1,4 @@
 import { SubjectComponent } from '../model/SubjectComponent.js';
-
-// controllers/subjectComponent.controller.js
-
-import { SubjectComponent } from "../models/SubjectComponent.js";
-
 export const createComponent = async (req, res) => {
   try {
     const { subject_id, component_name, max_marks, min_marks } = req.body;
