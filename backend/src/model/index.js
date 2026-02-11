@@ -23,7 +23,14 @@ import { FeatureFlag } from './FeatureFlag.js';
 import { FeeStructure } from './FeeStructure.js';
 import { StudentFee } from './StudentFees.js';
 import { FeePayment } from './FeePayment.js';
-import {Event} from './Event.js'
+import {Event} from './Event.js';
+import { Exam } from './Exam.js';
+import { Backlog } from './Backlog.js';
+import { BacklogAttempt } from './BacklogAttempts.js';
+import { SemesterResult } from './SemesterResult.js';
+import { StudentMarks } from './StudentMarks.js';
+import { SubjectComponent } from './SubjectComponent.js';
+import { SubjectResult } from './SubjectResult.js';
 
 /* =====================================================
    BASIC RELATIONSHIPS
@@ -234,6 +241,24 @@ Timetable.belongsTo(Class, {
   targetKey: "id"
 });
 
+/* =====================================================
+   EXAM MODULE
+===================================================== */
+
+StudentMarks.belongsTo(Exam, { foreignKey: 'exam_id' });
+StudentMarks.belongsTo(SubjectComponent, { foreignKey: 'component_id' });
+
+SubjectResult.belongsTo(Exam, { foreignKey: 'exam_id' });
+
+SemesterResult.belongsTo(Exam, { foreignKey: 'exam_id' });
+
+Backlog.belongsTo(Exam, { foreignKey: 'first_failed_exam_id' });
+Backlog.belongsTo(Exam, { foreignKey: 'cleared_exam_id' });
+
+BacklogAttempt.belongsTo(Backlog, { foreignKey: 'backlog_id' });
+BacklogAttempt.belongsTo(Exam, { foreignKey: 'exam_id' });
+
+
 
 /* =====================================================
    EXPORT
@@ -261,5 +286,12 @@ export {
   FeatureFlag,
   FeeStructure,
   StudentFee,
-  FeePayment
+  FeePayment,
+  Exam,
+  Backlog,
+  BacklogAttempt,
+  SemesterResult,
+  StudentMarks,
+  SubjectComponent,
+  SubjectResult,
 };
