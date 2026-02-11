@@ -192,6 +192,14 @@ const router = createBrowserRouter([
         path: "SendNotification",
         element: <SendNotificationAdmin />,
       },
+      {
+        path: "ManageProfileAdmin",
+        element: <ManageProfileAdmin />,
+      },
+      {
+        path: "Events",
+        element: <Events />,
+      },
     ],
   },
   {
@@ -209,6 +217,14 @@ const router = createBrowserRouter([
       {
         path: "Classroom",
         element: <Classroom />,
+      },
+      {
+        path: "ManageProfileAdmin",
+        element: <ManageProfileAdmin />,
+      },
+      {
+        path: "Events",
+        element: <Events />,
       },
     ],
   },
