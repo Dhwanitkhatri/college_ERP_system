@@ -19,6 +19,7 @@ import feeSatuseRoutes from "./src/routes/feeStatusRoutes.js"
 import sessionPlanningRoutes from "./src/routes/sessionPlanningRoutes.js"
 import attdanceRoutes from "./src/routes/attendanceRoutes.js";
 import eventsRoutes from "./src/routes/eventsRouts.js";
+import subjectComponentRoutes from "./src/routes/subjectComponentRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -58,6 +59,9 @@ app.use("/api/fee",feeSatuseRoutes);
 app.use("/api/session",sessionPlanningRoutes);
 app.use("/api/attendance",attdanceRoutes);
 app.use("/api/event", eventsRoutes);
+app.use("/api/components", subjectComponentRoutes);
+
+
 app.get("/", (req, res) => {
   res.send("College ERP System Backend is running");
 });
