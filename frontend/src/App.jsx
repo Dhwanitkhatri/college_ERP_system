@@ -39,7 +39,8 @@ import TakeAttendanceFaculty from "./Pages/Faculty/TakeAttendanceFaculty";
 import CreateEventAdmin from "./Pages/Admin/CreateEventAdmin";
 import SessionPlanningFaculty from "./Pages/Faculty/SessionPlanningFaculty";
 import PayFeeAdmin from "./Pages/Admin/PayFeeAdmin";
-import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin"
+import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin";
+import EditStudentAdmin from "./Pages/Admin/EditStudentAdmin";
 
 const router = createBrowserRouter([
   {
@@ -161,6 +162,10 @@ const router = createBrowserRouter([
       {
         path: "EditClassroomAdmin/:id",
         element: <EditClassroomAdmin />,
+      },
+      {
+        path: "EditStudentAdmin/:studentId",
+        element: <EditStudentAdmin />,
       },
     ],
   },

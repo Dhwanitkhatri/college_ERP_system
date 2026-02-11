@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ManageUserTemplateAdmin from "../../ui/Templates/ManageUserTemplateAdmin";
-import { useState, useEffect } from "react";
 import api from "../../api/axios.js";
 import EditButton from "../../ui/Buttons/EditButton.jsx";
 import DeleteButton from "../../ui/Buttons/DeleteButton.jsx";
@@ -10,29 +9,118 @@ import ActivateDeactivateButton from "../../ui/Buttons/ActivateDeactivateButton.
 const ManageFacultyAdmin = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const navigate = useNavigate(); //this is for navigating
-  const [faculties, setFaculties] = useState([]);
-  const [loading, setLoading] = useState(true);
 
+  const [faculties, setFaculties] = useState([]);
+  const [loading, setLoading] = useState(true); // Page loading state
+  const [actionLoading, setActionLoading] = useState(null); // Row action loading state
+
+  // Fetch all faculties when component loads
   useEffect(() => {
-    api
-      .get("api/faculties/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
+    const fetchFaculties = async () => {
+      try {
+        const res = await api.get("api/faculties/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         setFaculties(res.data); // backend sends array
-        setLoading(false);
         console.log("Fetched faculties:", res.data);
-      })
-      .catch((err) => {
-        setLoading(false);
+      } catch (err) {
         console.error(
           "Error fetching faculties:",
           err.response?.data || err.message
         );
+      } finally {
+        setLoading(false); // Stop loading after API completes
+      }
+    };
+
+    fetchFaculties();
+  }, [token]);
+
+  /*
+    This function toggles faculty active/inactive status.
+    It sends PATCH request to backend and updates UI instantly.
+  */
+  const toggleFacultyStatus = async (userId) => {
+    if (!window.confirm("Are you sure you want to change status?")) return;
+
+    try {
+      setActionLoading(userId); // Start row loading
+
+      const res = await api.put(
+        `api/faculties/active-inactive/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Status updated:", res.data);
+
+      // Update UI instantly
+      setFaculties((prev) =>
+        prev.map((faculty) =>
+          faculty.user_id === userId
+            ? {
+                ...faculty,
+                User: {
+                  ...faculty.User,
+                  status: res.data.status,
+                },
+              }
+            : faculty
+        )
+      );
+    } catch (err) {
+      console.error(
+        "Error updating status:",
+        err.response?.data || err.message
+      );
+    } finally {
+      setActionLoading(null); // Stop row loading
+    }
+  };
+
+  /*
+    This function deletes a faculty.
+    It calls backend and removes faculty from UI state.
+  */
+  const deleteFaculty = async (facultyId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to permanently delete this faculty?"
+      )
+    )
+      return;
+
+    try {
+      setActionLoading(facultyId); // Start row loading
+
+      await api.delete(`api/faculties/${facultyId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-  }, []);
+
+      console.log("Faculty deleted successfully");
+
+      // Remove from UI instantly (no reload)
+      setFaculties((prev) =>
+        prev.filter((faculty) => faculty.id !== facultyId)
+      );
+    } catch (err) {
+      console.error(
+        "Error deleting faculty:",
+        err.response?.data || err.message
+      );
+    } finally {
+      setActionLoading(null); // Stop row loading
+    }
+  };
 
   return (
     <div>
@@ -46,39 +134,85 @@ const ManageFacultyAdmin = () => {
           <thead className="bg-gray-100 dark:bg-gray-800">
             <tr>
               <th className="table-row-style font-semibold">Name</th>
-              <th className="table-row-style font-semibold sticky-col">Faculty Id</th>
+              <th className="table-row-style font-semibold sticky-col">
+                Faculty Id
+              </th>
               <th className="table-row-style font-semibold">Email</th>
               <th className="table-row-style font-semibold">Phone</th>
+              <th className="table-row-style font-semibold">Status</th>
               <th className="table-row-style font-semibold">Actions</th>
             </tr>
           </thead>
 
           <tbody>
+            {/* Page Loading State */}
             {loading ? (
-              <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
-                <td colSpan="5" className="table-row-style text-center">
-                  Loading...
+              <tr>
+                <td colSpan="6" className="table-row-style text-center">
+                  <div className="flex justify-center items-center gap-2">
+                    <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full"></div>
+                    Loading faculties...
+                  </div>
                 </td>
               </tr>
             ) : faculties.length === 0 ? (
-              <tr className="hover:bg-gray-200 dark:hover:bg-gray-900 transition">
-                <td colSpan="5" className="table-row-style text-center">
+              /* Empty State */
+              <tr>
+                <td colSpan="6" className="table-row-style text-center">
                   No faculties found.
                 </td>
               </tr>
             ) : (
               faculties.map((faculty) => (
                 <tr
-                  key={faculty.faculty_id}
+                  key={faculty.id}
                   className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                 >
                   <td className="table-row-style">{faculty.name}</td>
-                  <td className="table-row-style sticky-col">{faculty.faculty_id}</td>
+                  <td className="table-row-style sticky-col">
+                    {faculty.faculty_id}
+                  </td>
                   <td className="table-row-style">{faculty.email}</td>
                   <td className="table-row-style">{faculty.phone}</td>
+
+                  {/* Show current status */}
                   <td className="table-row-style">
-                    <EditButton onClick={()=>navigate(`/admin/Dashboard/EditFacultyAdmin/${faculty.id}`)} /> 
-                      <ActivateDeactivateButton /> <DeleteButton />
+                    {faculty.User?.status === "active" ? (
+                      <span className="text-green-600 font-semibold">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="text-red-600 font-semibold">
+                        Inactive
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="table-row-style flex gap-2">
+                    {/* Edit button */}
+                    <EditButton
+                      onClick={() =>
+                        navigate(
+                          `/admin/Dashboard/EditFacultyAdmin/${faculty.id}`
+                        )
+                      }
+                      disabled={actionLoading === faculty.id}
+                    />
+
+                    {/* Activate / Deactivate button */}
+                    <ActivateDeactivateButton
+                      status={faculty.User?.status}
+                      disabled={actionLoading === faculty.user_id}
+                      onClick={() =>
+                        toggleFacultyStatus(faculty.user_id)
+                      }
+                    />
+
+                    {/* Delete button */}
+                    <DeleteButton
+                      disabled={actionLoading === faculty.id}
+                      onClick={() => deleteFaculty(faculty.id)}
+                    />
                   </td>
                 </tr>
               ))
