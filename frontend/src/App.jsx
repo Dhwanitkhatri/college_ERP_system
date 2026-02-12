@@ -41,6 +41,7 @@ import SessionPlanningFaculty from "./Pages/Faculty/SessionPlanningFaculty";
 import PayFeeAdmin from "./Pages/Admin/PayFeeAdmin";
 import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin";
 import EditStudentAdmin from "./Pages/Admin/EditStudentAdmin";
+import ViewTimetable from "./Pages/ViewTimeTable";
 
 const router = createBrowserRouter([
   {
@@ -166,6 +167,10 @@ const router = createBrowserRouter([
       {
         path: "EditStudentAdmin/:studentId",
         element: <EditStudentAdmin />,
+      },
+      {
+        path: "ViewTimetable",
+        element: <ViewTimetable />,
       },
     ],
   },
