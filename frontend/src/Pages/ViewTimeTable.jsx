@@ -5,12 +5,16 @@ import DashboardChildPageCard from "../ui/Cards/DashboardChildPageCard";
 import { Calendar, FileText, ArrowLeft } from "lucide-react";
 
 export default function ViewTimetable() {
-  {/* this is the state and form part of the code */}
+  {
+    /* this is the state and form part of the code */
+  }
   const [activeTab, setActiveTab] = useState("menu");
   const { register, watch, setValue } = useForm();
   const selectedClass = watch("selectedClass");
 
-  {/* below is the dummy data for table design */}
+  {
+    /* below is the dummy data for table design */
+  }
   const classes = ["FYBCA-A", "FYBCA-B", "SYBCA-A", "SYBCA-B", "TYBCA-A"];
 
   const lectureData = [
@@ -28,7 +32,6 @@ export default function ViewTimetable() {
           faculty: "Prof. Kumar",
         },
         { time: "11:00 - 12:00", subject: "Web Dev", faculty: "Dr. Patel" },
-        { time: "12:00 - 1:00", subject: "Lunch Break", faculty: "-" },
         { time: "1:00 - 2:00", subject: "OS", faculty: "Prof. Reddy" },
         {
           time: "2:00 - 3:00",
@@ -55,7 +58,6 @@ export default function ViewTimetable() {
           subject: "Software Eng",
           faculty: "Prof. Verma",
         },
-        { time: "12:00 - 1:00", subject: "Lunch Break", faculty: "-" },
         { time: "1:00 - 2:00", subject: "Web Dev Lab", faculty: "Dr. Patel" },
         { time: "2:00 - 3:00", subject: "Web Dev Lab", faculty: "Dr. Patel" },
       ],
@@ -74,7 +76,6 @@ export default function ViewTimetable() {
           subject: "Data Structures",
           faculty: "Dr. Sharma",
         },
-        { time: "12:00 - 1:00", subject: "Lunch Break", faculty: "-" },
         {
           time: "1:00 - 2:00",
           subject: "Database Lab",
@@ -101,7 +102,6 @@ export default function ViewTimetable() {
           subject: "Computer Networks",
           faculty: "Dr. Gupta",
         },
-        { time: "12:00 - 1:00", subject: "Lunch Break", faculty: "-" },
         { time: "1:00 - 2:00", subject: "OS", faculty: "Prof. Reddy" },
         {
           time: "2:00 - 3:00",
@@ -124,7 +124,6 @@ export default function ViewTimetable() {
           subject: "Data Structures",
           faculty: "Dr. Sharma",
         },
-        { time: "12:00 - 1:00", subject: "Lunch Break", faculty: "-" },
         { time: "1:00 - 2:00", subject: "Project Work", faculty: "Multiple" },
         { time: "2:00 - 3:00", subject: "Project Work", faculty: "Multiple" },
       ],
@@ -143,7 +142,6 @@ export default function ViewTimetable() {
           faculty: "Prof. Kumar",
         },
         { time: "11:00 - 12:00", subject: "Web Dev", faculty: "Dr. Patel" },
-        { time: "12:00 - 1:00", subject: "Lunch Break", faculty: "-" },
         {
           time: "1:00 - 2:00",
           subject: "Operating Systems",
@@ -158,12 +156,16 @@ export default function ViewTimetable() {
     },
   ];
 
-  {/* this is the handler for the reset button */}
+  {
+    /* this is the handler for the reset button */
+  }
   const handleReset = () => {
     setActiveTab("menu");
     setValue("selectedClass", "");
   };
-  {/* main designing start from here */}
+  {
+    /* main designing start from here */
+  }
   return (
     <DashboardChildPageTemplate
       title="View Timetable"
