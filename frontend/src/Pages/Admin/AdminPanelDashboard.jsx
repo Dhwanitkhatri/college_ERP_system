@@ -19,12 +19,14 @@ const AdminPanelDashboard = () => {
           <Link to="AddSubjectAdmin"><ActionButtonDashboard title="Add Subject" /></Link>
           <Link to="AddClassAdmin"><ActionButtonDashboard title="Add New Classes" /></Link>
           <Link to="AddTimeTableAdmin"><ActionButtonDashboard title="Add Time Table" /></Link>
+          <Link to="CreateEventAdmin"><ActionButtonDashboard title="Add Event" /></Link>
           </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Manage">
           <Link to="ManageFacultyAdmin"><ActionButtonDashboard title="Manage Faculty" /></Link>
           <Link to="ManageStudentAdmin"><ActionButtonDashboard title="Manage Student" /></Link>
           <Link to="ManageSettingsAdmin"><ActionButtonDashboard title="Manage Settings" /></Link>
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Manage Events" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Manage Subjects" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
@@ -45,7 +47,6 @@ const AdminPanelDashboard = () => {
           <Link to="PayFeeAdmin"><ActionButtonDashboard title="Pay Fee" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
           <Link to="CreateFeeStructureAdmin"><ActionButtonDashboard title="Create Fee Structure" /></Link>
-          <Link to="CreateEventAdmin"><ActionButtonDashboard title="Create Event" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
     </PanelTemplateDashboard>

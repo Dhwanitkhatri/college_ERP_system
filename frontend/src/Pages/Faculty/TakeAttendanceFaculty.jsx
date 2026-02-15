@@ -9,6 +9,9 @@ import { useForm } from "react-hook-form";
 function TakeAttendanceFaculty() {
   const token = localStorage.getItem("token");
 
+  // get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+
   const {
     register,
     handleSubmit,
@@ -17,11 +20,12 @@ function TakeAttendanceFaculty() {
   } = useForm({
     defaultValues: {
       class_id: "",
-      date: "",
+      date: today, // set current date as default
       subject_id: "",
       lecture_no: "",
     },
   });
+
   const [studentList, setStudentList] = useState([]);
   const selectedClass = watch("class_id");
   const selectedDate = watch("date");
@@ -29,11 +33,10 @@ function TakeAttendanceFaculty() {
   const selectedSubject = watch("subject_id");
   const [classesList, setClassesList] = useState([]);
   const [lectureCount, setLectureCount] = useState(0);
+
   const lectureList = Array.from({ length: lectureCount }, (_, i) => ({
     lecture_no: i + 1,
   }));
-  
-
 
   // Fetch classes on component mount
   useEffect(() => {
@@ -66,7 +69,7 @@ function TakeAttendanceFaculty() {
         console.log("Fetched students:", formatted);
       })
       .catch((err) => console.error(err));
-  }, [selectedClass, selectedDate , selectedSubject]);
+  }, [selectedClass, selectedDate, selectedSubject]);
 
   useEffect(() => {
     // Fetch subjects when class or faculty changes
@@ -86,7 +89,7 @@ function TakeAttendanceFaculty() {
       });
   }, [selectedClass, selectedDate]);
 
-// get lectures when subject, class, faculty, date changes
+  // get lectures when subject, class, faculty, date changes
   useEffect(() => {
     if (!selectedClass || !selectedDate || !selectedSubject) return;
     api
@@ -103,7 +106,6 @@ function TakeAttendanceFaculty() {
         console.error("Error fetching lectures:", error);
       });
   }, [selectedClass, selectedDate, selectedSubject]);
-      
 
   // Handler to toggle attendance status
   const toggleStatus = (student_id) => {
@@ -128,12 +130,12 @@ function TakeAttendanceFaculty() {
   // Save attendance handler
   const onSubmit = (data) => {
     const attendanceData = {
-    subject_id: data.subject_id,
-    class_id: data.class_id,
-    date: data.date,
-    lecture_no: data.lecture_no,
-    attendance: studentList,
-  };
+      subject_id: data.subject_id,
+      class_id: data.class_id,
+      date: data.date,
+      lecture_no: data.lecture_no,
+      attendance: studentList,
+    };
 
     api
       .post("/api/attendance/", attendanceData, {
@@ -176,6 +178,7 @@ function TakeAttendanceFaculty() {
               </select>
             </div>
           </DashboardChildPageCard>
+
           <DashboardChildPageCard>
             <div className="dateDiv flex flex-col h-full justify-center">
               <label className="custom-label mb-2">Date</label>
@@ -188,6 +191,7 @@ function TakeAttendanceFaculty() {
               </div>
             </div>
           </DashboardChildPageCard>
+
           <DashboardChildPageCard>
             <div className="flex flex-col h-full justify-center">
               <label className="custom-label mb-2">Select Subject</label>
@@ -204,6 +208,7 @@ function TakeAttendanceFaculty() {
               </select>
             </div>
           </DashboardChildPageCard>
+
           <DashboardChildPageCard>
             <div className="flex flex-col h-full justify-center">
               <label className="custom-label mb-2">Select Lecture</label>
@@ -236,6 +241,7 @@ function TakeAttendanceFaculty() {
             </div>
           </DashboardChildPageCard>
         </div>
+
         <DashboardChildPageCard className="overflow-hidden p-0">
           <div className="tableDiv overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -255,7 +261,7 @@ function TakeAttendanceFaculty() {
               <tbody className="divide-y divide-[var(--border-light)]">
                 {studentList.map((item) => (
                   <tr
-                    key={item.id}
+                    key={item.student_id}
                     className="hover:bg-[var(--bg-hover)] transition-colors"
                   >
                     <td className="p-4 text-[var(--text-secondary)] text-sm">
@@ -283,6 +289,7 @@ function TakeAttendanceFaculty() {
             </table>
           </div>
         </DashboardChildPageCard>
+
         <div className="buttonDiv flex justify-end pt-1">
           <button
             type="button"

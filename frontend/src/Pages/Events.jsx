@@ -1,30 +1,59 @@
 import React from "react";
 import DashboardChildPageTemplate from "../ui/Templates/DashboardChildPageTemplate";
 import EventCard from "../ui/Cards/EventCard";
-import { useEffect,useState } from "react";
-import api from "../api/axios.js"
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios.js";
 
 export default function Events() {
-const [events , setEvents] = useState([]);//fetched events will be store here
+  const [events, setEvents] = useState([]); //fetched events will be store here
+  const navigate = useNavigate();
 
-useEffect(() => {
-  const token = localStorage.getItem("token"); // or wherever you stored it
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-  api.get("/api/event/course/", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-  .then((res) => {
-    setEvents(res.data);
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+    api
+      .get("/api/event/course/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setEvents(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
-}, []);
+  const handleEdit = (id) => {
+    navigate(`/admin/Dashboard/EditEventAdmin/${id}`);
+  };
 
-console.log(events);
+  const handleDelete = (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this event?",
+    );
+    if (!confirmDelete) return;
+
+    const token = localStorage.getItem("token");
+
+    api
+      .delete(`/api/event/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(() => {
+        setEvents(events.filter((event) => event.event_id !== id));
+        alert("Event deleted successfully");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Failed to delete event");
+      });
+  };
+
+  console.log(events);
+
   return (
     <DashboardChildPageTemplate
       title="Event Schedule"
@@ -32,19 +61,22 @@ console.log(events);
       width="max-w-7xl"
     >
       <div className="gridDiv grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
-  {events.map((event, index) => (
-    <EventCard
-      key={event.event_id}
-      title={event.title}
-      description={event.description}
-      date={event.event_date}
-      time={event.event_time}
-      location={event.location}
-      attendees={event.attendees_count}
-    />
-  ))}
-</div>
-
+        {events.map((event) => (
+          <EventCard
+            key={event.event_id}
+            event_id={event.event_id}
+            title={event.title}
+            description={event.description}
+            date={event.event_date}
+            time={event.event_time}
+            location={event.location}
+            attendees={event.attendees}
+            isAdmin={true}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
     </DashboardChildPageTemplate>
   );
 }

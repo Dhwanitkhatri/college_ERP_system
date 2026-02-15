@@ -42,6 +42,7 @@ import PayFeeAdmin from "./Pages/Admin/PayFeeAdmin";
 import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin";
 import EditStudentAdmin from "./Pages/Admin/EditStudentAdmin";
 import ViewTimetable from "./Pages/ViewTimeTable";
+import EditEventAdmin from "./Pages/Admin/EditEventAdmin";
 
 const router = createBrowserRouter([
   {
@@ -172,6 +173,10 @@ const router = createBrowserRouter([
         path: "ViewTimetable",
         element: <ViewTimetable />,
       },
+      {
+        path: "EditEventAdmin/:id",
+        element: <EditEventAdmin />,
+      },
     ],
   },
   {
@@ -210,6 +215,10 @@ const router = createBrowserRouter([
         path: "Events",
         element: <Events />,
       },
+      {
+        path: "NotAvailablePage",
+        element: <NotAvailablePage />,
+      },
     ],
   },
   {
@@ -235,6 +244,10 @@ const router = createBrowserRouter([
       {
         path: "Events",
         element: <Events />,
+      },
+      {
+        path: "NotAvailablePage",
+        element: <NotAvailablePage />,
       },
     ],
   },
