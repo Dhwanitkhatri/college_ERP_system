@@ -2,6 +2,7 @@ import { StudentMarks } from "../model/StudentMarks.js";
 import { SubjectComponent } from "../model/SubjectComponent.js";
 import { Student } from "../model/Student.js";
 import { Exam } from "../model/Exam.js";
+import { Subject } from "../model/Subject.js";
 import { sequelize } from "../config/db.js";
 
 export const enterMarks = async (req, res) => {
@@ -16,12 +17,12 @@ export const enterMarks = async (req, res) => {
       marks_obtained
     } = req.body;
 
-    //  Basic Validation
-    if (!student_id || !subject_id || !exam_id || !component_id || marks_obtained === undefined) {
+    // Basic Validation (Required fields + Marks non-negative)
+    if (!student_id || !subject_id || !component_id || marks_obtained === undefined) {
       await t.rollback();
       return res.status(400).json({
         success: false,
-        message: "All fields are required"
+        message: "student_id, subject_id, component_id, marks_obtained are required"
       });
     }
 
@@ -33,11 +34,11 @@ export const enterMarks = async (req, res) => {
       });
     }
 
-    // Parallel DB Checks (Optimized for performance)
+    // Parallel Fetch 
     const [component, student, exam] = await Promise.all([
       SubjectComponent.findByPk(component_id),
       Student.findOne({ where: { student_id } }),
-      Exam.findByPk(exam_id)
+      exam_id ? Exam.findByPk(exam_id) : null
     ]);
 
     if (!component) {
@@ -50,12 +51,36 @@ export const enterMarks = async (req, res) => {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
 
-    if (!exam) {
-      await t.rollback();
-      return res.status(404).json({ success: false, message: "Exam not found" });
+    // If EXAM type → exam_id required
+    if (component.type === "EXAM") {
+      if (!exam_id) {
+        await t.rollback();
+        return res.status(400).json({
+          success: false,
+          message: "Exam ID is required for EXAM components"
+        });
+      }
+
+      if (!exam) {
+        await t.rollback();
+        return res.status(404).json({
+          success: false,
+          message: "Exam not found"
+        });
+      }
     }
 
-    // Subject Match Check
+    // Subject Existence Check
+    const subject = await Subject.findOne({ where: { subject_id } });
+    if (!subject) {
+      await t.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Subject not found"
+      });
+    }
+
+    // Subject validation
     if (component.subject_id !== subject_id) {
       await t.rollback();
       return res.status(400).json({
@@ -64,7 +89,7 @@ export const enterMarks = async (req, res) => {
       });
     }
 
-    // Marks Validation
+    // Marks validation
     if (marks_obtained > component.max_marks) {
       await t.rollback();
       return res.status(400).json({
@@ -73,11 +98,11 @@ export const enterMarks = async (req, res) => {
       });
     }
 
-    // Upsert (Insert or Update)
+    //  UPSERT
     const [record, created] = await StudentMarks.upsert({
       student_id,
       subject_id,
-      exam_id,
+      exam_id: exam_id || null,
       component_id,
       marks_obtained
     }, {
@@ -85,7 +110,6 @@ export const enterMarks = async (req, res) => {
       returning: true
     });
 
-    // Commit Transaction
     await t.commit();
 
     return res.status(created ? 201 : 200).json({
@@ -96,13 +120,6 @@ export const enterMarks = async (req, res) => {
 
   } catch (error) {
     await t.rollback();
-
-    if (error.name === "SequelizeUniqueConstraintError") {
-      return res.status(400).json({
-        success: false,
-        message: "Duplicate entry detected"
-      });
-    }
 
     return res.status(500).json({
       success: false,
