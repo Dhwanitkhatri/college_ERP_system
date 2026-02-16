@@ -1,6 +1,5 @@
 import { sequelize } from "../config/db.js";
 import { DataTypes } from "sequelize";
-
 export const StudentMarks = sequelize.define("StudentMarks", {
   id: {
     type: DataTypes.INTEGER,
@@ -15,21 +14,28 @@ export const StudentMarks = sequelize.define("StudentMarks", {
     type: DataTypes.STRING(50),
     allowNull: false
   },
+
   exam_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: true
   },
+
   component_id: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+
   marks_obtained: {
-    type: DataTypes.FLOAT
-  },
-  is_absent: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
+    type: DataTypes.FLOAT,
+    allowNull: false
   }
+
 }, {
-  timestamps: false
+  timestamps: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['student_id', 'subject_id', 'exam_id', 'component_id']
+    }
+  ]
 });

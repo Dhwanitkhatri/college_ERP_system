@@ -15,6 +15,12 @@ export const SubjectComponent = sequelize.define("SubjectComponent", {
     type: DataTypes.STRING(50),
     allowNull: false
   },
+
+  type: {
+    type: DataTypes.ENUM('EXAM', 'ASSIGNMENT', 'ATTENDANCE', 'QUIZ'),
+    allowNull: false
+  },
+
   max_marks: {
     type: DataTypes.FLOAT,
     allowNull: false
@@ -24,5 +30,5 @@ export const SubjectComponent = sequelize.define("SubjectComponent", {
     allowNull: false
   }
 }, {
-  timestamps: false
+  timestamps: true,
 });
