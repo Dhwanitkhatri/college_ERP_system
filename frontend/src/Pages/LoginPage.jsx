@@ -6,56 +6,33 @@ import ThemeButton from "../ui/Buttons/ThemeButton.jsx";
 import { useForm } from "react-hook-form";
 
 function LoginPage() {
-  const navigate = useNavigate();
-
-  const {
+  const navigate = useNavigate();  //for navigation
+  
+  const {          //react hook form
     register,
     handleSubmit,
     setError,
     clearErrors,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    mode: "onSubmit",   //validate only when form is submitted
+  });
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);  //for password hide/unhide
 
   /*variable to store errors*/
   //  const usernamePattern = /^[a-zA-Z0-9]+$/;           /*aplhanumeric username pattern */
 
   const handleBackButtonClick = () => {
-    navigate("/");
+    navigate("/");     //navigation to last page
   };
 
   const onSubmit = async (data) => {
     /*function to handle errors on submit */
 
     const start = performance.now(); //  Start time
-    let isValid = true;
 
-    /*=================Validations for Empty Fields============================= */
-    if (!data.username && !data.password) {
-      setError("general", {
-        type: "manual",
-        message: "Please fill Username and Password.",
-      });
-      isValid = false;
-    } else if (!data.username) {
-      setError("username", {
-        type: "manual",
-        message: "Please Enter your Username.",
-      });
-      isValid = false;
-    } else if (!data.password) {
-      setError("password", {
-        type: "manual",
-        message: "Please Enter your Password.",
-      });
-      isValid = false;
-    }
-
-    /*============if any validation fails from front-end side then it will return=====*/
-    if (!isValid) return;
-
-    clearErrors();
+    clearErrors();   //clear previous manual errors before API call
 
     /*Backend Validations to match correct username and password */
     //calling API from backend (later)
@@ -102,9 +79,11 @@ function LoginPage() {
       <form id="loginForm" onSubmit={handleSubmit(onSubmit)}>
         {/*Main login container */}
         <div className="loginContainer w-full bg-white dark:bg-gray-800 dark:text-white border-gray-200 p-5 rounded-xl shadow-lg justify-center items-center justify-items-center">
+          
           {/* login header*/}
           <div className="loginHeader justify-center items-center justify-items-center w-full m-2 mt-1">
             <div className="loginTitleHeader flex w-full justify-between items-center">
+              
               <div
                 onClick={handleBackButtonClick}
                 className="loginBackButton p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
@@ -114,10 +93,8 @@ function LoginPage() {
 
               <p className="loginTitle dark:text-white">College ERP Login</p>
 
-              <div className="loginThemeButton p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                <button type="button">
+              <div className="loginThemeButton p-1 rounded-full cursor-pointer">
                   <ThemeButton />
-                </button>
               </div>
             </div>
 
@@ -128,6 +105,7 @@ function LoginPage() {
 
           {/* login details container */}
           <div className="loginDetails justify-start items-center w-full m-2">
+            
             <p className="usernameLabel font-semibold text-sm my-1 dark:text-gray-200">
               Username
             </p>
@@ -136,7 +114,13 @@ function LoginPage() {
               type="text"
               className="usernameInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] dark:bg-gray-700 dark:text-white placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
               placeholder="Enter Your Username"
-              {...register("username")}
+              {...register("username", {
+                required: "Please Enter your Username.",
+                minLength: {
+                  value: 3,
+                  message: "Username must be at least 3 characters.",
+                },
+              })}
             />
 
             {errors.username && (
@@ -154,7 +138,13 @@ function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 className="passwordInput border-none w-full rounded-lg p-2 bg-[#f5f5f4] dark:bg-gray-700 dark:text-white placeholder-gray-500 my-1 focus:ring-2 focus:ring-blue-500 outline-none"
                 placeholder="Enter Your Password"
-                {...register("password")}
+                {...register("password", {
+                  required: "Please Enter your Password.",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters.",
+                  },
+                })}
               />
 
               <button

@@ -7,6 +7,7 @@ import api from '../api/axios'
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
   const token = localStorage.getItem("token");
+
   useEffect(()=>{
     api.get("/api/notifications/my", {
       headers:{
@@ -21,17 +22,44 @@ const NotificationPage = () => {
       console.log("Error: ", err.response?.data || err.message);
     });
   },[])
+
   return (
-    <DashboardChildPageTemplate title="Notifications" desc="Stay updated with the latest announcements and important information">
-        <DashboardChildPageCard>
-          {notifications.length === 0 ?(
-            <div>No Notification for Now</div>
-          ):(
-            notifications.map((notification, index)=>(
-              <NotificationMessage key={index} title={notification.title} message={notification.message} />
-            ))
-          )}
-        </DashboardChildPageCard>
+    <DashboardChildPageTemplate 
+      title="Notifications" 
+      desc="Stay updated with the latest announcements and important information"
+    >
+      <DashboardChildPageCard>
+
+        {notifications.length === 0 ?(
+          <div>No Notification for Now</div>
+        ):(
+
+          notifications.map((notification, index)=>{
+
+            // -------- format date & time ahiya kariye chhe --------
+            const dateObj = new Date(notification.created_at);
+            const formattedDate = dateObj.toLocaleDateString();
+            const formattedTime = dateObj.toLocaleTimeString([], { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            });
+
+            return (
+              <NotificationMessage 
+                key={index} 
+                title={notification.title} 
+                message={notification.message}
+                sender={notification.sender_id}
+                senderRole={notification.sender_role}
+                date={formattedDate}
+                time={formattedTime}
+              />
+            )
+          })
+
+        )}
+
+      </DashboardChildPageCard>
     </DashboardChildPageTemplate>
   )
 }
