@@ -219,6 +219,14 @@ const router = createBrowserRouter([
         path: "NotAvailablePage",
         element: <NotAvailablePage />,
       },
+      {
+        path: "DatewiseReportAdmin",
+        element: <DatewiseReportAdmin />,
+      },
+      {
+        path: "ClasswiseReportAdmin",
+        element: <ClasswiseReportAdmin />,
+      },
     ],
   },
   {

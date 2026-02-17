@@ -140,7 +140,13 @@ export const getAllStudents = async (req, res) => {
     try {
         const students = await Student.findAll({
             where: { course_id: req.user.course_id },
-            attributes: { exclude: ["createdAt", "updatedAt"] }
+            attributes: { exclude: ["createdAt", "updatedAt"] },
+            include: [
+                {
+                    model: User,
+                    attributes: ["status"]   // only fetch status from User table
+                }
+            ]
         });
 
         res.json(students);
