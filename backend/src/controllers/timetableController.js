@@ -147,18 +147,49 @@ export const getAllTimetableEntries = async (req, res) => {
 export const getTimetableByClass = async (req, res) => {
   try {
     const { class_pk } = req.params;
+
     const timetable = await Timetable.findAll({
       where: { class_pk },
+      include: [
+        { model: Faculty, attributes: ["name"] },
+        { model: Subject, attributes: ["subject_name"] }
+      ],
       order: [
         ["day_of_week", "ASC"],
-        ["start_time", "ASC"],
+        ["start_time", "ASC"]
       ],
+      attributes:{
+         exclude: [
+      "id",
+      "schedule_id",
+      "class_pk",
+      "subject_id",
+      "faculty_id",
+      "createdAt",
+      "updatedAt",
+      
+    ]
+      }
     });
-    res.status(200).json(timetable);
+
+    // Group by day
+    const weekTimetable = timetable.reduce((acc, item) => {
+      const day = item.day_of_week;
+
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(item);
+
+      return acc;
+    }, {});
+
+    res.json(weekTimetable);
+
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // Get timetable for a specific faculty member
 export const getTimetableByFaculty = async (req, res) => {

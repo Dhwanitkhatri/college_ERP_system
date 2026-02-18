@@ -2,160 +2,89 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../ui/Cards/DashboardChildPageCard";
-import { Calendar, FileText, ArrowLeft } from "lucide-react";
+import { Calendar, FileText, ArrowLeft, SofaIcon } from "lucide-react";
+import api from "../api/axios.js";
+import { useEffect } from "react";
+const formatTimetable = (data) => {
+  const days = Object.keys(data);
+  const timeSlots = [
+  { start: "09:00:00", end: "09:55:00" },
+  { start: "10:00:00", end: "10:55:00" },
+  { start: "11:00:00", end: "11:55:00" },
+  { start: "12:00:00", end: "12:55:00" },
+  { start: "13:00:00", end: "13:55:00" },
+  { start: "14:00:00", end: "14:55:00" }
+];
+
+
+  return days.map(day => ({
+    day,
+    slots: timeSlots.map(slot => {
+      const lecture = (data[day] || []).find(
+        lec =>
+          lec.start_time === slot.start &&
+          lec.end_time === slot.end
+      );
+
+      return {
+        start: slot.start,
+        end: slot.end,
+        subject: lecture?.Subject?.subject_name || "",
+        faculty: lecture?.Faculty?.name || ""
+      };
+    })
+  }));
+};
+
+
 
 export default function ViewTimetable() {
   {
     /* this is the state and form part of the code */
   }
   const [activeTab, setActiveTab] = useState("menu");
+  const [classes , setClasses]=useState([]);
+  const [lectureData  ,setLectureDate]=useState([]);
   const { register, watch, setValue } = useForm();
   const selectedClass = watch("selectedClass");
+  const token = localStorage.getItem("token");
+  useEffect(() => {
+    api
+      .get("api/timetables/current-year-classes", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setClasses(response.data.data);
+        console.log(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching classes:", error);
+      });
+  }, []);
+  useEffect(() => {
+  if (!selectedClass) return;
 
-  {
-    /* below is the dummy data for table design */
-  }
-  const classes = ["FYBCA-A", "FYBCA-B", "SYBCA-A", "SYBCA-B", "TYBCA-A"];
+  api
+    .get(`api/timetables/class/${selectedClass}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => {
+      console.log(response.data);
+      const formatted = formatTimetable(response.data);
+      setLectureDate(formatted);
+      
+      console.log(formatted);
+    })
+    .catch((error) => {
+      console.error("Error fetching timetable:", error);
+    });
+}, [selectedClass]);
 
-  const lectureData = [
-    {
-      day: "Monday",
-      slots: [
-        {
-          time: "9:00 - 10:00",
-          subject: "Data Structures",
-          faculty: "Dr. Sharma",
-        },
-        {
-          time: "10:00 - 11:00",
-          subject: "Database Mgmt",
-          faculty: "Prof. Kumar",
-        },
-        { time: "11:00 - 12:00", subject: "Web Dev", faculty: "Dr. Patel" },
-        { time: "1:00 - 2:00", subject: "OS", faculty: "Prof. Reddy" },
-        {
-          time: "2:00 - 3:00",
-          subject: "Computer Networks",
-          faculty: "Dr. Gupta",
-        },
-      ],
-    },
-    {
-      day: "Tuesday",
-      slots: [
-        {
-          time: "9:00 - 10:00",
-          subject: "Computer Networks",
-          faculty: "Dr. Gupta",
-        },
-        {
-          time: "10:00 - 11:00",
-          subject: "Data Structures",
-          faculty: "Dr. Sharma",
-        },
-        {
-          time: "11:00 - 12:00",
-          subject: "Software Eng",
-          faculty: "Prof. Verma",
-        },
-        { time: "1:00 - 2:00", subject: "Web Dev Lab", faculty: "Dr. Patel" },
-        { time: "2:00 - 3:00", subject: "Web Dev Lab", faculty: "Dr. Patel" },
-      ],
-    },
-    {
-      day: "Wednesday",
-      slots: [
-        {
-          time: "9:00 - 10:00",
-          subject: "Database Mgmt",
-          faculty: "Prof. Kumar",
-        },
-        { time: "10:00 - 11:00", subject: "OS", faculty: "Prof. Reddy" },
-        {
-          time: "11:00 - 12:00",
-          subject: "Data Structures",
-          faculty: "Dr. Sharma",
-        },
-        {
-          time: "1:00 - 2:00",
-          subject: "Database Lab",
-          faculty: "Prof. Kumar",
-        },
-        {
-          time: "2:00 - 3:00",
-          subject: "Database Lab",
-          faculty: "Prof. Kumar",
-        },
-      ],
-    },
-    {
-      day: "Thursday",
-      slots: [
-        {
-          time: "9:00 - 10:00",
-          subject: "Software Eng",
-          faculty: "Prof. Verma",
-        },
-        { time: "10:00 - 11:00", subject: "Web Dev", faculty: "Dr. Patel" },
-        {
-          time: "11:00 - 12:00",
-          subject: "Computer Networks",
-          faculty: "Dr. Gupta",
-        },
-        { time: "1:00 - 2:00", subject: "OS", faculty: "Prof. Reddy" },
-        {
-          time: "2:00 - 3:00",
-          subject: "Database Mgmt",
-          faculty: "Prof. Kumar",
-        },
-      ],
-    },
-    {
-      day: "Friday",
-      slots: [
-        { time: "9:00 - 10:00", subject: "OS", faculty: "Prof. Reddy" },
-        {
-          time: "10:00 - 11:00",
-          subject: "Software Eng",
-          faculty: "Prof. Verma",
-        },
-        {
-          time: "11:00 - 12:00",
-          subject: "Data Structures",
-          faculty: "Dr. Sharma",
-        },
-        { time: "1:00 - 2:00", subject: "Project Work", faculty: "Multiple" },
-        { time: "2:00 - 3:00", subject: "Project Work", faculty: "Multiple" },
-      ],
-    },
-    {
-      day: "Saturday",
-      slots: [
-        {
-          time: "9:00 - 10:00",
-          subject: "Data Structures",
-          faculty: "Dr. Sharma",
-        },
-        {
-          time: "10:00 - 11:00",
-          subject: "Database Mgmt",
-          faculty: "Prof. Kumar",
-        },
-        { time: "11:00 - 12:00", subject: "Web Dev", faculty: "Dr. Patel" },
-        {
-          time: "1:00 - 2:00",
-          subject: "Operating Systems",
-          faculty: "Prof. Reddy",
-        },
-        {
-          time: "2:00 - 3:00",
-          subject: "Computer Networks",
-          faculty: "Dr. Gupta",
-        },
-      ],
-    },
-  ];
-
+  
   {
     /* this is the handler for the reset button */
   }
@@ -166,6 +95,7 @@ export default function ViewTimetable() {
   {
     /* main designing start from here */
   }
+
   return (
     <DashboardChildPageTemplate
       title="View Timetable"
@@ -240,8 +170,8 @@ export default function ViewTimetable() {
               >
                 <option value="">Choose a class</option>
                 {classes.map((cls) => (
-                  <option key={cls} value={cls}>
-                    {cls}
+                  <option key={cls.id} value={cls.id}>
+                    {cls.class_id} semester {cls.semester}
                   </option>
                 ))}
               </select>
@@ -257,12 +187,12 @@ export default function ViewTimetable() {
                       <th className="px-6 py-4 border-b dark:border-gray-700">
                         Day
                       </th>
-                      {lectureData[0].slots.map((slot, i) => (
+                      {lectureData.length > 0 &&lectureData[0].slots.map((slot, i) => (
                         <th
                           key={i}
                           className="px-6 py-4 border-b dark:border-gray-700 whitespace-nowrap"
                         >
-                          {slot.time}
+                          {slot.start}
                         </th>
                       ))}
                     </tr>

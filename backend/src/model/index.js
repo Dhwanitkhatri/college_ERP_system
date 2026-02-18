@@ -258,6 +258,18 @@ Backlog.belongsTo(Exam, { foreignKey: 'cleared_exam_id' });
 BacklogAttempt.belongsTo(Backlog, { foreignKey: 'backlog_id' });
 BacklogAttempt.belongsTo(Exam, { foreignKey: 'exam_id' });
 
+// Timetable → Faculty
+Timetable.belongsTo(Faculty, {
+  foreignKey: "faculty_id",
+  targetKey: "faculty_id"
+});
+
+// Timetable → Subject
+Timetable.belongsTo(Subject, {
+  foreignKey: "subject_id",
+  targetKey: "subject_id"
+});
+
 
 
 /* =====================================================
