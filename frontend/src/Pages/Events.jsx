@@ -4,13 +4,24 @@ import EventCard from "../ui/Cards/EventCard";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios.js";
+import { getUserRole } from "../utils/auth"; // adjust path if needed
 
 export default function Events() {
   const [events, setEvents] = useState([]); //fetched events will be store here
   const navigate = useNavigate();
 
+  /* role state to check if user is admin */
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
+
+    /* ===== Get role from token ===== */
+    const role = getUserRole();
+
+    if (role === "Admin") {   // ✅ case fixed
+      setIsAdmin(true);
+    }
 
     api
       .get("/api/event/course/", {
@@ -71,7 +82,7 @@ export default function Events() {
             time={event.event_time}
             location={event.location}
             attendees={event.attendees}
-            isAdmin={true}
+            isAdmin={isAdmin}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />

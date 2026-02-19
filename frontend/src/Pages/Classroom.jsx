@@ -1,12 +1,14 @@
 import React from "react";
 import DashboardChildPageTemplate from "../ui/Templates/DashboardChildPageTemplate";
 import ClassroomCard from "../ui/Cards/ClassroomCard";
+import { getUserRole } from "../utils/auth";
 import { useEffect, useState } from "react";
 import api from "../api/axios.js";
 
 export default function Classroom() {
   const token = localStorage.getItem("token"); // Get token from localStorage
   const [classes, setClasses] = useState([]);
+  const role = getUserRole(); // Get role from decoded token
 
   useEffect(() => {
     api
@@ -42,6 +44,7 @@ export default function Classroom() {
             dept={cls.semester}
             students={cls.total_students || 0}
             mentor={cls.mentor_name || "Not Assigned"}
+            isAdmin={role === "Admin"} // Only Admin will get true
           />
         ))}
       </div>
