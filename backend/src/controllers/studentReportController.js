@@ -322,6 +322,13 @@ export const getClassWiseReport = async (req, res) => {
       where: whereClause,
       order: [['student_id', 'ASC'], ['date', 'ASC'], ['lecture_no', 'ASC']]
     });
+    console.log("report"+attendanceRecords);
+   if (!attendanceRecords || attendanceRecords.length === 0) {
+  return res.status(400).json({
+    message: "faculty does not take this subject"
+  });
+}
+
 
     const attendanceMap = {};
     attendanceRecords.forEach(r => {
