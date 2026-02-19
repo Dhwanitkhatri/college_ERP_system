@@ -6,6 +6,7 @@ export default function ThemeButton() {
 
   return (
     <button
+      type="button"
       onClick={toggleTheme}
       className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
     >
