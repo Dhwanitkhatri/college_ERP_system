@@ -43,6 +43,8 @@ import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin";
 import EditStudentAdmin from "./Pages/Admin/EditStudentAdmin";
 import ViewTimetable from "./Pages/ViewTimeTable";
 import EditEventAdmin from "./Pages/Admin/EditEventAdmin";
+import ChangeCredentials from "./Pages/Faculty/ChangeCredentials";
+import UpdateAttendanceFaculty from "./Pages/Faculty/UpdateAttendanceFaculty";
 
 const router = createBrowserRouter([
   {
@@ -227,6 +229,18 @@ const router = createBrowserRouter([
         path: "ClasswiseReportAdmin",
         element: <ClasswiseReportAdmin />,
       },
+      {
+        path: "OverallClassReportAdmin",
+        element: <OverallClassReportAdmin />,
+      },
+      {
+        path: "ChangeCredentials",
+        element: <ChangeCredentials />,
+      },
+      {
+        path: "UpdateAttendanceFaculty",
+        element: <UpdateAttendanceFaculty />,
+      },
     ],
   },
   {
@@ -256,6 +270,10 @@ const router = createBrowserRouter([
       {
         path: "NotAvailablePage",
         element: <NotAvailablePage />,
+      },
+      {
+        path: "ChangeCredentials",
+        element: <ChangeCredentials />,
       },
     ],
   },

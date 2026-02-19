@@ -11,13 +11,6 @@ const AdminPanelDashboard = () => {
     <PanelTemplateDashboard username={username}>
       {/* ROW 1 */}
       <DashContentPanelDashboard>
-        <ActionContainerDashboard title="Class Management">
-          <ActionButtonDashboard title="Add Student" />
-          <ActionButtonDashboard title="Add Subject" />
-          <ActionButtonDashboard title="Add New Classes" />
-          <ActionButtonDashboard title="TimeTable" />
-        </ActionContainerDashboard>
-
         <ActionContainerDashboard title="Attendance & Planning">
           <Link to="TakeAttendanceFaculty">
             <ActionButtonDashboard title="Take Attendance" />
@@ -33,9 +26,16 @@ const AdminPanelDashboard = () => {
       {/* ROW 2 */}
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Report & Evaluation">
-          <Link to="DatewiseReportAdmin"><ActionButtonDashboard title="Datewise Report" /></Link>
+          <Link to="DatewiseReportAdmin">
+            <ActionButtonDashboard title="Datewise Report" />
+          </Link>
           <ActionButtonDashboard title="Studentwise Report" />
-          <Link to="ClasswiseReportAdmin"><ActionButtonDashboard title="Classwise Report" /></Link>
+          <Link to="ClasswiseReportAdmin">
+            <ActionButtonDashboard title="Classwise Report" />
+          </Link>
+          <Link to="OverallClassReportAdmin">
+            <ActionButtonDashboard title="Overall Class Report" />
+          </Link>
           <ActionButtonDashboard title="Feedback Evaluation" />
         </ActionContainerDashboard>
 
