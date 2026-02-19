@@ -22,6 +22,7 @@ import eventsRoutes from "./src/routes/eventsRouts.js";
 import subjectComponentRoutes from "./src/routes/subjectComponentRoutes.js";
 import examRoutes from "./src/routes/examRoutes.js";
 import marksRoutes from "./src/routes/marksRoutes.js";
+import examtimetableRoutes from "./src/routes/examTimetableRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -64,6 +65,7 @@ app.use("/api/event", eventsRoutes);
 app.use("/api/components", subjectComponentRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/marks", marksRoutes);
+app.use("/api/exam-timetable", examtimetableRoutes);
 
 
 app.get("/", (req, res) => {

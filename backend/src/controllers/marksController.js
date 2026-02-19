@@ -3,6 +3,7 @@ import { SubjectComponent } from "../model/SubjectComponent.js";
 import { Student } from "../model/Student.js";
 import { Exam } from "../model/Exam.js";
 import { Subject } from "../model/Subject.js";
+import { ExamTimetable } from "../model/ExamTimetable.js";
 import { sequelize } from "../config/db.js";
 
 export const enterMarks = async (req, res) => {
@@ -17,12 +18,14 @@ export const enterMarks = async (req, res) => {
       marks_obtained
     } = req.body;
 
-    // Basic Validation (Required fields + Marks non-negative)
+    // =============================
+    //  BASIC VALIDATION
+    // =============================
     if (!student_id || !subject_id || !component_id || marks_obtained === undefined) {
       await t.rollback();
       return res.status(400).json({
         success: false,
-        message: "student_id, subject_id, component_id, marks_obtained are required"
+        message: "student_id, subject_id, component_id, marks_obtained required"
       });
     }
 
@@ -34,10 +37,13 @@ export const enterMarks = async (req, res) => {
       });
     }
 
-    // Parallel Fetch 
-    const [component, student, exam] = await Promise.all([
+    // =============================
+    //  FETCH DATA
+    // =============================
+    const [component, student, subject, exam] = await Promise.all([
       SubjectComponent.findByPk(component_id),
       Student.findOne({ where: { student_id } }),
+      Subject.findOne({ where: { subject_id } }),
       exam_id ? Exam.findByPk(exam_id) : null
     ]);
 
@@ -51,13 +57,34 @@ export const enterMarks = async (req, res) => {
       return res.status(404).json({ success: false, message: "Student not found" });
     }
 
-    // If EXAM type → exam_id required
+    if (!subject) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Subject not found" });
+    }
+
+    // =============================
+    //  COMPONENT ↔ SUBJECT CHECK
+    // =============================
+    if (component.subject_id !== subject_id) {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "Component does not belong to this subject"
+      });
+    }
+
+    // =============================
+    //  COMPONENT TYPE LOGIC 🔥
+    // =============================
+
+    // CASE 1: EXAM COMPONENT
     if (component.type === "EXAM") {
+
       if (!exam_id) {
         await t.rollback();
         return res.status(400).json({
           success: false,
-          message: "Exam ID is required for EXAM components"
+          message: "Exam ID required for EXAM component"
         });
       }
 
@@ -68,28 +95,37 @@ export const enterMarks = async (req, res) => {
           message: "Exam not found"
         });
       }
-    }
 
-    // Subject Existence Check
-    const subject = await Subject.findOne({ where: { subject_id } });
-    if (!subject) {
-      await t.rollback();
-      return res.status(404).json({
-        success: false,
-        message: "Subject not found"
+      // CHECK SUBJECT IN TIMETABLE
+      const timetable = await ExamTimetable.findOne({
+        where: { exam_id, subject_id }
       });
+
+      if (!timetable) {
+        await t.rollback();
+        return res.status(400).json({
+          success: false,
+          message: "This subject is NOT scheduled in this exam"
+        });
+      }
     }
 
-    // Subject validation
-    if (component.subject_id !== subject_id) {
-      await t.rollback();
-      return res.status(400).json({
-        success: false,
-        message: "Component does not belong to this subject"
-      });
+    // CASE 2:  INTERNAL / ASSIGNMENT
+    else if (component.type === "INTERNAL" || component.type === "ASSIGNMENT") {
+
+      //  exam_id SHOULD NOT BE PASSED
+      if (exam_id) {
+        await t.rollback();
+        return res.status(400).json({
+          success: false,
+          message: "Exam ID not allowed for INTERNAL/ASSIGNMENT"
+        });
+      }
     }
 
-    // Marks validation
+    // =============================
+    //  MARKS VALIDATION
+    // =============================
     if (marks_obtained > component.max_marks) {
       await t.rollback();
       return res.status(400).json({
@@ -98,11 +134,13 @@ export const enterMarks = async (req, res) => {
       });
     }
 
-    //  UPSERT
+    // =============================
+    // UPSERT
+    // =============================
     const [record, created] = await StudentMarks.upsert({
       student_id,
       subject_id,
-      exam_id: exam_id || null,
+      exam_id: component.type === "EXAM" ? exam_id : null,
       component_id,
       marks_obtained
     }, {
@@ -114,7 +152,7 @@ export const enterMarks = async (req, res) => {
 
     return res.status(created ? 201 : 200).json({
       success: true,
-      message: created ? "Marks created successfully" : "Marks updated successfully",
+      message: created ? "Marks created" : "Marks updated",
       data: record
     });
 
