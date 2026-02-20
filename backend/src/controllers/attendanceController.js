@@ -5,6 +5,7 @@ import { Subject } from "../model/Subject.js";
 import { Timetable } from "../model/Timetable.js";
 import { Class } from "../model/Class.js";
 import { User } from "../model/User.js";
+import {Faculty} from "../model/Faculty.js"
 
 export const markAttendance = async (req, res) => {
   const t = await sequelize.transaction();
@@ -99,50 +100,124 @@ export const markAttendance = async (req, res) => {
   }
 };
 
-export const getAttendance = async (req, res) => {
+export const getAttendance  = async (req, res) => {
   try {
-    const { student_id, subject_id, class_id, date } = req.query;
-    const whereClause = {};
+    const { class_id, subject_id, lecture_no, date } = req.params;
+    const faculty = await Faculty.findOne({where:{user_id:req.user.uid}})
 
-    if (student_id) whereClause.student_id = student_id;
-    if (subject_id) whereClause.subject_id = subject_id;
-    if (class_id) whereClause.class_id = class_id;
-    if (date) whereClause.date = date;
+    if (!class_id || !subject_id || !lecture_no || !date) {
+      return res.status(400).json({ message: "Missing parameters" });
+    }
 
-    const attendanceRecords = await Attendance.findAll({
-      where: whereClause
+    const students = await Student.findAll({
+      where: { class_pk :class_id },
+      include: [
+        {
+          model: Attendance,
+          required: false, // LEFT JOIN
+          where: {
+            subject_id,
+            lecture_no,
+            date,
+          
+          }
+        }
+      ]
+    });
+
+    const formatted = students.map(student => {
+      const attendanceRecord = student.Attendances[0];
+
+      return {
+        student_id: student.student_id,
+        name: student.name,
+        status: attendanceRecord ? attendanceRecord.status : "Absent"
+      };
+    });
+
+    return res.status(200).json(formatted);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+export const updateAttendance = async (req, res) => {
+  try {
+    const {
+      class_id,
+      subject_id,
+      lecture_no,
+      date,
+      students,
+    } = req.body;
+
+    if (!class_id || !subject_id || !lecture_no || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    if (!Array.isArray(students) || students.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Students array is required",
+      });
+    }
+
+  
+    const faculty = await Faculty.findOne({
+      where: { user_id: req.user.uid },
+    });
+
+    if (!faculty) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty not found",
+      });
+    }
+
+    
+    const faculty_id = faculty.faculty_id;
+
+    console.log("Faculty ID:", faculty_id);
+
+    
+    const attendanceData = students.map((student) => ({
+      student_id: student.student_id,
+      subject_id,
+      faculty_id, // now correct
+      class_id,
+      lecture_no,
+      date,
+      status: student.status,
+    }));
+
+    await Attendance.bulkCreate(attendanceData, {
+      updateOnDuplicate: ["status", "updatedAt"],
     });
 
     return res.status(200).json({
       success: true,
-      data: attendanceRecords
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-export const updateAttendance = async (req, res) => {
-  try {
-    const { attendance_id } = req.params;
-    const { status } = req.body;
-    const attendanceRecord = await Attendance.findByPk(attendance_id);
-
-    if (!attendanceRecord) {
-      return res.status(404).json({ message: "Attendance record not found" });
-    }
-    attendanceRecord.status = status;
-    await attendanceRecord.save();
-    return res.status(200).json({
       message: "Attendance updated successfully",
-      data: attendanceRecord
     });
+
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: error.message });
+    console.error("Update Attendance Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
+
+
+
 export const deleteAttendance = async (req, res) => {
   try {
     const { attendance_id } = req.params;

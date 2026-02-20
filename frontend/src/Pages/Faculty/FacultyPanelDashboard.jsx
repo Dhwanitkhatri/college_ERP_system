@@ -19,6 +19,9 @@ const AdminPanelDashboard = () => {
           <Link to="SessionPlanningFaculty">
             <ActionButtonDashboard title="Session Planning" />
           </Link>
+          <Link to="UpdateAttendanceFaculty">
+            <ActionButtonDashboard title="update attendance" />
+          </Link>
           <ActionButtonDashboard title="Update Session Planning" />
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
