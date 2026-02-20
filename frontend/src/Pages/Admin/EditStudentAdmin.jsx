@@ -7,9 +7,11 @@ import SaveButton from "../../ui/Buttons/SaveButton";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { Eye, EyeOff } from "lucide-react"; //added for password toggle
 
 const EditStudentAdmin = () => {
   const [student, setStudent] = useState(null);
+  const [showPassword, setShowPassword] = useState(false); //state for toggling password visibility
   const { studentId } = useParams(); //this holds student id from url
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -68,6 +70,7 @@ const EditStudentAdmin = () => {
           email: data.email,
           admission_year: data.admission_year,
           year_of_study: data.year_of_study,
+          password: data.password, //added password field
         },
         {
           headers: {
@@ -155,6 +158,49 @@ const EditStudentAdmin = () => {
               <option value="TY">TY</option>
               <option value="LY">LY</option>
             </select>
+          </div>
+
+          {/* Password Div */}
+          <div className="form-field">
+            <label className="custom-label">Password</label>
+
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter New Password"
+                className="custom-input"
+                {...register("password", {
+                  required: "Please Fill This Field",
+                  minLength: {
+                    value: 8,
+                    message: "Minimum 8 Characters are Required",
+                  },
+                  pattern: {
+                    value:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/,
+                    message:
+                      "Password must contain at least one uppercase, one lowercase and one special character",
+                  },
+                })}
+              />
+
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </span>
+            </div>
+
+            {errors.password && (
+              <p className="custom-error">{errors.password.message}</p>
+            )}
           </div>
 
           {/* Student ID Div */}

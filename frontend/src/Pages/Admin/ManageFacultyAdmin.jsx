@@ -8,7 +8,7 @@ import ActivateDeactivateButton from "../../ui/Buttons/ActivateDeactivateButton.
 
 const ManageFacultyAdmin = () => {
   const token = localStorage.getItem("token"); // Get token from localStorage
-  const navigate = useNavigate(); //this is for navigating
+  const navigate = useNavigate(); // this is for navigating
 
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true); // Page loading state
@@ -41,7 +41,7 @@ const ManageFacultyAdmin = () => {
 
   /*
     This function toggles faculty active/inactive status.
-    It sends PATCH request to backend and updates UI instantly.
+    It sends PUT request to backend and updates UI instantly.
   */
   const toggleFacultyStatus = async (userId) => {
     if (!window.confirm("Are you sure you want to change status?")) return;
@@ -166,14 +166,23 @@ const ManageFacultyAdmin = () => {
               faculties.map((faculty) => (
                 <tr
                   key={faculty.id}
-                  className="hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                  className="hover:bg-[var(--bg-hover)] transition"
                 >
                   <td className="table-row-style">{faculty.name}</td>
+
+                  {/* Sticky Faculty ID Column */}
                   <td className="table-row-style sticky-col">
                     {faculty.faculty_id}
                   </td>
-                  <td className="table-row-style">{faculty.email}</td>
-                  <td className="table-row-style">{faculty.phone}</td>
+
+                  <td className="table-row-style">
+                    {faculty.email}
+                  </td>
+
+                  {/* Phone Column (wraps naturally) */}
+                  <td className="table-row-style break-words">
+                    {faculty.phone}
+                  </td>
 
                   {/* Show current status */}
                   <td className="table-row-style">
@@ -188,31 +197,31 @@ const ManageFacultyAdmin = () => {
                     )}
                   </td>
 
-                  <td className="table-row-style flex gap-2">
-                    {/* Edit button */}
-                    <EditButton
-                      onClick={() =>
-                        navigate(
-                          `/admin/Dashboard/EditFacultyAdmin/${faculty.id}`
-                        )
-                      }
-                      disabled={actionLoading === faculty.id}
-                    />
+                  {/* ✅ FIXED ACTION COLUMN */}
+                  <td className="table-row-style">
+                    <div className="flex flex-wrap gap-2 items-center h-full">
+                      <EditButton
+                        onClick={() =>
+                          navigate(
+                            `/admin/Dashboard/EditFacultyAdmin/${faculty.id}`
+                          )
+                        }
+                        disabled={actionLoading === faculty.id}
+                      />
 
-                    {/* Activate / Deactivate button */}
-                    <ActivateDeactivateButton
-                      status={faculty.User?.status}
-                      disabled={actionLoading === faculty.user_id}
-                      onClick={() =>
-                        toggleFacultyStatus(faculty.user_id)
-                      }
-                    />
+                      <ActivateDeactivateButton
+                        status={faculty.User?.status}
+                        disabled={actionLoading === faculty.user_id}
+                        onClick={() =>
+                          toggleFacultyStatus(faculty.user_id)
+                        }
+                      />
 
-                    {/* Delete button */}
-                    <DeleteButton
-                      disabled={actionLoading === faculty.id}
-                      onClick={() => deleteFaculty(faculty.id)}
-                    />
+                      <DeleteButton
+                        disabled={actionLoading === faculty.id}
+                        onClick={() => deleteFaculty(faculty.id)}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))

@@ -28,6 +28,7 @@ const AdminPanelDashboard = () => {
           <Link to="ManageSettingsAdmin"><ActionButtonDashboard title="Manage Settings" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Manage Events" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Manage Subjects" /></Link>
+          <Link to="ManageNotificationsAdmin"><ActionButtonDashboard title="Manage Notifications" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
 

@@ -88,8 +88,8 @@ const OverallClassReportAdmin = () => {
       .catch((err) =>
         console.error(
           "Error generating report:",
-          err.response?.data || err.message
-        )
+          err.response?.data || err.message,
+        ),
       );
   };
 
@@ -169,49 +169,82 @@ const OverallClassReportAdmin = () => {
         <div className="containerRight lg:col-span-8">
           {!isReportGenerated ? (
             <DashboardChildPageCard>
-              <div className="flex flex-col items-center justify-center h-64 gap-2">
-                <FileText size={40} className="text-gray-400" />
-                <p className="font-semibold">No Report Generated</p>
+              <div className="flex flex-col items-center justify-center h-64 text-center gap-2">
+                {/* Dynamic Icon Color */}
+                <FileText size={40} className="text-[var(--text-muted)]" />
+
+                {/* Dynamic Text Color */}
+                <p className="font-semibold text-[var(--text-secondary)]">
+                  No Report Generated
+                </p>
               </div>
             </DashboardChildPageCard>
           ) : (
             <DashboardChildPageCard>
-              <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <div className="table-wrapper max-h-[600px] overflow-y-auto">
                 <table className="w-full border-collapse">
-                  <thead className="sticky top-0 bg-[var(--bg-secondary)]">
+                  <thead>
                     <tr>
-                      <th className="table-row-style">Sr. No</th>
-                      <th className="table-row-style">Enrollment</th>
-                      <th className="table-row-style">Name</th>
+                      <th className="table-row-style sticky-header">Sr. No</th>
+
+                      {/* Sticky Enrollment Column */}
+                      <th className="table-row-style sticky-header sticky-col">
+                        Enrollment
+                      </th>
+
+                      <th className="table-row-style sticky-header">Name</th>
 
                       {/* subject column ni mapping */}
                       {subjects.map((sub) => (
-                        <th key={sub.subject_id} className="table-row-style">{sub.subject_name}</th>
+                        <th
+                          key={sub.subject_id}
+                          className="table-row-style sticky-header"
+                        >
+                          {sub.subject_name}
+                        </th>
                       ))}
-                      <th className="table-row-style">Total Absent</th>
-                      <th className="table-row-style">Total Present</th>
-                      <th className="table-row-style">Total lectures</th>
-                      <th className="table-row-style">Attendance %</th>
+
+                      <th className="table-row-style sticky-header">
+                        Total Absent
+                      </th>
+                      <th className="table-row-style sticky-header">
+                        Total Present
+                      </th>
+                      <th className="table-row-style sticky-header">
+                        Total lectures
+                      </th>
+                      <th className="table-row-style sticky-header">
+                        Attendance %
+                      </th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {students.map((stu, index) => (
-                      <tr key={stu.student_id}>
+                      <tr
+                        key={stu.student_id}
+                        className="hover:bg-[var(--bg-hover)] transition"
+                      >
                         <td className="table-row-style">{index + 1}</td>
-                        <td className="table-row-style">{stu.student_id}</td>
+
+                        <td className="table-row-style sticky-col">
+                          {stu.student_id}
+                        </td>
+
                         <td className="table-row-style">{stu.name}</td>
 
                         {/* subject data mapping */}
                         {stu.subject_wise.map((sub) => {
-                          
-
                           return (
-                            <td key={sub.subject_id} className="table-row-style">
+                            <td
+                              key={sub.subject_id}
+                              className="table-row-style"
+                            >
                               {sub.present}/{sub.total_classes}
                             </td>
                           );
                         })}
+
                         <td className="table-row-style">{stu.absent}</td>
                         <td className="table-row-style">{stu.present}</td>
                         <td className="table-row-style">{stu.total_classes}</td>

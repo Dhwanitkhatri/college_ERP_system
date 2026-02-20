@@ -1,4 +1,4 @@
-import { ChevronDown, Send, Mail, Users, Calendar } from "lucide-react";
+import { ChevronDown, Send } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import api from "../../api/axios.js";
@@ -15,6 +15,7 @@ export default function SendNotificationAdmin() {
 
   const sendTo = watch("sendTo");
   const [allUsers, setAllUsers] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -26,7 +27,8 @@ export default function SendNotificationAdmin() {
         .then((res) => setAllUsers(res.data.allUsers))
         .catch((err) => console.error(err.response?.data || err.message));
     }
-     if (sendTo === "Class") {
+
+    if (sendTo === "Class") {
       api
         .get("api/notifications/classes", {
           headers: { Authorization: `Bearer ${token}` },
@@ -34,85 +36,86 @@ export default function SendNotificationAdmin() {
         .then((res) => setAllUsers(res.data))
         .catch((err) => console.error(err.response?.data || err.message));
     }
-  }
-  , [sendTo]);
 
- 
+    setSelectedItems([]);
+  }, [sendTo]);
 
-async function onSubmit(data) {
-
-  const payload = {
-    title: data.title,
-    message: data.message
+  const handleCheckboxChange = (item) => {
+    setSelectedItems((prev) =>
+      prev.find((i) => i.id === item.id && i.role === item.role)
+        ? prev.filter((i) => !(i.id === item.id && i.role === item.role))
+        : [...prev, item]
+    );
   };
 
-  // ALL USERS (COURSE)//this is done
-  if (data.sendTo === "Course") {
-    payload.target_type = "COURSE";
-  }
+  async function onSubmit(data) {
+    const payload = {
+      title: data.title,
+      message: data.message,
+    };
 
-  // ALL STUDENTS
-  else if (data.sendTo === "Student") {
-    payload.target_type = "ROLE";
-    payload.receiver_role = "Student";
-  }
+    // ALL USERS (COURSE)//this is done
+    if (data.sendTo === "Course") {
+      payload.target_type = "COURSE";
+    }
 
-  // ALL FACULTY
-  else if (data.sendTo === "Faculty") {
-    payload.target_type = "ROLE";
-    payload.receiver_role = "Faculty";
-  }
+    // ALL STUDENTS
+    else if (data.sendTo === "Student") {
+      payload.target_type = "ROLE";
+      payload.receiver_role = "Student";
+    }
 
-  // SPECIFIC CLASS this is done 
-  else if (data.sendTo === "Class") {
-      const [section, name] = data.name.split("|");
-    if (!data.name) {
-      alert("Please select a class");
+    // ALL FACULTY
+    else if (data.sendTo === "Faculty") {
+      payload.target_type = "ROLE";
+      payload.receiver_role = "Faculty";
+    }
+
+    // SPECIFIC CLASS this is done 
+    else if (data.sendTo === "Class") {
+      if (selectedItems.length === 0) {
+        alert("Please select at least one class");
+        return;
+      }
+
+      payload.target_type = "CLASS";
+      payload.class_ids = selectedItems.map((c) => c.id);
+    }
+
+    // INDIVIDUAL
+    else if (data.sendTo === "Individual") {
+      if (selectedItems.length === 0) {
+        alert("Please select at least one user");
+        return;
+      }
+
+      payload.target_type = "INDIVIDUAL";
+      payload.receivers = selectedItems; 
+    }
+
+    else {
+      alert("Please select target");
       return;
     }
-    payload.target_type = "CLASS";
-    payload.class_id = name;
-    payload.section = section;
-  }
 
-  // INDIVIDUAL
-  else if (data.sendTo === "Individual") {
-   
-    const [role, id] = data.name.split("|");
-    if (!role || !id) {
-      alert("Please select role and user");
-      return;
+    try {
+      await api.post(
+        "/api/notifications/send",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Notification sent successfully");
+      setSelectedItems([]);
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to send notification");
     }
-    payload.target_type = "INDIVIDUAL";
-    payload.receiver_role = role;
-    payload.receiver_id = id;
   }
-
-  else {
-    alert("Please select target");
-    return;
-  }
-
- try {
-  const token = localStorage.getItem("token");
-
-  await api.post(
-    "/api/notifications/send",
-    payload, //  data goes here
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  alert("Notification sent successfully");
-} catch (error) {
-  console.error(error);
-  alert(error.response?.data?.message || "Failed to send notification");
-}
-
-}
 
   return (
     <DashboardChildPageTemplate
@@ -156,43 +159,48 @@ async function onSubmit(data) {
                 <p className="custom-error">{errors.sendTo.message}</p>
               )}
             </div>
-
-            {/* -------- optional field ahiya chhe -------- */}
-            {(sendTo === "Individual" || sendTo === "Class") && (
-              <div className="subjectDiv form-field">
-                <label className="subjectLabel custom-label">Name</label>
-
-                <div className="relative">
-                  <select
-                    defaultValue=""
-                    className="subjectInput custom-input appearance-none cursor-pointer"
-                    {...register("name", {
-                      required: "Please select a name",
-                    })}
-                  >
-                    <option value="" disabled>
-                      Select Name
-
-                    </option>
-                    {allUsers.map((u) => (
-                      <option key={`${u.role}|${u.id}`} value={`${u.role}|${u.id}`}>
-                        {u.id} 
-                      </option>
-                    ))}
-                  </select>
-                
-
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <ChevronDown className="h-4 w-4 text-gray-500 dark:text-[#9ca3af]" />
-                  </div>
-                </div>
-
-                {errors.subject && (
-                  <p className="custom-error">{errors.subject.message}</p>
-                )}
-              </div>
-            )}
           </div>
+
+          {/* -------- optional field ahiya chhe -------- */}
+          {(sendTo === "Individual" || sendTo === "Class") && (
+            <div className="form-field">
+              <label className="custom-label">
+                {sendTo === "Individual" ? "Select Users" : "Select Classes"}
+              </label>
+
+              <div
+                className="custom-input"
+                style={{
+                  maxHeight: "220px",
+                  overflowY: "auto",
+                  padding: "0.75rem",
+                }}
+              >
+                {allUsers.map((u) => (
+                  <div
+                    key={`${u.role}|${u.id}`}
+                    className="flex items-center gap-3 py-2 border-b border-gray-200 dark:border-gray-700"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedItems.find(
+                          (i) => i.id === u.id && i.role === u.role
+                        ) !== undefined
+                      }
+                      onChange={() => handleCheckboxChange(u)}
+                      className="cursor-pointer"
+                    />
+
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>{u.id}</strong> | {u.name || u.role} |{" "}
+                      {u.role}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ---------------- title field ahiya chhe ---------------- */}
           <div className="titleDiv form-field">

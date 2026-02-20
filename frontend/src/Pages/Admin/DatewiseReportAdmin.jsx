@@ -295,11 +295,12 @@ const DatewiseReportAdmin = () => {
             /*No Report Generated */
             <DashboardChildPageCard>
               <div className="flex flex-col items-center justify-center h-64 text-center gap-2">
-                <FileText size={40} className="text-gray-400" />
-                <p className="text-lg font-semibold">No Report Generated</p>
-                <p className="text-sm text-gray-500">
-                  Select all filters and click <b>"Generate Report"</b> to view
-                  attendance data.
+                {/* Dynamic Icon Color */}
+                <FileText size={40} className="text-[var(--text-muted)]" />
+
+                {/* Dynamic Text Color */}
+                <p className="font-semibold text-[var(--text-secondary)]">
+                  No Report Generated
                 </p>
               </div>
             </DashboardChildPageCard>

@@ -7,9 +7,11 @@ import { useState, useEffect } from "react";
 import SaveButton from "../../ui/Buttons/SaveButton";
 import { useParams, useNavigate } from "react-router-dom"; //using this for getting id from url
 import api from "../../api/axios";
+import { Eye, EyeOff } from "lucide-react"; //added for password toggle
 
 const EditFacultyAdmin = () => {
   const [faculty, setFaculty] = useState(null); // for storing the faculty data which will come from api call
+  const [showPassword, setShowPassword] = useState(false); //state for toggling password visibility
   const { facultyId } = useParams(); //this is state which knows which faculty to edit, it holds faculty id came from url
   const token = localStorage.getItem("token"); //get token from localstorage
   const navigate = useNavigate(); //for navigating back to managefaculty page
@@ -63,6 +65,7 @@ const EditFacultyAdmin = () => {
           name: data.fullName,
           phone: data.phoneNo,
           email: data.email,
+          password: data.password, //added password field
         },
         {
           headers: {
@@ -155,6 +158,49 @@ const EditFacultyAdmin = () => {
             )}
           </div>
 
+          {/* Edit Password Div */}
+          <div className="passwordDiv form-field">
+            <label className="passwordLabel custom-label">Password</label>
+
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter New Password"
+                className="passwordInput custom-input"
+                {...register("password", {
+                  required: "Please Fill This Field",
+                  minLength: {
+                    value: 8,
+                    message: "Minimum 8 Characters are Required",
+                  },
+                  pattern: {
+                    value:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$/,
+                    message:
+                      "Password must contain at least one uppercase, one lowercase and one special character",
+                  },
+                })}
+              />
+
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </span>
+            </div>
+
+            {errors.password && (
+              <p className="custom-error">{errors.password.message}</p>
+            )}
+          </div>
+
           {/*Faculty id Div */}
           <div className="facultyId form-field">
             <label className="facultyIdLabel custom-label">Faculty ID</label>
@@ -165,6 +211,7 @@ const EditFacultyAdmin = () => {
               {...register("facultyId")}
             />
           </div>
+
           <div className="form-actions">
             <SaveButton /> <CancelButton />
           </div>

@@ -45,6 +45,8 @@ import ViewTimetable from "./Pages/ViewTimeTable";
 import EditEventAdmin from "./Pages/Admin/EditEventAdmin";
 import ChangeCredentials from "./Pages/Faculty/ChangeCredentials";
 import UpdateAttendanceFaculty from "./Pages/Faculty/UpdateAttendanceFaculty";
+import ManageNotificationsAdmin from "./Pages/Admin/ManageNotificationsAdmin";
+import EditNotificationAdmin from "./Pages/Admin/EditNotificationAdmin";
 
 const router = createBrowserRouter([
   {
@@ -178,6 +180,14 @@ const router = createBrowserRouter([
       {
         path: "EditEventAdmin/:id",
         element: <EditEventAdmin />,
+      },
+      {
+        path: "ManageNotificationsAdmin",
+        element: <ManageNotificationsAdmin />,
+      },
+      {
+        path: "EditNotificationAdmin/:id",
+        element: <EditNotificationAdmin />,
       },
     ],
   },

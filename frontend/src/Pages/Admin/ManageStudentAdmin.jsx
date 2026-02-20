@@ -13,6 +13,7 @@ const ManageStudentAdmin = () => {
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null); // Row action loading state
 
   // Fetch all students when component loads
   useEffect(() => {
@@ -49,6 +50,8 @@ const ManageStudentAdmin = () => {
       return;
 
     try {
+      setActionLoading(id); // Start row loading
+
       await api.delete(`api/students/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -64,6 +67,8 @@ const ManageStudentAdmin = () => {
         "Error deleting student:",
         err.response?.data || err.message
       );
+    } finally {
+      setActionLoading(null); // Stop row loading
     }
   };
 
@@ -75,6 +80,8 @@ const ManageStudentAdmin = () => {
     if (!window.confirm("Are you sure you want to change status?")) return;
 
     try {
+      setActionLoading(userId); // Start row loading
+
       const res = await api.put(
         `api/students/active-inactive/${userId}`,
         {},
@@ -106,6 +113,8 @@ const ManageStudentAdmin = () => {
         "Error updating status:",
         err.response?.data || err.message
       );
+    } finally {
+      setActionLoading(null); // Stop row loading
     }
   };
 
@@ -117,12 +126,14 @@ const ManageStudentAdmin = () => {
         searchDesc="Search by name or roll no.."
         addLink="/admin/dashboard/AddStudentAdmin"
       >
-        <table className="w-full border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
+        <table className="w-full border table-wrapper border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead className="bg-gray-100 dark:bg-gray-800">
             <tr>
+              {/* Sticky Enrollment No Column */}
               <th className="table-row-style font-semibold sticky-col">
                 Enrollment No
               </th>
+
               <th className="table-row-style font-semibold">Name</th>
               <th className="table-row-style font-semibold">Year</th>
               <th className="table-row-style font-semibold">Email</th>
@@ -135,7 +146,10 @@ const ManageStudentAdmin = () => {
             {loading ? (
               <tr>
                 <td colSpan="6" className="table-row-style text-center">
-                  Loading...
+                  <div className="flex justify-center items-center gap-2">
+                    <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full"></div>
+                    Loading students...
+                  </div>
                 </td>
               </tr>
             ) : students.length === 0 ? (
@@ -146,15 +160,26 @@ const ManageStudentAdmin = () => {
               </tr>
             ) : (
               students.map((student) => (
-                <tr key={student.id}>
+                <tr
+                  key={student.id}
+                  className="hover:bg-[var(--bg-hover)] transition"
+                >
+                  {/* Sticky Student ID */}
                   <td className="table-row-style sticky-col">
                     {student.student_id}
                   </td>
-                  <td className="table-row-style">{student.name}</td>
+
+                  <td className="table-row-style">
+                    {student.name}
+                  </td>
+
                   <td className="table-row-style">
                     {student.year_of_study}
                   </td>
-                  <td className="table-row-style">{student.email}</td>
+
+                  <td className="table-row-style break-words">
+                    {student.email}
+                  </td>
 
                   {/* Show current status */}
                   <td className="table-row-style">
@@ -169,25 +194,31 @@ const ManageStudentAdmin = () => {
                     )}
                   </td>
 
-                  <td className="table-row-style flex gap-2">
-                    <EditButton
-                      onClick={() =>
-                        navigate(
-                          `/admin/Dashboard/EditStudentAdmin/${student.id}`
-                        )
-                      }
-                    />
+                  {/* ✅ FIXED ACTION COLUMN (no flex on td) */}
+                  <td className="table-row-style">
+                    <div className="flex flex-wrap gap-2 items-center h-full">
+                      <EditButton
+                        disabled={actionLoading === student.id}
+                        onClick={() =>
+                          navigate(
+                            `/admin/Dashboard/EditStudentAdmin/${student.id}`
+                          )
+                        }
+                      />
 
-                    <ActivateDeactivateButton
-                      status={student.User?.status}
-                      onClick={() =>
-                        toggleStudentStatus(student.user_id)
-                      }
-                    />
+                      <ActivateDeactivateButton
+                        status={student.User?.status}
+                        disabled={actionLoading === student.user_id}
+                        onClick={() =>
+                          toggleStudentStatus(student.user_id)
+                        }
+                      />
 
-                    <DeleteButton
-                      onClick={() => deleteStudent(student.id)}
-                    />
+                      <DeleteButton
+                        disabled={actionLoading === student.id}
+                        onClick={() => deleteStudent(student.id)}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))
