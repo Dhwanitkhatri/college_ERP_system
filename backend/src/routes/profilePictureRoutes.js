@@ -6,7 +6,8 @@ import {
     uploadProfilePicture,
     getProfilePicture,
     deleteProfilePicture,
-    profileInfoAdmin
+    profileInfoAdmin,
+    changePassword
 } from "../controllers/profilePictureController.js";
 
 const router = express.Router();
@@ -25,5 +26,7 @@ router.get("/get", authMiddleware, getProfilePicture);
 router.delete("/delete", authMiddleware, deleteProfilePicture);
 
 router.get("/adminInfo",authMiddleware,profileInfoAdmin);
+
+router.put("/change-password",authMiddleware,changePassword);
 
 export default router;

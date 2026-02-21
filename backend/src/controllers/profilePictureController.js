@@ -6,9 +6,11 @@ import fs from 'fs';
 import { Student } from "../model/Student.js";
 import { Faculty } from "../model/Faculty.js";
 import { Admin } from "../model/Admin.js";
+import { User } from '../model/User.js';
 import {EmployeePersonalDetails} from '../model/EmployeePersonalDetails.js';
 import Sequelize from 'sequelize';
 import { sequelize } from '../config/db.js';
+import bcrypt from 'bcrypt';
 
 const roleModelMap = {
     student: Student,
@@ -299,6 +301,71 @@ export const profileInfoAdmin = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching profile:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  try {
+    const { uid: user_id } = req.user;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Old password and new password are required",
+      });
+    }
+
+    
+    const user = await User.findOne({
+      where: { user_id }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+   
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Old password is incorrect",
+      });
+    }
+
+   
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New password cannot be same as old password",
+      });
+    }
+
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully. Please login again.",
+    });
+
+  } catch (error) {
+    console.error("Error changing password:", error);
     return res.status(500).json({
       success: false,
       error: error.message,
