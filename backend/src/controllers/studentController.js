@@ -180,75 +180,119 @@ export const getStudentById = async (req, res) => {
 };
 
 // Update a student by ID (admins only)
+
+
 export const updateStudentById = async (req, res) => {
-    const t = await sequelize.transaction(); //start transaction
-    try {
-        const { id } = req.params;
-        const {
-            course_id,
-            class_id,
-            name,
-            dob,
-            gender,
-            email,
-            admission_year,
-            year_of_study,
-        } = req.body;
-        //validation for atleast one field to update
-        if (
-            !course_id &&
-            !class_id &&
-            !name &&
-            !dob &&
-            !gender &&
-            !email &&
-            !admission_year &&
-            !year_of_study
-        ) {
-            await t.rollback();
-            return res.status(400).json({ message: "At least one field is required to update" });
-        }
+  let t;
 
-        const student = await Student.findOne({
-            where: {
-                id: id,
-                course_id: req.user.course_id
-            },
-            transaction: t
-        });
+  try {
+    t = await sequelize.transaction();
 
-        if (!student) {
-            await t.rollback();
-            return res.status(404).json({
-                message: "Student not found or you don't have access to update this student"
-            });
-        }
-        // Update only the provided fields
-        const updateData = {};
-        const allowedFields = [
-            'course_id', 'class_id', 'name', 'dob', 'gender',
-            'email', 'admission_year', 'year_of_study'
-        ];
-        //loop through allowed fields
-        for (const field of allowedFields) {
-            if (req.body[field] !== undefined) {
-                updateData[field] = req.body[field];
-            }
-        }
-        await student.update(updateData, { transaction: t });
-        await t.commit();
+    const { id } = req.params;
+    const {
+      course_id,
+      class_id,
+      name,
+      dob,
+      gender,
+      email,
+      admission_year,
+      year_of_study,
+      password,
+    } = req.body;
 
-        const updatedStudent = await Student.findByPk(id);//fetch updated student
-        res.json({
-            message: "Student updated successfully",
-            student: updatedStudent
-        });
-    } catch (error) {
-        await t.rollback();
-        console.error("Error updating student:", error);
-        res.status(500).json({ message: "Internal server error" });
+    if (
+      !course_id &&
+      !class_id &&
+      !name &&
+      !dob &&
+      !gender &&
+      !email &&
+      !admission_year &&
+      !year_of_study &&
+      !password
+    ) {
+      await t.rollback();
+      return res.status(400).json({
+        message: "At least one field is required to update",
+      });
     }
+
+    // 🔎 Find student with User relation
+    const student = await Student.findOne({
+      where: {
+        id: id,
+        course_id: req.user.course_id,
+      },
+      include: {
+        model: User,
+      },
+      transaction: t,
+    });
+
+    if (!student) {
+      await t.rollback();
+      return res.status(404).json({
+        message:
+          "Student not found or you don't have access to update this student",
+      });
+    }
+
+    // =========================
+    // Update Student Table
+    // =========================
+    const updateStudentData = {};
+    const allowedStudentFields = [
+      "course_id",
+      "class_id",
+      "name",
+      "dob",
+      "gender",
+      "admission_year",
+      "year_of_study",
+    ];
+
+    for (const field of allowedStudentFields) {
+      if (req.body[field] !== undefined) {
+        updateStudentData[field] = req.body[field];
+      }
+    }
+
+    if (Object.keys(updateStudentData).length > 0) {
+      await student.update(updateStudentData, { transaction: t });
+    }
+
+    // =========================
+    // Update User Table
+    // =========================
+    const updateUserData = {};
+
+    if (email) {
+      updateUserData.email = email;
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateUserData.password = hashedPassword;
+    }
+
+    if (Object.keys(updateUserData).length > 0) {
+      await student.User.update(updateUserData, { transaction: t });
+    }
+
+    await t.commit();
+
+    res.json({
+      message: "Student updated successfully",
+    });
+
+  } catch (error) {
+    if (t) await t.rollback();
+    console.error("Error updating student:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
+
 
 // Delete a student by ID (admins only)
 export const deleteStudentById = async (req, res) => {

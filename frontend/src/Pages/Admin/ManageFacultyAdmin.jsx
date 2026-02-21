@@ -197,7 +197,7 @@ const ManageFacultyAdmin = () => {
                     )}
                   </td>
 
-                  {/* ✅ FIXED ACTION COLUMN */}
+                  
                   <td className="table-row-style">
                     <div className="flex flex-wrap gap-2 items-center h-full">
                       <EditButton

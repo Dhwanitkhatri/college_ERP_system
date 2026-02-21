@@ -133,24 +133,32 @@ export const getFacultyById = async (req, res) => {
 };
 
 //update faculty by id
-export const updateFacultyById = async (req, res) => {
-  try {
-    const t = await sequelize.transaction(); //start transaction
-    const { id } = req.params;
-    const { course_id, name, phone, email } = req.body;
 
-    //validation to require fields
-    if (!course_id && !name && !phone && !email) {
+
+export const updateFacultyById = async (req, res) => {
+  let t;
+
+  try {
+    t = await sequelize.transaction();
+
+    const { id } = req.params;
+    const { course_id, name, phone, email, password } = req.body;
+
+    if (!course_id && !name && !phone && !email && !password) {
       await t.rollback();
       return res
         .status(400)
         .json({ message: "At least one field is required to update" });
     }
 
+    // 🔎 Find faculty WITH user relation
     const faculty = await Faculty.findOne({
       where: {
         id: id,
         course_id: req.user.course_id,
+      },
+      include: {
+        model: User,
       },
       transaction: t,
     });
@@ -163,21 +171,48 @@ export const updateFacultyById = async (req, res) => {
       });
     }
 
-    // Update only provided fields
-    const updatedData = {};
-    const allowedFields = ["course_id", "name", "phone", "email"];
+    // =========================
+    // Update Faculty Table
+    // =========================
+    const updatedFacultyData = {};
+    const allowedFields = ["course_id", "name", "phone"];
 
-    //loop through fields and add to updatedData if present in req.body
     for (const field of allowedFields) {
       if (req.body[field] !== undefined) {
-        updatedData[field] = req.body[field];
+        updatedFacultyData[field] = req.body[field];
       }
     }
-    await faculty.update(updatedData, { transaction: t });
+
+    if (Object.keys(updatedFacultyData).length > 0) {
+      await faculty.update(updatedFacultyData, { transaction: t });
+    }
+
+    // =========================
+    // Update User Table
+    // =========================
+    const updatedUserData = {};
+
+    if (email) {
+      updatedUserData.email = email;
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updatedUserData.password = hashedPassword;
+    }
+
+    if (Object.keys(updatedUserData).length > 0) {
+      await faculty.User.update(updatedUserData, { transaction: t });
+    }
+
     await t.commit();
-    res.json({ message: "Faculty updated successfully", faculty });
+
+    res.json({
+      message: "Faculty updated successfully",
+    });
+
   } catch (error) {
-    await t.rollback();
+    if (t) await t.rollback();
     console.error("Error updating faculty:", error);
     res.status(500).json({ message: "Internal server error" });
   }
