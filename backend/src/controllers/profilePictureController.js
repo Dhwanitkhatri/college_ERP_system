@@ -190,41 +190,118 @@ export const deleteProfilePicture = async (req, res) => {
     }
 };
 
-export const profileInfoAdmin = async(req,res)=>{
-   try {
-     const user_id = req.user.uid;
-    const admin = await sequelize.query(
-  `
-  SELECT 
-    a.user_id,
-    a.email,
-    a.name,
-    a.contact_number,
-    a.course_id,
-    a.admin_id,
-    e.address,
-    e.DOB
-  FROM Admins a
-  LEFT JOIN EmployeePersonalDetails e
-    ON a.user_id = e.user_id
-  WHERE a.user_id = :user_id
-  `,
-  {
-    replacements: { user_id },
-    type: Sequelize.QueryTypes.SELECT,
-    plain: true
-  }
-);
+export const profileInfoAdmin = async (req, res) => {
+  try {
+    const { uid: user_id, role, course_id } = req.user;
 
-    if(!admin){
-        return res.status(404).json({message :'admin details not found'})
+    if (!user_id || !role) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid token data",
+      });
     }
-    return res.status(200).json({admin:admin});
-   } catch (error) {
-        console.error("Error fetching admin profile:", error);
-        return res.status(500).json({
-            success: false,
-            error: error.message
-        });
-   }
-}
+
+    let query = "";
+    let replacements = { user_id, course_id };
+
+    // ================= ADMIN =================
+    if (role === "Admin") {
+      query = `
+        SELECT 
+          a.user_id,
+          a.email,
+          a.name,
+          a.contact_number,
+          a.course_id,
+          a.admin_id AS role_id,
+          e.address,
+          e.DOB
+        FROM admins a
+        LEFT JOIN employeepersonaldetails e
+          ON a.user_id = e.user_id
+        WHERE a.user_id = :user_id
+          AND a.course_id = :course_id
+      `;
+    }
+
+    // ================= FACULTY =================
+    else if (role === "Faculty") {
+      query = `
+        SELECT 
+          f.user_id,
+          f.email,
+          f.name,
+          f.phone AS contact_number,
+          f.course_id,
+          f.faculty_id AS role_id,
+          e.address,
+          e.DOB
+        FROM faculties f
+        LEFT JOIN employeepersonaldetails e
+          ON f.user_id = e.user_id
+        WHERE f.user_id = :user_id
+          AND f.course_id = :course_id
+      `;
+    }
+
+    // ================= STUDENT =================
+    else if (role === "Student") {
+      query = `
+        SELECT 
+          s.user_id,
+          s.email,
+          s.name,
+          NULL AS contact_number,
+          s.course_id,
+          s.student_id AS role_id,
+          sp.address,
+          s.dob AS DOB
+        FROM students s
+        LEFT JOIN studentpersonaldetails sp
+          ON s.student_id = sp.student_id
+        WHERE s.user_id = :user_id
+          AND s.course_id = :course_id
+      `;
+    }
+
+    else {
+      return res.status(403).json({
+        success: false,
+        message: "Invalid role",
+      });
+    }
+
+    const profile = await sequelize.query(query, {
+      replacements,
+      type: Sequelize.QueryTypes.SELECT,
+      plain: true,
+    });
+
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
+      });
+    }
+    const formattedProfile = {
+  ...profile,
+  DOB: profile.DOB
+    ? new Date(profile.DOB).toISOString().split("T")[0]
+    : null
+};
+
+
+    return res.status(200).json({
+      success: true,
+      role,
+      profile:formattedProfile,
+    });
+
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};

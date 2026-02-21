@@ -1,16 +1,22 @@
-import { Feedback, Student} from "../model";
+import { Feedback, Student , Faculty} from "../model";
 
 //submit the feedback by the student
 export const submitFeedback = async (req, res) => {
   try {
-    const { student_id, faculty_id, rating, comments } = req.body;
+    const {faculty_id, rating, comments } = req.body;
+      const student = await Student.findOne({where:{user_id:req.user.uid}});
 
-    if(!student_id || !faculty_id || !rating || !comments )
+    if(!faculty_id || !rating || !comments )
         return res.status(400).json("all field are require ");
+    if(!student)
+        return res.status(404).json("student not found");
+    const faculty = await Faculty.findOne({where:{faculty_id}});
+    if(!faculty)
+      return res.status(404).json("faculty not found");
 
     const feedback = await Feedback.create({
-      student_id,
-      faculty_id,
+      student_id:student.student_id,
+      faculty_id:faculty.faculty_id,
       rating,
       comments,
       date_submitted: new Date(),
@@ -29,7 +35,7 @@ export const submitFeedback = async (req, res) => {
 //student seeing there own feedback 
 export const getStudentFeedback = async (req, res) => {
   try {
-    const { studentId } = req.params;
+    const student = await Student.findOne({where:{user_id:req.user.uid}});
     const student_id = await Student.findOne({where:{user_id : studentId}})
     const feedback = await Feedback.findAll({
       where: { student_id: student_id }
@@ -44,7 +50,7 @@ export const getStudentFeedback = async (req, res) => {
 //for admin to fetch all the feedback 
 export const getAllFeedbacks = async (req, res) => {
   try {
-    const feedbacks = await Feedback.findAll();
+    const feedbacks = await Feedback.findAll({where:{course_id:req.user.course_id}});
     res.json(feedbacks);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -54,7 +60,9 @@ export const getAllFeedbacks = async (req, res) => {
 export const getPendingFeedbacks = async (req, res) => {
   try {
     const feedbacks = await Feedback.findAll({
-      where: { status: "pending" }
+      where: { status: "pending",
+        course_id:req.user.course_id 
+      }
     });
 
     res.json(feedbacks);
