@@ -7,7 +7,8 @@ import { Faculty } from "../model/Faculty.js";
 import { Admin } from "../model/Admin.js";
 import { Class } from "../model/Class.js";
 import { User } from "../model/User.js";
-import { QueryTypes } from "sequelize";
+import { QueryTypes, where } from "sequelize";
+
 // Send notification
 export const sendNotification = async (req, res) => {
   try {
@@ -294,5 +295,163 @@ export const getAllClasses = async (req, res) => {
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ message: error.message });
+  }
+};
+//the notifications send by the logged-in user 
+export const getMySentNotifications = async (req, res) => {
+  try {
+    const { uid, role, course_id } = req.user;
+
+    let senderId;
+    const user = await User.findOne({where:{user_id:uid}});
+    //  Get actual sender_id from role table
+    senderId = user.username;
+    console.log(senderId)
+    console.log(role);
+    console.log(course_id);
+    //  Now fetch notifications
+    const notifications = await Notification.findAll({
+      where: {
+        sender_id: senderId,
+        sender_role: role,
+        course_id: course_id,
+      },
+      order: [["created_at", "DESC"]],
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: notifications.length,
+      notifications,
+    });
+
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+//update the send notifications
+export const updateNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findOne({where:{user_id:req.user.uid}});
+    const senderId =user.username;
+    const notification = await Notification.findOne({
+      where: {
+        id: id,
+        sender_id: senderId,
+        sender_role: req.user.role,
+      },
+    });
+    console.log(notification);
+    if (!notification) {
+      return res.status(404).json({
+        message: "Notification not found or you are not authorized",
+      });
+    }
+
+    const allowedFields = [
+      "title",
+      "message",
+      "receiver_id",
+      "receiver_role",
+      "course_id",
+      "class_id",
+      "section",
+      "target_type",
+    ];
+
+    const updateData = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    }
+
+    await notification.update(updateData);
+
+    res.json({
+      message: "Notification updated successfully",
+      notification,
+    });
+
+  } catch (error) {
+    console.error("Error updating notification:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//delete the send notifications
+export const deleteNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findOne({where:{user_id : req.user.uid}});
+
+    const notification = await Notification.findOne({
+      where: {
+        id: id,
+        sender_id: user.username,
+        sender_role: req.user.role,
+      },
+    });
+
+    if (!notification) {
+      return res.status(404).json({
+        message: "Notification not found or you are not authorized",
+      });
+    }
+
+    await notification.destroy();
+
+    res.json({
+      message: "Notification deleted successfully",
+    });
+
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+export const getNotificationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { uid, role } = req.user;
+
+    let senderId;
+
+    const user = await User.findOne({where:{user_id:uid}});
+    if(!user)
+      return res.status(404).json({message:"user not found"});
+
+    senderId = user.username;
+    /* -------- Find Notification -------- */
+    const notification = await Notification.findOne({
+      where: {
+        id: id,
+        sender_id: senderId,   // ensures only creator can fetch
+        sender_role: role,
+      },
+    });
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      notification,
+    });
+
+  } catch (error) {
+    console.error("Error fetching notification:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

@@ -1,20 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import api from "../../api/axios.js"
 
 const EditNotificationAdmin = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get notification ID from URL
+  const { id } = useParams();
 
-  /* ---------------- Dummy Pre-filled Data ---------------- */
-  /* Later this will come from API using ID */
   const [formData, setFormData] = useState({
-    title: "Exam Schedule Released",
-    message: "Final semester exams will start from 10th March.",
+    title: "",
+    message: "",
   });
 
-  /* ---------------- Handle Input Change ---------------- */
+  const [loading, setLoading] = useState(true);
+
+  const token = localStorage.getItem("token");
+
+  /* ---------------- FETCH NOTIFICATION BY ID ---------------- */
+  useEffect(() => {
+    const fetchNotification = async () => {
+      try {
+        const res = await api.get(
+          `/api/notifications/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setFormData({
+          title: res.data.notification.title,
+          message: res.data.notification.message,
+        });
+
+      } catch (error) {
+        console.error("Error fetching notification:", error);
+        alert("Failed to load notification");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotification();
+  }, [id, token]);
+
+  /* ---------------- HANDLE INPUT CHANGE ---------------- */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -24,16 +57,33 @@ const EditNotificationAdmin = () => {
     }));
   };
 
-  /* ---------------- Handle Save (Dummy) ---------------- */
-  const handleSubmit = (e) => {
+  /* ---------------- UPDATE NOTIFICATION ---------------- */
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Updated Notification:", formData);
+    try {
+      await api.put(
+        `/api/notifications/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    alert("Notification updated successfully!");
+      alert("Notification updated successfully!");
+      navigate("/admin/Dashboard/ManageNotificationsAdmin");
 
-    navigate("/admin/Dashboard/ManageNotificationsAdmin");
+    } catch (error) {
+      console.error("Error updating notification:", error);
+      alert("Failed to update notification");
+    }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <DashboardChildPageTemplate
@@ -41,10 +91,9 @@ const EditNotificationAdmin = () => {
       desc={`Editing notification ID: ${id}`}
     >
       <DashboardChildPageCard>
-
         <form onSubmit={handleSubmit}>
 
-          {/* ---------------- Title Field ---------------- */}
+          {/* Title */}
           <div className="form-field">
             <label className="custom-label">Title</label>
             <input
@@ -57,7 +106,7 @@ const EditNotificationAdmin = () => {
             />
           </div>
 
-          {/* ---------------- Message Field ---------------- */}
+          {/* Message */}
           <div className="form-field">
             <label className="custom-label">Message</label>
             <textarea
@@ -70,10 +119,8 @@ const EditNotificationAdmin = () => {
             ></textarea>
           </div>
 
-          {/* ---------------- Action Buttons ---------------- */}
+          {/* Buttons */}
           <div className="form-actions">
-
-            {/* Cancel Button */}
             <button
               type="button"
               onClick={() => navigate("/admin/manage-notifications")}
@@ -82,7 +129,6 @@ const EditNotificationAdmin = () => {
               Cancel
             </button>
 
-            {/* Save Button */}
             <button
               type="submit"
               className="px-4 py-2 rounded-md"
@@ -93,10 +139,9 @@ const EditNotificationAdmin = () => {
             >
               Save Changes
             </button>
-
           </div>
-        </form>
 
+        </form>
       </DashboardChildPageCard>
     </DashboardChildPageTemplate>
   );
