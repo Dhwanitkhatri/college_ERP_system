@@ -12,52 +12,193 @@ import { QueryTypes, where } from "sequelize";
 // Send notification
 export const sendNotification = async (req, res) => {
   try {
-    const { title, message, receiver_id, receiver_role, class_id, section, target_type } = req.body;
-    const sender_id = req.user.uid;
+    const {
+      title,
+      message,
+      receivers,      // 👈 NEW (for INDIVIDUAL)
+      receiver_role,
+      class_id,
+      section,
+      target_type,
+    } = req.body;
+
+    const sender_uid = req.user.uid;
     const sender_role = req.user.role;
     const course_id = req.user.course_id;
 
-    //validate rquired fields
+    /* ---------------- VALIDATION ---------------- */
+
     if (!title || !message || !target_type) {
-      return res.status(400).json({ message: "Title, message, and target_type are required." });
+      return res.status(400).json({
+        success: false,
+        message: "Title, message and target_type are required.",
+      });
     }
+
+    if (!["Admin", "Faculty"].includes(sender_role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Only Admin and Faculty can send notifications.",
+      });
+    }
+
+    /* ---------------- GET SENDER USERNAME ---------------- */
 
     const senderUser = await User.findOne({
-      where: { user_id: sender_id },
-      attributes: ['username']
+      where: { user_id: sender_uid },
+      attributes: ["username"],
     });
+
     if (!senderUser) {
-      return res.status(404).json({ message: "Sender user not found." });
+      return res.status(404).json({
+        success: false,
+        message: "Sender not found.",
+      });
     }
-    // Use username as sender_id
+
     const senderUserName = senderUser.username;
 
-    //authorize sender role
-    if (!["Admin", "Faculty"].includes(sender_role)) {
-      return res.status(403).json({ message: "Only admin and faculty can send notifications." });
-    }
-    // process based on target_type
+    /* ===================================================== */
+    /* ================= SWITCH TARGET TYPE ================= */
+    /* ===================================================== */
+
     switch (target_type) {
+
+      /* ===================================================== */
+      /* ================= INDIVIDUAL (UPDATED) ============== */
+      /* ===================================================== */
+
       case "INDIVIDUAL": {
-        if (!receiver_id || !receiver_role) {
-          return res.status(400).json({ message: "receiver_id and receiver_role are required for INDIVIDUAL target_type." });
+
+        if (!receivers || !Array.isArray(receivers) || receivers.length === 0) {
+          return res.status(400).json({
+            success: false,
+            message: "receivers array is required for INDIVIDUAL.",
+          });
         }
-        let validReceiver = null;
-        switch (receiver_role) {
-          case "Student":
-            validReceiver = await Student.findOne({ where: { student_id: receiver_id, course_id } });
-            break;
-          case "Faculty":
-            validReceiver = await Faculty.findOne({ where: { faculty_id: receiver_id, course_id } });
-            break;
-          case "Admin":
-            validReceiver = await Admin.findOne({ where: { admin_id: receiver_id } });
-            break;
-          default:
-            return res.status(400).json({ message: "Invalid receiver_role." });
+
+        const notificationsData = [];
+
+        for (let r of receivers) {
+          const { receiver_id, receiver_role } = r;
+
+          if (!receiver_id || !receiver_role) continue;
+
+          let validReceiver = null;
+
+          if (receiver_role === "Student") {
+            validReceiver = await Student.findOne({
+              where: { student_id: receiver_id, course_id },
+            });
+          }
+
+          if (receiver_role === "Faculty") {
+            validReceiver = await Faculty.findOne({
+              where: { faculty_id: receiver_id, course_id },
+            });
+          }
+
+          if (receiver_role === "Admin") {
+            validReceiver = await Admin.findOne({
+              where: { admin_id: receiver_id },
+            });
+          }
+
+          if (!validReceiver) continue;
+
+          notificationsData.push({
+            title,
+            message,
+            sender_id: senderUserName,
+            sender_role,
+            receiver_id,          // 👈 stored per user
+            receiver_role,        // 👈 stored per user
+            course_id,
+            target_type,
+          });
         }
-        if (!validReceiver) {
-          return res.status(404).json({ message: "Receiver not found." });
+
+        if (notificationsData.length === 0) {
+          return res.status(404).json({
+            success: false,
+            message: "No valid receivers found.",
+          });
+        }
+
+        await Notification.bulkCreate(notificationsData);
+
+        return res.status(201).json({
+          success: true,
+          message: "Notification sent to selected individuals.",
+        });
+      }
+
+      /* ===================================================== */
+      /* ================= CLASS ============================= */
+      /* ===================================================== */
+
+      case "CLASS": {
+
+        if (!class_id) {
+          return res.status(400).json({
+            success: false,
+            message: "class_id is required for CLASS.",
+          });
+        }
+
+        const classIds = Array.isArray(class_id)
+          ? class_id
+          : [class_id];
+
+        const notificationsData = [];
+
+        for (let clsId of classIds) {
+          const classExists = await Class.findOne({
+            where: { class_id: clsId, course_id },
+          });
+
+          if (!classExists) continue;
+
+          notificationsData.push({
+            title,
+            message,
+            sender_id: senderUserName,
+            sender_role,
+            receiver_id: null,
+            receiver_role: "Student",
+            course_id,
+            class_id: clsId,
+            section: section || null,
+            target_type,
+          });
+        }
+
+        if (notificationsData.length === 0) {
+          return res.status(404).json({
+            success: false,
+            message: "No valid classes found.",
+          });
+        }
+
+        await Notification.bulkCreate(notificationsData);
+
+        return res.status(201).json({
+          success: true,
+          message: "Notification sent to selected classes.",
+        });
+      }
+
+      /* ===================================================== */
+      /* ================= ROLE ============================== */
+      /* ===================================================== */
+
+      case "ROLE": {
+
+        if (!receiver_role) {
+          return res.status(400).json({
+            success: false,
+            message: "receiver_role is required for ROLE.",
+          });
         }
 
         await Notification.create({
@@ -65,79 +206,25 @@ export const sendNotification = async (req, res) => {
           message,
           sender_id: senderUserName,
           sender_role,
-          receiver_id,
+          receiver_id: null,
           receiver_role,
           course_id,
-          class_id: class_id || null,
-          section: section || null,
-          target_type
+          target_type,
         });
-        return res.status(201).json({
-          message: "Notification sent to individual successfully.",
-          data: {
-            receiver_id,
-            receiver_role
-          }
-        });
-      }
-      case "CLASS": {
-        if (!class_id) {
-          return res.status(400).json({ message: "class_id is required for CLASS target_type." });
-        }
-
-        const classExists = await Class.findOne({ where: { class_id, course_id } });
-        if (!classExists) {
-          return res.status(404).json({ message: "Class not found." });
-        }
-
-        
-
-        await Notification.create({
-          title,
-          message,
-          sender_id: senderUserName,
-          sender_role,
-          receiver_id: null, // Academic ID
-          receiver_role: null,
-          course_id,
-          class_id,
-          section,
-          target_type
-        });
-       
-        return res.status(201).json({
-          success: true,
-          message: `Notification sent to students in class ${class_id}`,
-        });
-
-      }
-      case "ROLE": {
-        if (!receiver_role) {
-          return res.status(400).json({ message: "receiver_role is required for ROLE target_type." });
-        }
-        
-
-       
-        await Notification.create({
-          title,
-          message,
-          sender_id: senderUserName, // Use academic ID
-          sender_role: sender_role,
-          receiver_id: null, // Academic ID
-          receiver_role:receiver_role,
-          course_id,
-          target_type
-        });
-
-        
 
         return res.status(201).json({
           success: true,
+          message: `Notification sent to role: ${receiver_role}`,
         });
       }
+
+      /* ===================================================== */
+      /* ================= COURSE ============================ */
+      /* ===================================================== */
+
       case "COURSE": {
-        
-        const notifications = Notification.create({
+
+        await Notification.create({
           title,
           message,
           sender_id: senderUserName,
@@ -145,23 +232,35 @@ export const sendNotification = async (req, res) => {
           receiver_id: null,
           receiver_role: null,
           course_id,
-          target_type
+          target_type,
         });
-        await Notification.bulkCreate(notifications);
+
         return res.status(201).json({
           success: true,
-          message: `Notification sent to all users in course ${course_id}`,
+          message: `Notification sent to entire course ${course_id}`,
         });
       }
-      
+
+      /* ===================================================== */
+      /* ================= DEFAULT =========================== */
+      /* ===================================================== */
+
       default:
-        return res.status(400).json({ message: "Invalid target_type." });
+        return res.status(400).json({
+          success: false,
+          message: "Invalid target_type.",
+        });
     }
+
   } catch (error) {
     console.error("Error sending notification:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
   }
 };
+
 
 export const getUserNotifications = async (req, res) => {
   try {

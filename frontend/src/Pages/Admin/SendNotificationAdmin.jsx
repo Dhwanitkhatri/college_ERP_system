@@ -79,7 +79,7 @@ export default function SendNotificationAdmin() {
       }
 
       payload.target_type = "CLASS";
-      payload.class_ids = selectedItems.map((c) => c.id);
+      payload.class_id = selectedItems.map((c) => c.id);
     }
 
     // INDIVIDUAL
@@ -90,7 +90,10 @@ export default function SendNotificationAdmin() {
       }
 
       payload.target_type = "INDIVIDUAL";
-      payload.receivers = selectedItems; 
+      payload.receivers = selectedItems.map((u) => ({
+    receiver_id: u.id,
+    receiver_role: u.role,
+  }));
     }
 
     else {
