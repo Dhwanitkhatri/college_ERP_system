@@ -80,6 +80,7 @@ const ManageNotificationsAdmin = () => {
     <DashboardChildPageTemplate
       title="Manage Notifications"
       desc="View, edit, and delete system-wide notifications"
+      width="max-w-6xl"
     >
       <DashboardChildPageCard>
         <div className="table-wrapper overflow-x-auto">
@@ -156,7 +157,7 @@ const ManageNotificationsAdmin = () => {
                     </td>
 
                     <td className="table-row-style align-middle">
-                      <div className="flex items-center justify-center gap-2">
+                      <div className="flex items-start gap-2">
                         <EditButton
                           onClick={() =>
                             handleEdit(notification.id)

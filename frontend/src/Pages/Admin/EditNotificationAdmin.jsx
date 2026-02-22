@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
-import api from "../../api/axios.js"
+import SaveButton from "../../ui/Buttons/SaveButton";
+import CancelButton from "../../ui/Buttons/CancelButton";
+import api from "../../api/axios.js";
 
 const EditNotificationAdmin = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const EditNotificationAdmin = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
 
@@ -38,7 +40,7 @@ const EditNotificationAdmin = () => {
 
       } catch (error) {
         console.error("Error fetching notification:", error);
-        alert("Failed to load notification");
+        setError("Failed to load notification");
       } finally {
         setLoading(false);
       }
@@ -77,12 +79,24 @@ const EditNotificationAdmin = () => {
 
     } catch (error) {
       console.error("Error updating notification:", error);
-      alert("Failed to update notification");
+      setError("Failed to update notification");
     }
   };
 
+  /* ---------------- LOADING STATE ---------------- */
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <DashboardChildPageTemplate
+        title="Edit Notification"
+        desc="Loading notification..."
+      >
+        <DashboardChildPageCard>
+          <p className="text-sm text-[var(--text-muted)]">
+            Loading...
+          </p>
+        </DashboardChildPageCard>
+      </DashboardChildPageTemplate>
+    );
   }
 
   return (
@@ -91,6 +105,10 @@ const EditNotificationAdmin = () => {
       desc={`Editing notification ID: ${id}`}
     >
       <DashboardChildPageCard>
+
+        {/* Error Message */}
+        {error && <p className="custom-error">{error}</p>}
+
         <form onSubmit={handleSubmit}>
 
           {/* Title */}
@@ -102,6 +120,7 @@ const EditNotificationAdmin = () => {
               value={formData.title}
               onChange={handleChange}
               className="custom-input"
+              placeholder="Enter notification title"
               required
             />
           </div>
@@ -114,31 +133,21 @@ const EditNotificationAdmin = () => {
               rows="4"
               value={formData.message}
               onChange={handleChange}
-              className="custom-input"
+              className="custom-input resize-none"
+              placeholder="Enter notification message"
               required
             ></textarea>
           </div>
 
           {/* Buttons */}
           <div className="form-actions">
-            <button
-              type="button"
-              onClick={() => navigate("/admin/manage-notifications")}
-              className="px-4 py-2 border rounded-md"
-            >
-              Cancel
-            </button>
+            
+            {/* Cancel Button (NO NAVIGATION LOGIC HERE) */}
+            <CancelButton />
 
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-md"
-              style={{
-                backgroundColor: "var(--Submit-Btn-General)",
-                color: "white",
-              }}
-            >
-              Save Changes
-            </button>
+            {/* Save Button (Your Themed Component) */}
+            <SaveButton />
+
           </div>
 
         </form>

@@ -32,7 +32,7 @@ const AdminPanelDashboard = () => {
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Applications & Feedback">
           {/* <ActionButtonDashboard title="Make Application" /> */}
-          <ActionButtonDashboard title="Feedback" />
+          <Link to="FacultyFeedBackStudent"><ActionButtonDashboard title="Feedback" /></Link>
           {/* <ActionButtonDashboard title="Complaint Box" /> */}
           <ActionButtonDashboard title="Examination Form" />
         </ActionContainerDashboard>

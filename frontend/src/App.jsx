@@ -47,6 +47,9 @@ import ChangeCredentials from "./Pages/Faculty/ChangeCredentials";
 import UpdateAttendanceFaculty from "./Pages/Faculty/UpdateAttendanceFaculty";
 import ManageNotificationsAdmin from "./Pages/Admin/ManageNotificationsAdmin";
 import EditNotificationAdmin from "./Pages/Admin/EditNotificationAdmin";
+import FacultyFeedbackStudent from "./Pages/Student/FacultyFeedbackStudent";
+import FeedbackEvaluationAdmin from "./Pages/Admin/FeedbackEvaluationAdmin";
+import ViewFeedbackFaculty from "./Pages/Faculty/ViewFeedbackFaculty";
 
 const router = createBrowserRouter([
   {
@@ -189,6 +192,14 @@ const router = createBrowserRouter([
         path: "EditNotificationAdmin/:id",
         element: <EditNotificationAdmin />,
       },
+      {
+        path: "ChangeCredentials",
+        element: <ChangeCredentials />,
+      },
+      {
+        path: "FeedbackEvaluationAdmin",
+        element: <FeedbackEvaluationAdmin />,
+      },
     ],
   },
   {
@@ -251,6 +262,18 @@ const router = createBrowserRouter([
         path: "UpdateAttendanceFaculty",
         element: <UpdateAttendanceFaculty />,
       },
+      {
+        path: "ViewFeedbackFaculty",
+        element: <ViewFeedbackFaculty />,
+      },
+      {
+        path: "ManageNotificationsAdmin",
+        element: <ManageNotificationsAdmin />,
+      },
+      {
+        path: "EditNotificationAdmin/:id",
+        element: <EditNotificationAdmin />,
+      },
     ],
   },
   {
@@ -284,6 +307,10 @@ const router = createBrowserRouter([
       {
         path: "ChangeCredentials",
         element: <ChangeCredentials />,
+      },
+      {
+        path: "FacultyFeedbackStudent",
+        element: <FacultyFeedbackStudent />,
       },
     ],
   },

@@ -40,6 +40,7 @@ const AdminPanelDashboard = () => {
           <Link to="ClasswiseReportAdmin"><ActionButtonDashboard title="Classwise Report" /></Link>
           <Link to="OverallClassReportAdmin"><ActionButtonDashboard title="Overall Class Report" /></Link>
           <Link to="ViewTimeTable"><ActionButtonDashboard title="View Time Table" /></Link>
+          <Link to="FeedbackEvaluationAdmin"><ActionButtonDashboard title="Feedback Evaluation" /></Link>
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Communication & Services">
@@ -48,6 +49,7 @@ const AdminPanelDashboard = () => {
           <Link to="PayFeeAdmin"><ActionButtonDashboard title="Pay Fee" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
           <Link to="CreateFeeStructureAdmin"><ActionButtonDashboard title="Create Fee Structure" /></Link>
+          <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
     </PanelTemplateDashboard>
