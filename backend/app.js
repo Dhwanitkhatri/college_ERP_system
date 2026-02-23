@@ -24,6 +24,7 @@ import examRoutes from "./src/routes/examRoutes.js";
 import marksRoutes from "./src/routes/marksRoutes.js";
 import examtimetableRoutes from "./src/routes/examTimetableRoutes.js";
 import resultRoutes from "./src/routes/resultRoutes.js";
+import feedbackRoutes from "./src/routes/feedbackRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -68,6 +69,7 @@ app.use("/api/exams", examRoutes);
 app.use("/api/marks", marksRoutes);
 app.use("/api/exam-timetable", examtimetableRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/feedback",feedbackRoutes);
 
 
 app.get("/", (req, res) => {

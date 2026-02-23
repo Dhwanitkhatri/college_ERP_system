@@ -23,10 +23,10 @@ const ViewFeedbackFaculty = () => {
       setError("");
 
       // Get faculty id from token (or localStorage)
-      const facultyId = localStorage.getItem("faculty_id");
+      
 
       const response = await api.get(
-        `/api/feedback/accepted/${facultyId}`,
+        `/api/feedback/accepted`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -34,7 +34,7 @@ const ViewFeedbackFaculty = () => {
         }
       );
 
-      setFeedbacks(response.data);
+      setFeedbacks(response.data.data);
 
     } catch (err) {
       setError("Failed to fetch feedback");

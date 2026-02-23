@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useForm } from "react-hook-form";
 import api from "../../api/axios.js";
@@ -9,12 +9,8 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 
 const FacultyFeedbackStudent = () => {
   // Dummy faculty list (Replace later with API data)
-  const dummyFaculties = [
-    { faculty_id: 1, name: "Dr. Rajesh Sharma" },
-    { faculty_id: 2, name: "Prof. Anjali Mehta" },
-    { faculty_id: 3, name: "Mr. Vivek Patel" },
-  ];
 
+  const [faculties , setFaculties] = useState([])
   const [selectedRating, setSelectedRating] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false); // to control rating error display
 
@@ -30,7 +26,19 @@ const FacultyFeedbackStudent = () => {
     setSelectedRating(0);
     setIsSubmitted(false);
   };
-
+  const token = localStorage.getItem("token");
+  useEffect(()=>{
+    api.get("/api/feedback/faculty-feedback",{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    }).then((res)=>{
+      setFaculties(res.data.data);
+    }).catch((errors)=>{
+      console.log(errors);
+      alert("failed to fetch the faculty");
+    })
+  },[])
   async function onSubmit(data) {
     try {
       setIsSubmitted(true);
@@ -85,7 +93,7 @@ const FacultyFeedbackStudent = () => {
               })}
             >
               <option value="">-- Select Faculty --</option>
-              {dummyFaculties.map((faculty) => (
+              {faculties.map((faculty) => (
                 <option
                   key={faculty.faculty_id}
                   value={faculty.faculty_id}

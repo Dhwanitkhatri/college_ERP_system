@@ -7,11 +7,6 @@ export const Feedback = sequelize.define("Feedback", {
     autoIncrement: true,
     type: DataTypes.INTEGER,
   },
-  feedback_id: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
   student_id: {
     type: DataTypes.STRING,
     allowNull: false,

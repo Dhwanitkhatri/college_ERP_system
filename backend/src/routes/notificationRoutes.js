@@ -21,9 +21,9 @@ router.post("/send", authMiddleware, featureGuard("NOTIFICATION_SEND"),sendNotif
 // Get my notifications
 router.get("/my", authMiddleware,featureGuard("NOTIFICATION_VIEW") ,getUserNotifications);
 
-router.get("/users-for-notification", authMiddleware, adminMiddleware, fetchAllUsersForNotification);
+router.get("/users-for-notification", authMiddleware, fetchAllUsersForNotification);
 
-router.get("/classes", authMiddleware, adminMiddleware, getAllClasses);
+router.get("/classes", authMiddleware, getAllClasses);
 router.get("/my-notifications", authMiddleware, getMySentNotifications);
 router.put("/:id", authMiddleware, updateNotification);
 router.delete("/:id", authMiddleware, deleteNotification);
