@@ -23,6 +23,9 @@ const AdminPanelDashboard = () => {
             <ActionButtonDashboard title="Session Planning" />
           </Link>
           <ActionButtonDashboard title="Update Session Planning" />
+          <Link to="ViewTimeTable">
+            <ActionButtonDashboard title="View Time Table" />
+          </Link>
         </ActionContainerDashboard>
         <ActionContainerDashboard title="Report & Evaluation">
           <Link to="DatewiseReportAdmin">
@@ -35,7 +38,9 @@ const AdminPanelDashboard = () => {
           <Link to="OverallClassReportAdmin">
             <ActionButtonDashboard title="Overall Class Report" />
           </Link>
-          <Link to="ViewFeedbackFaculty"><ActionButtonDashboard title="View Feedback" /></Link>
+          <Link to="ViewFeedbackFaculty">
+            <ActionButtonDashboard title="View Feedback" />
+          </Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
 
@@ -47,9 +52,13 @@ const AdminPanelDashboard = () => {
           <Link to="SendNotification">
             <ActionButtonDashboard title="Send Notifications" />
           </Link>
-          <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
+          <Link to="ChangeCredentials">
+            <ActionButtonDashboard title="Change Credentials" />
+          </Link>
           <ActionButtonDashboard title="Live Classes" />
-          <Link to="ManageNotificationsAdmin"><ActionButtonDashboard title="Manage Notifications" /></Link>
+          <Link to="ManageNotificationsAdmin">
+            <ActionButtonDashboard title="Manage Notifications" />
+          </Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
     </PanelTemplateDashboard>

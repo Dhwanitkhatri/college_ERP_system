@@ -50,6 +50,8 @@ import EditNotificationAdmin from "./Pages/Admin/EditNotificationAdmin";
 import FacultyFeedbackStudent from "./Pages/Student/FacultyFeedbackStudent";
 import FeedbackEvaluationAdmin from "./Pages/Admin/FeedbackEvaluationAdmin";
 import ViewFeedbackFaculty from "./Pages/Faculty/ViewFeedbackFaculty";
+import ManageSubjectsAdmin from "./Pages/Admin/ManageSubjectsAdmin";
+import EditSubjectAdmin from "./Pages/Admin/EditSubjectAdmin";
 
 const router = createBrowserRouter([
   {
@@ -200,6 +202,14 @@ const router = createBrowserRouter([
         path: "FeedbackEvaluationAdmin",
         element: <FeedbackEvaluationAdmin />,
       },
+      {
+        path: "ManageSubjectsAdmin",
+        element: <ManageSubjectsAdmin />,
+      },
+      {
+        path: "EditSubjectAdmin/:subject_id",
+        element: <EditSubjectAdmin />,
+      },
     ],
   },
   {
@@ -274,6 +284,10 @@ const router = createBrowserRouter([
         path: "EditNotificationAdmin/:id",
         element: <EditNotificationAdmin />,
       },
+      {
+        path: "ViewTimetable",
+        element: <ViewTimetable />,
+      },
     ],
   },
   {
@@ -311,6 +325,10 @@ const router = createBrowserRouter([
       {
         path: "FacultyFeedbackStudent",
         element: <FacultyFeedbackStudent />,
+      },
+      {
+        path: "ViewTimetable",
+        element: <ViewTimetable />,
       },
     ],
   },
