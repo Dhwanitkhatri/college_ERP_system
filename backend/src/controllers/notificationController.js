@@ -301,36 +301,54 @@ export const getUserNotifications = async (req, res) => {
     
     console.log("Class ID:", class_id);
     const notifications = await sequelize.query(
-      `
-      SELECT *
-      FROM notifications
-      WHERE
-    
-        (target_type = 'COURSE' and course_id = :course_id)
-        OR
-        (target_type = 'CLASS' AND class_id = :class_id and course_id = :course_id)
-        OR
-        (target_type = 'ROLE' AND receiver_role = :role and course_id = :course_id)
-        OR
-          (
-            target_type = 'INDIVIDUAL'
-            AND receiver_role = :role
-            AND receiver_id = :user_id
-            and course_id = :course_id
-          )
-    
-      ORDER BY created_at DESC
-      `,
-      {
-        replacements: {
-          course_id,
-          role: user_role,
-          user_id:username.username,
-          class_id   // NULL for faculty/admin → auto ignored
-        },
-        type: QueryTypes.SELECT
-      }
-    );
+  `
+  SELECT 
+    n.*,
+
+    COALESCE(
+      f.name,
+      a.name
+    ) AS sender_name
+
+  FROM notifications n
+
+  LEFT JOIN faculties f
+    ON n.sender_role = 'Faculty'
+    AND f.faculty_id = n.sender_id
+    AND f.course_id = n.course_id
+
+  LEFT JOIN admins a
+    ON n.sender_role = 'Admin'
+    AND a.admin_id = n.sender_id
+    AND a.course_id = n.course_id
+
+  WHERE
+        (n.target_type = 'COURSE' AND n.course_id = :course_id)
+    OR
+        (n.target_type = 'CLASS' AND n.class_id = :class_id AND n.course_id = :course_id)
+    OR
+        (n.target_type = 'ROLE' AND n.receiver_role = :role AND n.course_id = :course_id)
+    OR
+        (
+          n.target_type = 'INDIVIDUAL'
+          AND n.receiver_role = :role
+          AND n.receiver_id = :user_id
+          AND n.course_id = :course_id
+        )
+
+  ORDER BY n.created_at DESC
+  `,
+  {
+    replacements: {
+      course_id,
+      role: user_role,
+      user_id: username.username,
+      class_id
+    },
+    type: QueryTypes.SELECT
+  }
+);
+
 
     return res.status(200).json({ notifications });
 

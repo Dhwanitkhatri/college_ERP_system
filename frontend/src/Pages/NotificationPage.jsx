@@ -49,7 +49,7 @@ const NotificationPage = () => {
                 key={index} 
                 title={notification.title} 
                 message={notification.message}
-                sender={notification.sender_id}
+                sender={notification.sender_name}
                 senderRole={notification.sender_role}
                 date={formattedDate}
                 time={formattedTime}

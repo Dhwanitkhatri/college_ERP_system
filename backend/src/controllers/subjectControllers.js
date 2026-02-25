@@ -62,7 +62,10 @@ export const createSubject = async (req, res) => {
 
 export const getAllSubjects = async (req, res) => {
   try {
-    const subjects = await Subject.findAll();
+    const course_id = req.user.course_id;
+    const subjects = await Subject.findAll({where:{course_id}});
+    if(!subjects)
+      return res.status(404).json({message:"no subjects found"});
     res.status(200).json({ subjects });
   } catch (error) {
     console.error("Error fetching subjects:", error);
