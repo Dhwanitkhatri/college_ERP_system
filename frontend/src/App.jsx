@@ -52,6 +52,7 @@ import FeedbackEvaluationAdmin from "./Pages/Admin/FeedbackEvaluationAdmin";
 import ViewFeedbackFaculty from "./Pages/Faculty/ViewFeedbackFaculty";
 import ManageSubjectsAdmin from "./Pages/Admin/ManageSubjectsAdmin";
 import EditSubjectAdmin from "./Pages/Admin/EditSubjectAdmin";
+import ViewTimeTableStudent from "./Pages/Student/ViewTimeTableStudent";
 
 const router = createBrowserRouter([
   {
@@ -286,7 +287,7 @@ const router = createBrowserRouter([
       },
       {
         path: "ViewTimetable",
-        element: <ViewTimetable />,
+        element: <ViewTimeTableStudent />,
       },
     ],
   },
@@ -328,7 +329,7 @@ const router = createBrowserRouter([
       },
       {
         path: "ViewTimetable",
-        element: <ViewTimetable />,
+        element: <ViewTimeTableStudent />,
       },
     ],
   },
