@@ -4,7 +4,8 @@ import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
 import { Faculty } from "../model/Faculty.js";
 import { sequelize } from "../config/db.js";
-import { Op, fn, col } from "sequelize";
+import { Student } from "../model/Student.js";
+import { Op, fn, col, where } from "sequelize";
 import {
   getCurrentAcademicYear,
   getSemesterType,
@@ -144,76 +145,90 @@ export const getAllTimetableEntries = async (req, res) => {
 };
 
 // Get timetable for a specific class
-export const getTimetableByClass = async (req, res) => {
+export const getTimetable = async (req, res) => {
   try {
-    const { class_pk } = req.params;
+    const { uid, role } = req.user;
 
-    const timetable = await Timetable.findAll({
-      where: { class_pk },
-      include: [
-        { model: Faculty, attributes: ["name"] },
-        { model: Subject, attributes: ["subject_name"] }
-      ],
-      order: [
-        ["day_of_week", "ASC"],
-        ["start_time", "ASC"]
-      ],
-      attributes:{
-         exclude: [
-      "id",
-      "schedule_id",
-      "class_pk",
-      "subject_id",
-      "faculty_id",
-      "createdAt",
-      "updatedAt",
-      
-    ]
-      }
-    });
+    let timetable = [];
 
-    // Group by day
-    const weekTimetable = timetable.reduce((acc, item) => {
+    // ===============================
+    // FACULTY
+    // ===============================
+    if (role === "Faculty") {
+      const faculty = await Faculty.findOne({
+        where: { user_id: uid }
+      });
+
+      if (!faculty)
+        return res.status(404).json({ message: "Faculty not found" });
+
+      timetable = await Timetable.findAll({
+        where: { faculty_id: faculty.faculty_id },
+
+        include: [
+          { model: Subject, attributes: ["subject_name"] },
+          {model:Class , attributes:["class_id"]}
+        ],
+        order: [
+          ["day_of_week", "ASC"],
+          ["start_time", "ASC"]
+        ]
+      });
+    }
+
+    
+    // STUDENT
+    
+    else if (role === "Student") {
+      const student = await Student.findOne({
+        where: { user_id: uid }
+      });
+
+      if (!student)
+        return res.status(404).json({ message: "Student not found" });
+
+      timetable = await Timetable.findAll({
+        where: { class_pk: student.class_pk },
+        include: [
+          { model: Faculty, attributes: ["name"] },
+          { model: Subject, attributes: ["subject_name"] }
+        ],
+        order: [
+          ["day_of_week", "ASC"],
+          ["start_time", "ASC"]
+        ]
+      });
+    }
+
+    else {
+      return res.status(403).json({ message: "Unauthorized role" });
+    }
+
+       const weekTimetable = timetable.reduce((acc, item) => {
       const day = item.day_of_week;
-
       if (!acc[day]) acc[day] = [];
       acc[day].push(item);
-
       return acc;
     }, {});
 
-    res.json(weekTimetable);
+    return res.status(200).json(weekTimetable);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-
-// Get timetable for a specific faculty member
-export const getTimetableByFaculty = async (req, res) => {
-  try {
-    const faculty = await Faculty.findOne({where:{user_id : req.user.uid}});
-    const timetable = await Timetable.findAll({
-      where: { faculty_id :faculty.faculty_id },
-      order: [
-        ["day_of_week", "ASC"],
-        ["start_time", "ASC"],
-      ],
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message
     });
-    res.status(200).json(timetable);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
 
 //get available time slots for a class on a specific day
 export const getAvailableTimeSlots = async (req, res) => {
   try {
     let { class_id, day_of_week } = req.params;
 
-    // 🔧 fix day_of_week
+   
     day_of_week = day_of_week.replace(/"/g, "");
 
     const allTimeSlots = [

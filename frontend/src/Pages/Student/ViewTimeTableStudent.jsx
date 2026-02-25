@@ -29,7 +29,7 @@ const formatTimetable = (data) => {
         start: slot.start,
         end: slot.end,
         subject: lecture?.Subject?.subject_name || "",
-        faculty: lecture?.Faculty?.name || "",
+        faculty: lecture?.Faculty?.name || lecture?.Class?.class_id || "",
       };
     }),
   }));
@@ -46,13 +46,14 @@ const ViewTimeTableStudent = () => {
     if (activeTab !== "lecture") return;
 
     api
-      .get("api/timetables/class/my-class", {
+      .get("/api/timetables/my-timetable", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((response) => {
         const formatted = formatTimetable(response.data);
+        console.log(formatted)
         setLectureData(formatted);
       })
       .catch((error) => {
