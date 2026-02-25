@@ -52,6 +52,15 @@ const AdminPanelDashboard = () => {
           <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
+
+      {/* ROW 3 */}
+      <DashContentPanelDashboard>
+        <ActionContainerDashboard title="Exam">
+          <Link to="CreateSubjectComponentAdmin"><ActionButtonDashboard title="Create Subject Component"></ActionButtonDashboard></Link>
+          <Link to="CreateExamAdmin"><ActionButtonDashboard title="Create Exam"></ActionButtonDashboard></Link>
+          <Link to="AddExamTimeTableAdmin"><ActionButtonDashboard title="Add Exam TimeTable"></ActionButtonDashboard></Link>
+        </ActionContainerDashboard>
+      </DashContentPanelDashboard>
     </PanelTemplateDashboard>
   );
 };

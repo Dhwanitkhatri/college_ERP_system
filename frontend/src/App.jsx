@@ -53,6 +53,11 @@ import ViewFeedbackFaculty from "./Pages/Faculty/ViewFeedbackFaculty";
 import ManageSubjectsAdmin from "./Pages/Admin/ManageSubjectsAdmin";
 import EditSubjectAdmin from "./Pages/Admin/EditSubjectAdmin";
 import ViewTimeTableStudent from "./Pages/Student/ViewTimeTableStudent";
+import CreateSubjectComponentAdmin from "./Pages/Admin/CreateSubjectComponentAdmin";
+import CreateExamAdmin from "./Pages/Admin/CreateExamAdmin";
+import AddExamTimeTableAdmin from "./Pages/Admin/AddExamTimeTableAdmin";
+import EnterExamMarksFaculty from "./Pages/Faculty/EnterExamMarksFaculty";
+import ViewAttendanceReportStudent from "./Pages/Student/ViewAttendanceReportStudent";
 
 const router = createBrowserRouter([
   {
@@ -211,6 +216,18 @@ const router = createBrowserRouter([
         path: "EditSubjectAdmin/:subject_id",
         element: <EditSubjectAdmin />,
       },
+      {
+        path: "CreateSubjectComponentAdmin",
+        element: <CreateSubjectComponentAdmin />,
+      },
+      {
+        path: "CreateExamAdmin",
+        element: <CreateExamAdmin />,
+      },
+      {
+        path: "AddExamTimeTableAdmin",
+        element: <AddExamTimeTableAdmin />,
+      },
     ],
   },
   {
@@ -289,6 +306,10 @@ const router = createBrowserRouter([
         path: "ViewTimetable",
         element: <ViewTimeTableStudent />,
       },
+      {
+        path: "EnterExamMarksFaculty",
+        element: <EnterExamMarksFaculty />,
+      },
     ],
   },
   {
@@ -330,6 +351,10 @@ const router = createBrowserRouter([
       {
         path: "ViewTimetable",
         element: <ViewTimeTableStudent />,
+      },
+      {
+        path: "ViewAttendanceReportStudent",
+        element: <ViewAttendanceReportStudent />,
       },
     ],
   },

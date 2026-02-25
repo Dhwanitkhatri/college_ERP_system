@@ -21,7 +21,7 @@ const AdminPanelDashboard = () => {
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Academic Reports">
-          <ActionButtonDashboard title="Attendance Report" />
+          <Link to="ViewAttendanceReportStudent"><ActionButtonDashboard title="Attendance Report" /></Link>
           {/* <ActionButtonDashboard title="Generate Exam Result" /> */}
           <ActionButtonDashboard title="Examination Result" />
           {/* <ActionButtonDashboard title="View Documents" /> */}
