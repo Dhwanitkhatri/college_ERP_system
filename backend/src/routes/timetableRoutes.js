@@ -15,7 +15,7 @@ router.get('/', authMiddleware, adminMiddleware, getAllTimetableEntries);
 router.get('/class/:class_pk', authMiddleware,adminMiddleware, getTimetableByClass);
 
 // Get timetable by faculty ID (authenticated users)
-router.get('/faculty/:faculty_id', authMiddleware,adminMiddleware, getTimetableByFaculty);
+router.get('/faculty', authMiddleware,adminMiddleware, getTimetableByFaculty);
 
 // Get available time slots for a class on a specific day (authenticated users)
 router.get('/available-slots/:class_id/:day_of_week', authMiddleware, adminMiddleware,getAvailableTimeSlots);

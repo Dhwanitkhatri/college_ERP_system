@@ -194,9 +194,9 @@ export const getTimetableByClass = async (req, res) => {
 // Get timetable for a specific faculty member
 export const getTimetableByFaculty = async (req, res) => {
   try {
-    const { faculty_id } = req.params;
+    const faculty = await Faculty.findOne({where:{user_id : req.user.uid}});
     const timetable = await Timetable.findAll({
-      where: { faculty_id },
+      where: { faculty_id :faculty.faculty_id },
       order: [
         ["day_of_week", "ASC"],
         ["start_time", "ASC"],
