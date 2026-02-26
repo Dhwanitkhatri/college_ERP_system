@@ -26,12 +26,8 @@ const ViewAttendanceReportStudent = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // ⚠️ You must store class_id and student_id in localStorage during login
-      const classId = localStorage.getItem("class_id");
-      const loggedStudentId = localStorage.getItem("student_id");
-
       const res = await api.get(
-        `/student/overall-class-wise?class_id=${classId}`,
+        `/api/attendance/student`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -39,12 +35,7 @@ const ViewAttendanceReportStudent = () => {
         }
       );
 
-      const allStudents = res.data.students;
-
-      // ✅ Find only logged-in student
-      const currentStudent = allStudents.find(
-        s => s.student_id === loggedStudentId
-      );
+      const currentStudent = res.data.students;
 
       if (!currentStudent) {
         setLoading(false);

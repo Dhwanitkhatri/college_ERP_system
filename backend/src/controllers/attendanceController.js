@@ -356,3 +356,83 @@ export const getLecturesBySubjectAndDate = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+//student fetch the own attendacne 
+import { Attendance } from "../models/Attendance.js";
+import { Subject } from "../models/Subject.js";
+import { Sequelize } from "sequelize";
+
+import { Attendance } from "../models/Attendance.js";
+import { Subject } from "../models/Subject.js";
+import { Student } from "../models/Student.js";
+import { Sequelize } from "sequelize";
+
+export const getStudentAttendance = async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    // ✅ Get student using logged-in user
+    const student = await Student.findOne({
+      where: { user_id: uid }
+    });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // ✅ Subject-wise grouped attendance
+    const subjectAttendance = await Attendance.findAll({
+      where: { student_id: student.student_id },
+      attributes: [
+        "subject_id",
+        [Sequelize.fn("COUNT", Sequelize.col("Attendance.attendance_id")), "total_classes"],
+        [
+          Sequelize.fn(
+            "SUM",
+            Sequelize.literal(`CASE WHEN status = 'Present' THEN 1 ELSE 0 END`)
+          ),
+          "present"
+        ]
+      ],
+      include: [
+        {
+          model: Subject,
+          attributes: ["subject_name"]
+        }
+      ],
+      group: ["subject_id", "Subject.subject_id"]
+    });
+
+    let overallTotal = 0;
+    let overallPresent = 0;
+
+    const formattedSubjects = subjectAttendance.map(item => {
+      const totalClasses = parseInt(item.get("total_classes"));
+      const present = parseInt(item.get("present"));
+      const absent = totalClasses - present;
+
+      overallTotal += totalClasses;
+      overallPresent += present;
+
+      return {
+        subject_name: item.Subject.subject_name,
+        total_classes: totalClasses,
+        present: present,
+        absent: absent
+      };
+    });
+
+    // ✅ Final Response (MATCHES YOUR FRONTEND)
+    res.status(200).json({
+      students: {
+        student_id: student.student_id,
+        total_classes: overallTotal,
+        present: overallPresent,
+        subject_wise: formattedSubjects
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

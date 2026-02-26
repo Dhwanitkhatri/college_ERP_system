@@ -6,7 +6,8 @@ import { markAttendance ,
       getStudentByClass,
        getSubjectsByFacultyAndClass , 
        getClasses,
-       getLecturesBySubjectAndDate
+       getLecturesBySubjectAndDate,
+       getAttendanceSummary
 
  } from "../controllers/attendanceController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
@@ -18,6 +19,7 @@ router.get("/students/:class_id", authMiddleware, getStudentByClass);
 router.get("/subjects/:class_id/:date", authMiddleware, getSubjectsByFacultyAndClass);
 router.get("/lectures/:class_id/:subject_id/:date", authMiddleware, getLecturesBySubjectAndDate);
 router.get("/classes", authMiddleware, getClasses);
+router.get("/student",authMiddleware,getAttendanceSummary)
 router.put("/update", authMiddleware, updateAttendance);
 router.delete("/:id", authMiddleware, deleteAttendance);
 export default router;
