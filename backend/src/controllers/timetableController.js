@@ -409,3 +409,41 @@ export const getFaculty = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+// Get timetable by class ID (for admin timetable view)
+export const getTimetableByClassId = async (req, res) => {
+  try {
+    const { classId } = req.params;
+
+    if (!classId) {
+      return res.status(400).json({ message: "Class ID is required" });
+    }
+
+    const timetable = await Timetable.findAll({
+      where: { class_pk: classId },
+      include: [
+        { model: Subject, attributes: ["subject_name"] },
+        { model: Faculty, attributes: ["name"] }
+      ],
+      order: [
+        ["day_of_week", "ASC"],
+        ["start_time", "ASC"]
+      ]
+    });
+
+    // Convert into week format (Monday: [], Tuesday: [])
+    const weekTimetable = timetable.reduce((acc, item) => {
+      const day = item.day_of_week;
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(item);
+      return acc;
+    }, {});
+
+    return res.status(200).json(weekTimetable);
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message
+    });
+  }
+};

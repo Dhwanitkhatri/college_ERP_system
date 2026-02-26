@@ -5,6 +5,7 @@ import { Subject } from "../model/Subject.js";
 import { Timetable } from "../model/Timetable.js";
 import { Class } from "../model/Class.js";
 import { User } from "../model/User.js";
+import { Sequelize } from "sequelize";
 import {Faculty} from "../model/Faculty.js"
 
 export const markAttendance = async (req, res) => {
@@ -357,14 +358,7 @@ export const getLecturesBySubjectAndDate = async (req, res) => {
   }
 };
 //student fetch the own attendacne 
-import { Attendance } from "../models/Attendance.js";
-import { Subject } from "../models/Subject.js";
-import { Sequelize } from "sequelize";
 
-import { Attendance } from "../models/Attendance.js";
-import { Subject } from "../models/Subject.js";
-import { Student } from "../models/Student.js";
-import { Sequelize } from "sequelize";
 
 export const getStudentAttendance = async (req, res) => {
   try {
@@ -384,7 +378,7 @@ export const getStudentAttendance = async (req, res) => {
       where: { student_id: student.student_id },
       attributes: [
         "subject_id",
-        [Sequelize.fn("COUNT", Sequelize.col("Attendance.attendance_id")), "total_classes"],
+        [Sequelize.fn("COUNT", Sequelize.col("Attendance.id")), "total_classes"],
         [
           Sequelize.fn(
             "SUM",

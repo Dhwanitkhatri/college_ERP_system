@@ -1,6 +1,6 @@
 //time-table routes
 import express from 'express';
-import { createTimetableEntry, getAllTimetableEntries, getAvailableTimeSlots, updateTimetableEntry, deleteTimetableEntry , getCurrentYearClasses , getSubject , getFaculty ,getTimetable} from '../controllers/timetableController.js';
+import { createTimetableEntry, getAllTimetableEntries, getAvailableTimeSlots, updateTimetableEntry, deleteTimetableEntry , getCurrentYearClasses , getSubject , getFaculty ,getTimetable ,getTimetableByClassId} from '../controllers/timetableController.js';
 import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -12,6 +12,11 @@ router.post('/', authMiddleware, adminMiddleware, createTimetableEntry);
 router.get('/', authMiddleware, adminMiddleware, getAllTimetableEntries);
 
 // Get timetable by class ID (authenticated users)
+router.get(
+  "/class/:classId",
+  authMiddleware,
+  getTimetableByClassId
+);
 
 // Get timetable by faculty ID (authenticated users)
 router.get('/my-timetable', authMiddleware, getTimetable);
