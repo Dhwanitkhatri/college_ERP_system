@@ -12,7 +12,7 @@ export const Exam = sequelize.define("Exam", {
     allowNull: false
   },
   exam_type: {
-    type: DataTypes.ENUM('REGULAR','RE-EXAM','IMPROVEMENT'),
+    type: DataTypes.ENUM('REGULAR','RE-EXAM','IMPROVEMENT','BACKLOG'),
     allowNull: false
   },
   semester: {
