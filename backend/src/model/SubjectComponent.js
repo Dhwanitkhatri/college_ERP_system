@@ -11,13 +11,8 @@ export const SubjectComponent = sequelize.define("SubjectComponent", {
     type: DataTypes.STRING(10),
     allowNull: false
   },
-  component_name: {
-    type: DataTypes.STRING(50),
-    allowNull: false
-  },
-
   type: {
-    type: DataTypes.ENUM('EXAM', 'ASSIGNMENT', 'ATTENDANCE', 'QUIZ'),
+    type: DataTypes.ENUM('INTERNAL', 'EXTERNAL', 'ASSIGNMENT', 'ATTENDANCE', 'BACKLOG'),
     allowNull: false
   },
 

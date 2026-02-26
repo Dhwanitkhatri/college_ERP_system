@@ -1,23 +1,26 @@
 import { SubjectComponent } from '../model/SubjectComponent.js';
 
+// ======================
+// CREATE COMPONENT
+// ======================
 export const createComponent = async (req, res) => {
   try {
-    const { subject_id, component_name, type, max_marks, min_marks } = req.body;
+    const { subject_id, type, max_marks, min_marks } = req.body;
 
     // Required validation
-    if (!subject_id || !component_name || !type || !max_marks || !min_marks) {
+    if (!subject_id || !type || !max_marks || !min_marks) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required"
+        message: "subject_id, type, max_marks, min_marks are required"
       });
     }
 
-    // Type validation
-    const validTypes = ['EXAM', 'ASSIGNMENT', 'ATTENDANCE', 'QUIZ'];
+    // Type validation – match your model's ENUM values
+    const validTypes = ['INTERNAL', 'EXTERNAL', 'ASSIGNMENT', 'ATTENDANCE'];
     if (!validTypes.includes(type)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid component type"
+        message: `Invalid component type. Must be one of: ${validTypes.join(', ')}`
       });
     }
 
@@ -29,21 +32,20 @@ export const createComponent = async (req, res) => {
       });
     }
 
-    // Unique check (IMPORTANT 🔥)
+    // Unique check: one component of a given type per subject
     const existing = await SubjectComponent.findOne({
-      where: { subject_id, component_name, type }
+      where: { subject_id, type }
     });
 
     if (existing) {
       return res.status(400).json({
         success: false,
-        message: "Component already exists for this subject with same type"
+        message: `A component of type '${type}' already exists for this subject`
       });
     }
 
     const component = await SubjectComponent.create({
       subject_id,
-      component_name,
       type,
       max_marks,
       min_marks
@@ -60,7 +62,9 @@ export const createComponent = async (req, res) => {
   }
 };
 
-//
+// ======================
+// GET ALL COMPONENTS FOR A SUBJECT
+// ======================
 export const getComponentsBySubject = async (req, res) => {
   try {
     const { subject_id } = req.params;
@@ -80,38 +84,60 @@ export const getComponentsBySubject = async (req, res) => {
   }
 };
 
-
+// ======================
+// UPDATE COMPONENT
+// ======================
 export const updateComponent = async (req, res) => {
   try {
     const { component_id } = req.params;
     const { max_marks, min_marks, type } = req.body;
 
     const component = await SubjectComponent.findByPk(component_id);
-
     if (!component) {
       return res.status(404).json({ success: false, message: "Component not found" });
     }
 
+    // If type is being updated, validate it
     if (type) {
-      const validTypes = ['EXAM', 'ASSIGNMENT', 'ATTENDANCE', 'QUIZ'];
+      const validTypes = ['INTERNAL', 'EXTERNAL', 'ASSIGNMENT', 'ATTENDANCE'];
       if (!validTypes.includes(type)) {
         return res.status(400).json({
-          message: "Invalid component type"
+          success: false,
+          message: `Invalid component type. Must be one of: ${validTypes.join(', ')}`
         });
+      }
+
+      // Check for uniqueness if type is changing
+      if (type !== component.type) {
+        const existing = await SubjectComponent.findOne({
+          where: {
+            subject_id: component.subject_id,
+            type
+          }
+        });
+        if (existing) {
+          return res.status(400).json({
+            success: false,
+            message: `A component of type '${type}' already exists for this subject`
+          });
+        }
       }
     }
 
-    // Marks validation
-    if (min_marks > max_marks) {
+    // Marks validation (if both provided)
+    const newMax = max_marks !== undefined ? max_marks : component.max_marks;
+    const newMin = min_marks !== undefined ? min_marks : component.min_marks;
+    if (newMin > newMax) {
       return res.status(400).json({
         success: false,
         message: "Min marks cannot be greater than max marks"
       });
     }
 
+    // Perform update
     await component.update({
-      max_marks,
-      min_marks,
+      max_marks: newMax,
+      min_marks: newMin,
       type: type || component.type
     });
 
@@ -126,12 +152,14 @@ export const updateComponent = async (req, res) => {
   }
 };
 
+// ======================
+// DELETE COMPONENT
+// ======================
 export const deleteComponent = async (req, res) => {
   try {
     const { component_id } = req.params;
 
     const component = await SubjectComponent.findByPk(component_id);
-
     if (!component) {
       return res.status(404).json({
         success: false,

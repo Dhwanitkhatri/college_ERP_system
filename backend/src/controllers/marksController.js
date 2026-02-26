@@ -6,6 +6,9 @@ import { Subject } from "../model/Subject.js";
 import { ExamTimetable } from "../model/ExamTimetable.js";
 import { sequelize } from "../config/db.js";
 
+// ======================
+// ENTER MARKS CONTROLLER
+// ======================
 export const enterMarks = async (req, res) => {
   const t = await sequelize.transaction();
 
@@ -19,13 +22,13 @@ export const enterMarks = async (req, res) => {
     } = req.body;
 
     // =============================
-    //  BASIC VALIDATION
+    // BASIC VALIDATION
     // =============================
     if (!student_id || !subject_id || !component_id || marks_obtained === undefined) {
       await t.rollback();
       return res.status(400).json({
         success: false,
-        message: "student_id, subject_id, component_id, marks_obtained required"
+        message: "student_id, subject_id, component_id, marks_obtained are required"
       });
     }
 
@@ -38,7 +41,7 @@ export const enterMarks = async (req, res) => {
     }
 
     // =============================
-    //  FETCH DATA
+    // FETCH DATA
     // =============================
     const [component, student, subject, exam] = await Promise.all([
       SubjectComponent.findByPk(component_id),
@@ -63,7 +66,7 @@ export const enterMarks = async (req, res) => {
     }
 
     // =============================
-    //  COMPONENT ↔ SUBJECT CHECK
+    // COMPONENT ↔ SUBJECT CHECK
     // =============================
     if (component.subject_id !== subject_id) {
       await t.rollback();
@@ -74,29 +77,29 @@ export const enterMarks = async (req, res) => {
     }
 
     // =============================
-    //  COMPONENT TYPE LOGIC 🔥
+    // COMPONENT TYPE HANDLING
     // =============================
 
-    // CASE 1: EXAM COMPONENT
-    if (component.type === "EXAM") {
+    // Define which component types require an exam_id and timetable validation
+    const examComponentTypes = ['INTERNAL', 'EXTERNAL', 'BACKLOG'];  // Add more if needed
+    const continuousComponentTypes = ['ASSIGNMENT', 'ATTENDANCE', 'QUIZ'];
 
+    // CASE 1: Exam‑type component
+    if (examComponentTypes.includes(component.type)) {
       if (!exam_id) {
         await t.rollback();
         return res.status(400).json({
           success: false,
-          message: "Exam ID required for EXAM component"
+          message: `Exam ID is required for ${component.type} component`
         });
       }
 
       if (!exam) {
         await t.rollback();
-        return res.status(404).json({
-          success: false,
-          message: "Exam not found"
-        });
+        return res.status(404).json({ success: false, message: "Exam not found" });
       }
 
-      // CHECK SUBJECT IN TIMETABLE
+      // Verify that this subject is actually scheduled in this exam
       const timetable = await ExamTimetable.findOne({
         where: { exam_id, subject_id }
       });
@@ -105,26 +108,34 @@ export const enterMarks = async (req, res) => {
         await t.rollback();
         return res.status(400).json({
           success: false,
-          message: "This subject is NOT scheduled in this exam"
+          message: "This subject is NOT scheduled in the given exam"
         });
       }
     }
 
-    // CASE 2:  INTERNAL / ASSIGNMENT
-    else if (component.type === "INTERNAL" || component.type === "ASSIGNMENT") {
-
-      //  exam_id SHOULD NOT BE PASSED
+    // CASE 2: Continuous component (attendance, assignment, quiz)
+    else if (continuousComponentTypes.includes(component.type)) {
+      // These components should NOT have an exam_id
       if (exam_id) {
         await t.rollback();
         return res.status(400).json({
           success: false,
-          message: "Exam ID not allowed for INTERNAL/ASSIGNMENT"
+          message: `Exam ID is NOT allowed for ${component.type} component`
         });
       }
     }
 
+    // If some other type appears (shouldn't happen if enum is correct), reject
+    else {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        message: `Unsupported component type: ${component.type}`
+      });
+    }
+
     // =============================
-    //  MARKS VALIDATION
+    // MARKS VALIDATION
     // =============================
     if (marks_obtained > component.max_marks) {
       await t.rollback();
@@ -135,12 +146,15 @@ export const enterMarks = async (req, res) => {
     }
 
     // =============================
-    // UPSERT
+    // UPSERT MARKS
     // =============================
+    // For exam‑type components, store exam_id; for continuous, store null
+    const storedExamId = examComponentTypes.includes(component.type) ? exam_id : null;
+
     const [record, created] = await StudentMarks.upsert({
       student_id,
       subject_id,
-      exam_id: component.type === "EXAM" ? exam_id : null,
+      exam_id: storedExamId,
       component_id,
       marks_obtained
     }, {
@@ -152,13 +166,12 @@ export const enterMarks = async (req, res) => {
 
     return res.status(created ? 201 : 200).json({
       success: true,
-      message: created ? "Marks created" : "Marks updated",
+      message: created ? "Marks created successfully" : "Marks updated successfully",
       data: record
     });
 
   } catch (error) {
     await t.rollback();
-
     return res.status(500).json({
       success: false,
       message: error.message

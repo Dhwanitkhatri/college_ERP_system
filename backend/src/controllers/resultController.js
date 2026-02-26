@@ -90,11 +90,13 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
     let totalMarks = 0;
     let maxTotal = 0;
     let isPass = true;
-    let breakdown = {
+
+    // Initialize breakdown with all possible component types
+    const breakdown = {
       INTERNAL: 0,
       EXTERNAL: 0,
       ASSIGNMENT: 0,
-      ATTENDANCE: 0
+      ATTENDANCE: 0,
     };
 
     for (const comp of components) {
@@ -107,17 +109,8 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
       totalMarks += obtained;
       maxTotal += comp.max_marks;
 
-      // Breakdown logic
-      if (comp.type === "EXAM") {
-        if (comp.component_name === "INTERNAL") {
-          breakdown.INTERNAL += obtained;
-        } else if (comp.component_name === "EXTERNAL") {
-          breakdown.EXTERNAL += obtained;
-        }
-        // handle other exam-type components if needed
-      } else {
-        breakdown[comp.type] = (breakdown[comp.type] || 0) + obtained;
-      }
+      // Add obtained marks to the corresponding type
+      breakdown[comp.type] = (breakdown[comp.type] || 0) + obtained;
 
       if (obtained < comp.min_marks) isPass = false;
     }
@@ -195,10 +188,7 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
 
     subjectResults.push({
       subject_id: subject.subject_id,
-      internal: breakdown.INTERNAL,
-      external: breakdown.EXTERNAL,
-      assignment: breakdown.ASSIGNMENT,
-      attendance: breakdown.ATTENDANCE,
+      ...breakdown, // includes all types (INTERNAL, EXTERNAL, etc.)
       total_marks: totalMarks,
       percentage,
       grade,
@@ -320,4 +310,4 @@ export const generateBulkResults = async (req, res) => {
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
-};
+}
