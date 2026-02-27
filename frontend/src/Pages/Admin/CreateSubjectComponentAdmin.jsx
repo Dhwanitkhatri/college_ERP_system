@@ -88,28 +88,6 @@ const CreateSubjectComponent = () => {
           </div>
 
           {/* COMPONENT NAME */}
-          <div className="form-field">
-            <label className="custom-label">Component Name</label>
-            <input
-              type="text"
-              placeholder="Enter Component Name (e.g. Midterm Exam)"
-              className="custom-input"
-              {...register("component_name", {
-                required: "Component name is required",
-                minLength: {
-                  value: 3,
-                  message: "Minimum 3 characters required",
-                },
-                maxLength: {
-                  value: 50,
-                  message: "Maximum 50 characters allowed",
-                },
-              })}
-            />
-            {errors.component_name && (
-              <p className="custom-error">{errors.component_name.message}</p>
-            )}
-          </div>
 
           {/* COMPONENT TYPE */}
           <div className="form-field">
@@ -121,7 +99,8 @@ const CreateSubjectComponent = () => {
               })}
             >
               <option value="">Select Type</option>
-              <option value="EXAM">EXAM</option>
+              <option value="INTERNAL">INTERNAL</option>
+              <option value="EXTERNAL">EXTERNAL</option>
               <option value="ASSIGNMENT">ASSIGNMENT</option>
               <option value="ATTENDANCE">ATTENDANCE</option>
             </select>
