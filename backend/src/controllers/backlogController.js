@@ -7,10 +7,9 @@ import { BacklogAttempt } from "../model/BacklogAttempts.js";
 import { StudentMarks } from "../model/StudentMarks.js";
 import { Student } from "../model/Student.js";
 import { Subject } from "../model/Subject.js";
-//import { ExamTimetable } from "../model/ExamTimetable.js";
 
 // ==========================================
-// 1. CREATE BACKLOG EXAM (with both components)
+// 1. CREATE BACKLOG EXAM (with both internal & external components)
 // ==========================================
 export const createBacklogExam = async (req, res) => {
   const t = await sequelize.transaction();
@@ -19,44 +18,53 @@ export const createBacklogExam = async (req, res) => {
       subject_id,
       semester,
       academic_year,
-      internal_max = 25,
-      internal_min = 11,
-      external_max = 50,
-      external_min = 22,
-     // exam_date,
-     // start_time,
-      //end_time
+      internal_max,
+      internal_min,
+      external_max,
+      external_min,
     } = req.body;
 
     // Validate subject
     const subject = await Subject.findOne({ where: { subject_id, semester } });
     if (!subject) throw new Error("Subject not found for given semester");
 
+    // Fetch original components to get default max/min if not provided
+    const originalInternal = await SubjectComponent.findOne({
+      where: { subject_id, type: "INTERNAL" }
+    });
+    const originalExternal = await SubjectComponent.findOne({
+      where: { subject_id, type: "EXTERNAL" }
+    });
+
+    // Use provided values or fallback to original component's values, or default if not found
+    const internalMax = internal_max ?? originalInternal?.max_marks ?? 25;
+    const internalMin = internal_min ?? originalInternal?.min_marks ?? 11;
+    const externalMax = external_max ?? originalExternal?.max_marks ?? 50;
+    const externalMin = external_min ?? originalExternal?.min_marks ?? 22;
+
     // Create or find BACKLOG_INTERNAL component
     let internalComp = await SubjectComponent.findOne({
-      where: { subject_id, component_name: "BACKLOG_INTERNAL", type: "EXAM" }
+      where: { subject_id, type: "BACKLOG_INTERNAL" }
     });
     if (!internalComp) {
       internalComp = await SubjectComponent.create({
         subject_id,
-        component_name: "BACKLOG_INTERNAL",
-        type: "EXAM",
-        max_marks: internal_max,
-        min_marks: internal_min
+        type: "BACKLOG_INTERNAL",
+        max_marks: internalMax,
+        min_marks: internalMin
       }, { transaction: t });
     }
 
     // Create or find BACKLOG_EXTERNAL component
     let externalComp = await SubjectComponent.findOne({
-      where: { subject_id, component_name: "BACKLOG_EXTERNAL", type: "EXAM" }
+      where: { subject_id, type: "BACKLOG_EXTERNAL" }
     });
     if (!externalComp) {
       externalComp = await SubjectComponent.create({
         subject_id,
-        component_name: "BACKLOG_EXTERNAL",
-        type: "EXAM",
-        max_marks: external_max,
-        min_marks: external_min
+        type: "BACKLOG_EXTERNAL",
+        max_marks: externalMax,
+        min_marks: externalMin
       }, { transaction: t });
     }
 
@@ -68,9 +76,6 @@ export const createBacklogExam = async (req, res) => {
       academic_year,
       status: "DRAFT"
     }, { transaction: t });
-
-    // Optionally create ExamTimetable entries if you have that model
-   // await ExamTimetable.create({ exam_id: exam.exam_id, subject_id, exam_date, start_time, end_time }, { transaction: t });
 
     await t.commit();
 
@@ -87,7 +92,7 @@ export const createBacklogExam = async (req, res) => {
 };
 
 // ==========================================
-// 2. GET ELIGIBLE STUDENTS (unchanged)
+// 2. GET ELIGIBLE STUDENTS
 // ==========================================
 export const getEligibleStudents = async (req, res) => {
   try {
@@ -111,7 +116,7 @@ export const getEligibleStudents = async (req, res) => {
 export const enterBacklogMarks = async (req, res) => {
   const t = await sequelize.transaction();
   try {
-    const { student_id, exam_id, subject_id, component_name, marks_obtained } = req.body;
+    const { student_id, exam_id, subject_id, type, marks_obtained } = req.body;
 
     // Validate exam
     const exam = await Exam.findOne({ where: { exam_id, exam_type: "BACKLOG" } });
@@ -123,11 +128,11 @@ export const enterBacklogMarks = async (req, res) => {
     });
     if (!backlog) throw new Error("Student does not have an active backlog for this subject");
 
-    // Find the correct component
+    // Find the correct component (must be BACKLOG_INTERNAL or BACKLOG_EXTERNAL)
     const component = await SubjectComponent.findOne({
-      where: { subject_id, component_name, type: "EXAM" }
+      where: { subject_id, type }
     });
-    if (!component) throw new Error(`Component ${component_name} not found for this subject`);
+    if (!component) throw new Error(`Component of type ${type} not found for this subject`);
 
     // Save/update marks
     const [marks, created] = await StudentMarks.upsert({
@@ -167,7 +172,7 @@ export const generateBacklogResult = async (req, res) => {
     // Get all marks for this exam, including component info
     const marks = await StudentMarks.findAll({
       where: { exam_id },
-      include: [{ model: SubjectComponent, where: { type: "EXAM" } }]
+      include: [{ model: SubjectComponent }]
     });
 
     // Group by student_id and subject_id
@@ -183,9 +188,9 @@ export const generateBacklogResult = async (req, res) => {
     for (const key in grouped) {
       const { student_id, subject_id, marks: studentMarks } = grouped[key];
 
-      // Determine if both internal and external components are present and passed
-      const internalMark = studentMarks.find(m => m.SubjectComponent.component_name === "BACKLOG_INTERNAL");
-      const externalMark = studentMarks.find(m => m.SubjectComponent.component_name === "BACKLOG_EXTERNAL");
+      // Find internal and external backlog marks by component type
+      const internalMark = studentMarks.find(m => m.SubjectComponent.type === "BACKLOG_INTERNAL");
+      const externalMark = studentMarks.find(m => m.SubjectComponent.type === "BACKLOG_EXTERNAL");
 
       if (!internalMark || !externalMark) {
         // Skip if missing marks (maybe log a warning)
@@ -200,7 +205,7 @@ export const generateBacklogResult = async (req, res) => {
       const backlog = await Backlog.findOne({
         where: { student_id, subject_id, status: "ACTIVE" }
       });
-      if (!backlog) continue; // should not happen
+      if (!backlog) continue;
 
       const nextAttempt = backlog.total_attempts + 1;
 
@@ -251,7 +256,7 @@ export const generateBacklogResult = async (req, res) => {
 };
 
 // ==========================================
-// 5. GET ACTIVE BACKLOGS (unchanged)
+// 5. GET ACTIVE BACKLOGS
 // ==========================================
 export const getActiveBacklogs = async (req, res) => {
   try {
@@ -270,7 +275,7 @@ export const getActiveBacklogs = async (req, res) => {
 };
 
 // ==========================================
-// 6. STUDENT BACKLOG HISTORY (unchanged)
+// 6. STUDENT BACKLOG HISTORY
 // ==========================================
 export const getStudentBacklogHistory = async (req, res) => {
   try {

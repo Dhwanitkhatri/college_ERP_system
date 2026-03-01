@@ -259,21 +259,21 @@ export const generateStudentResult = async (req, res) => {
 // ======================
 export const generateBulkResults = async (req, res) => {
   try {
-    const { exam_id, semester, course_id } = req.body;
+    const { exam_id, semester } = req.body;
+    const course_id = req.user?.course_id; // from auth middleware
+
     if (!exam_id) throw new Error("exam_id is required");
+    if (!semester) throw new Error("semester is required");
+    if (!course_id) throw new Error("User course_id not found. Cannot generate results.");
 
     // Validate exam
     const exam = await Exam.findByPk(exam_id);
     if (!exam) throw new Error("Exam not found");
     if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
 
-    // Build student filter
-    const studentWhere = {};
-    const classWhere = { semester };
-    if (course_id) classWhere.course_id = course_id;
-
+    // Build student filter using course_id from user token
+    const classWhere = { semester, course_id };
     const students = await Student.findAll({
-      where: studentWhere,
       include: [{
         model: Class,
         where: classWhere,
@@ -283,7 +283,7 @@ export const generateBulkResults = async (req, res) => {
       attributes: ['student_id']
     });
 
-    if (!students.length) throw new Error("No students found for the given semester/course");
+    if (!students.length) throw new Error("No students found for the given semester and your course");
 
     const results = [];
     const errors = [];

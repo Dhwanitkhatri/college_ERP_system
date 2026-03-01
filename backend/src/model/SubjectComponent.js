@@ -12,7 +12,7 @@ export const SubjectComponent = sequelize.define("SubjectComponent", {
     allowNull: false
   },
   type: {
-    type: DataTypes.ENUM('INTERNAL', 'EXTERNAL', 'ASSIGNMENT', 'ATTENDANCE', 'BACKLOG'),
+    type: DataTypes.ENUM('INTERNAL', 'EXTERNAL', 'ASSIGNMENT', 'ATTENDANCE', 'BACKLOG', 'BACKLOG_INTERNAL', 'BACKLOG_EXTERNAL'),
     allowNull: false
   },
 
