@@ -7,16 +7,23 @@ import { CreditCard, Search } from "lucide-react";
 import axios from "axios";
 
 export default function PayFeeAdmin() {
-
-  {/* this is the variables for fee data*/}
+  {
+    /* this is the variables for fee data*/
+  }
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState("");
   const [searchEnrollment, setSearchEnrollment] = useState("");
   const [feeSummary, setFeeSummary] = useState(null);
 
+  // NEW STATES
+  const [academicYear, setAcademicYear] = useState("");
+  const [semester, setSemester] = useState("");
+
   const token = localStorage.getItem("token");
 
-  {/* this is the react hook form part*/}
+  {
+    /* this is the react hook form part*/
+  }
   const {
     register,
     handleSubmit,
@@ -25,20 +32,23 @@ export default function PayFeeAdmin() {
     formState: { errors },
   } = useForm();
 
-  {/*below is the calculation part of the fee data */}
+  {
+    /*below is the calculation part of the fee data */
+  }
   const amountInput = watch("amount");
   const payingNow = Number(amountInput) || 0;
 
   const totalFee = feeSummary?.total_fee;
   const alreadyPaid = feeSummary?.paid_amount || 0;
 
-  const newTotalPaid =
-    totalFee !== undefined ? alreadyPaid + payingNow : null;
+  const newTotalPaid = totalFee !== undefined ? alreadyPaid + payingNow : null;
 
   const newPending =
     totalFee !== undefined ? totalFee - (alreadyPaid + payingNow) : null;
 
-  {/* fetch all students */}
+  {
+    /* fetch all students */
+  }
   useEffect(() => {
     const fetchStudents = async () => {
       try {
@@ -54,14 +64,16 @@ export default function PayFeeAdmin() {
     fetchStudents();
   }, []);
 
-  {/* fetch fee summary when student selected */}
-  const fetchFeeStatus = async (studentId) => {
+  {
+    /* fetch fee summary when student selected */
+  }
+  const fetchFeeStatus = async (studentId, year, sem) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/fee/check-fee-status?student_id=${studentId}&academic_year=2025-2026`,
+        `http://localhost:5000/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       setFeeSummary(res.data.feeSummary);
@@ -70,21 +82,46 @@ export default function PayFeeAdmin() {
     }
   };
 
-  {/* filter students by enrollment search */}
+  {
+    /* filter students by enrollment search */
+  }
   const filteredStudents = students.filter((student) =>
-    student.student_id
-      .toLowerCase()
-      .includes(searchEnrollment.toLowerCase())
+    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase()),
   );
 
-  {/* this part is handle form submission */}
-  const onSubmit = (data) => {
-    console.log(data);
-    alert("Payment Saved!");
-    reset();
+  {
+    /* this part is handle form submission */
+  }
+  const onSubmit = async (data) => {
+    try {
+      await axios.post(
+        "http://localhost:5000/api/fee/pay",
+        {
+          student_id: selectedStudent,
+          academic_year: academicYear,
+          semester: semester,
+          amount_paid: data.amount,
+          payment_mode: data.paymentMode,
+          reference_no: data.referenceNumber,
+          payment_date: data.paymentDate,
+          remarks: data.remarks,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      alert("Payment Saved!");
+      reset();
+      fetchFeeStatus(selectedStudent, academicYear, semester);
+    } catch (error) {
+      alert(error.response?.data?.message || "Payment Failed");
+    }
   };
 
-  {/*the main designing part start here */}
+  {
+    /*the main designing part start here */
+  }
   return (
     <DashboardChildPageTemplate
       title="Pay Fee"
@@ -92,22 +129,26 @@ export default function PayFeeAdmin() {
       width="max-w-6xl"
     >
       <div className="pb-20 space-y-6">
-
         {/* ================= STUDENT SELECTION CARD ================= */}
         <DashboardChildPageCard>
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 mb-6 text-[var(--text-primary)]">
             <CreditCard size={20} />
             <h3 className="font-medium">Select Student</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             {/* enrollment search field */}
             <div>
               <label className="custom-label mb-2">
                 Search by Enrollment Number
               </label>
+
               <div className="relative">
+                <Search
+                  size={18}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                />
+
                 <input
                   type="text"
                   placeholder="Enter enrollment number"
@@ -115,44 +156,83 @@ export default function PayFeeAdmin() {
                   onChange={(e) => setSearchEnrollment(e.target.value)}
                   className="custom-input bg-[var(--bg-primary)] theme-transition pl-10"
                 />
-                <Search
-                  size={18}
-                  className="absolute left-3 top-3 text-gray-400"
-                />
               </div>
             </div>
 
             {/* student dropdown */}
             <div>
-              <label className="custom-label mb-2">
-                Select Student
-              </label>
+              <label className="custom-label mb-2">Select Student</label>
               <select
                 className="custom-input bg-[var(--bg-primary)] theme-transition"
                 value={selectedStudent}
                 onChange={(e) => {
                   setSelectedStudent(e.target.value);
-                  fetchFeeStatus(e.target.value);
+                  if (academicYear && semester) {
+                    fetchFeeStatus(e.target.value, academicYear, semester);
+                  }
                 }}
               >
                 <option value="">Choose Student</option>
 
                 {filteredStudents.map((student) => (
-                  <option
-                    key={student.student_id}
-                    value={student.student_id}
-                  >
+                  <option key={student.student_id} value={student.student_id}>
                     {student.student_id} - {student.name}
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* NEW Academic Year dropdown */}
+            <div>
+              <label className="custom-label mb-2">Academic Year</label>
+              <select
+                className="custom-input bg-[var(--bg-primary)] theme-transition"
+                value={academicYear}
+                onChange={(e) => {
+                  setAcademicYear(e.target.value);
+                  if (selectedStudent && semester) {
+                    fetchFeeStatus(selectedStudent, e.target.value, semester);
+                  }
+                }}
+              >
+                <option value="">Select Academic Year</option>
+                <option value="2024-2025">2024-2025</option>
+                <option value="2025-2026">2025-2026</option>
+                <option value="2026-2027">2026-2027</option>
+              </select>
+            </div>
+
+            {/* NEW Semester dropdown */}
+            <div>
+              <label className="custom-label mb-2">Semester</label>
+              <select
+                className="custom-input bg-[var(--bg-primary)] theme-transition"
+                value={semester}
+                onChange={(e) => {
+                  setSemester(e.target.value);
+                  if (selectedStudent && academicYear) {
+                    fetchFeeStatus(
+                      selectedStudent,
+                      academicYear,
+                      e.target.value,
+                    );
+                  }
+                }}
+              >
+                <option value="">Select Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+              </select>
+            </div>
           </div>
         </DashboardChildPageCard>
 
-        {/* SHOW BELOW CONTENT ONLY AFTER STUDENT IS SELECTED */}
-        {selectedStudent && (
+        {/* SHOW BELOW CONTENT ONLY AFTER ALL SELECTED */}
+        {selectedStudent && academicYear && semester && (
           <>
             {/* this part is the fee summary card part */}
             <div className="p-6 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800 transition-colors">
@@ -162,7 +242,6 @@ export default function PayFeeAdmin() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-
                 {/* this is the total fee part */}
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
@@ -208,16 +287,13 @@ export default function PayFeeAdmin() {
                     {feeSummary ? "As Assigned" : "-"}
                   </p>
                 </div>
-
               </div>
             </div>
 
             {/* the payment form start from here */}
             <DashboardChildPageCard>
               <form onSubmit={handleSubmit(onSubmit)}>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
                   {/* this is the amount input part */}
                   <div>
                     <label className="custom-label mb-2">
@@ -227,12 +303,12 @@ export default function PayFeeAdmin() {
                       type="number"
                       placeholder="Enter amount"
                       className="custom-input bg-[var(--bg-primary)] theme-transition"
-                      {...register("amount", { required: "Amount is required" })}
+                      {...register("amount", {
+                        required: "Amount is required",
+                      })}
                     />
                     {errors.amount && (
-                      <p className="custom-error">
-                        {errors.amount.message}
-                      </p>
+                      <p className="custom-error">{errors.amount.message}</p>
                     )}
                   </div>
 
@@ -278,9 +354,7 @@ export default function PayFeeAdmin() {
 
                   {/* this is the payment date part */}
                   <div>
-                    <label className="custom-label mb-2">
-                      Payment Date
-                    </label>
+                    <label className="custom-label mb-2">Payment Date</label>
                     <div className="relative">
                       <input
                         type="date"
@@ -307,7 +381,6 @@ export default function PayFeeAdmin() {
                       {...register("remarks")}
                     ></textarea>
                   </div>
-
                 </div>
 
                 {/* below is the buttons part */}
@@ -324,12 +397,10 @@ export default function PayFeeAdmin() {
                   {/* this is the cancel button */}
                   <CancelButton onClick={() => reset()} />
                 </div>
-
               </form>
             </DashboardChildPageCard>
           </>
         )}
-
       </div>
     </DashboardChildPageTemplate>
   );
