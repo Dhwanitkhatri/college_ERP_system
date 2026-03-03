@@ -549,7 +549,8 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(400).json({ message: "class_id is required" });
     }
 
-    // ✅ Get Class with Faculty and User (NO alias used)
+    /* ================= CLASS WITH MENTOR ================= */
+
     const classRecord = await Class.findOne({
       where: { id: class_id },
       include: [{
@@ -565,7 +566,8 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(404).json({ message: "Class not found" });
     }
 
-    // ✅ Faculty can only access their own class
+    /* ================= FACULTY ACCESS CONTROL ================= */
+
     if (role === "Faculty") {
       if (
         !classRecord.Faculty ||
@@ -577,44 +579,69 @@ export const getOverallClassAttendancereport = async (req, res) => {
       }
     }
 
-    // ✅ Get Students
+    /* ================= GET STUDENTS ================= */
+
     const students = await Student.findAll({
       where: { class_pk: classRecord.id },
       order: [["student_id", "ASC"]]
     });
 
     if (!students.length) {
-      return res.status(404).json({ message: "No students found in class" });
+      return res.status(404).json({
+        message: "No students found in class"
+      });
     }
 
     const studentIds = students.map(s => s.student_id);
 
-    // ✅ Month Filter
-    const dateFilter = {};
+    /* ================= MONTH FILTER ================= */
+
+    let dateFilter = {};
+
     if (month) {
       const monthNum = Number(month);
+
       if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-        return res.status(400).json({ message: "Month must be between 1-12" });
+        return res.status(400).json({
+          message: "Month must be between 1-12"
+        });
       }
 
-      const [startYear, endYear] = classRecord.academic_year
-        .split("-")
-        .map(Number);
+      // ✅ Fix academic year parsing (2025-26 → 2025 & 2026)
+      const [startStr, endShortStr] =
+        classRecord.academic_year.split("-");
 
-      const year = monthNum >= 7 ? startYear : endYear;
+      const startYear = Number(startStr);
 
-      const startDate = new Date(year, monthNum - 1, 1);
-      const endDate = new Date(year, monthNum, 0);
+      const endYear =
+        endShortStr.length === 2
+          ? Math.floor(startYear / 100) * 100 + Number(endShortStr)
+          : Number(endShortStr);
+
+      const selectedYear =
+        monthNum >= 7 ? startYear : endYear;
+
+      // ✅ Safe date formatting (NO ISO timezone issue)
+      const formatDate = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      };
+
+      const startDate = new Date(selectedYear, monthNum - 1, 1);
+      const endDate = new Date(selectedYear, monthNum, 0);
 
       dateFilter.date = {
         [Op.between]: [
-          startDate.toISOString().split("T")[0],
-          endDate.toISOString().split("T")[0]
+          formatDate(startDate),
+          formatDate(endDate)
         ]
       };
     }
 
-    // ✅ Attendance Records with Subject
+    /* ================= FETCH ATTENDANCE ================= */
+
     const attendanceRecords = await Attendance.findAll({
       where: {
         class_id: classRecord.id,
@@ -628,7 +655,8 @@ export const getOverallClassAttendancereport = async (req, res) => {
       order: [["date", "ASC"], ["student_id", "ASC"]]
     });
 
-    // ✅ Process Data
+    /* ================= PROCESS DATA ================= */
+
     const studentMap = {};
     const subjectSummary = {};
     const uniqueDates = new Set();
@@ -640,6 +668,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
         total_classes: 0,
         present: 0,
         absent: 0,
+        attendance_percentage: "0.00%",
         subject_wise: {}
       };
     });
@@ -648,11 +677,16 @@ export const getOverallClassAttendancereport = async (req, res) => {
       const student = studentMap[r.student_id];
       if (!student) return;
 
-      const dateStr = new Date(r.date).toISOString().split("T")[0];
+      const dateStr = r.date; // already YYYY-MM-DD
       uniqueDates.add(dateStr);
 
       student.total_classes++;
-      r.status === "Present" ? student.present++ : student.absent++;
+
+      if (r.status === "Present") {
+        student.present++;
+      } else {
+        student.absent++;
+      }
 
       const subjectId = r.Subject.subject_id;
 
@@ -667,9 +701,12 @@ export const getOverallClassAttendancereport = async (req, res) => {
       }
 
       student.subject_wise[subjectId].total_classes++;
-      r.status === "Present"
-        ? student.subject_wise[subjectId].present++
-        : student.subject_wise[subjectId].absent++;
+
+      if (r.status === "Present") {
+        student.subject_wise[subjectId].present++;
+      } else {
+        student.subject_wise[subjectId].absent++;
+      }
 
       subjectSummary[subjectId] ??= {
         subject_id: subjectId,
@@ -677,10 +714,21 @@ export const getOverallClassAttendancereport = async (req, res) => {
       };
     });
 
+    /* ================= CALCULATE PERCENTAGE ================= */
+
+    Object.values(studentMap).forEach(s => {
+      if (s.total_classes > 0) {
+        s.attendance_percentage =
+          ((s.present / s.total_classes) * 100).toFixed(2) + "%";
+      }
+    });
+
     const formattedStudents = Object.values(studentMap).map(s => ({
       ...s,
       subject_wise: Object.values(s.subject_wise)
     }));
+
+    /* ================= RESPONSE ================= */
 
     return res.status(200).json({
       success: true,
@@ -698,6 +746,8 @@ export const getOverallClassAttendancereport = async (req, res) => {
 
   } catch (error) {
     console.error("Overall Attendance Error:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({
+      message: "Internal server error"
+    });
   }
 };
