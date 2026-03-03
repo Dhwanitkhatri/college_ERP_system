@@ -32,6 +32,9 @@ export default function PayFeeAdmin() {
     formState: { errors },
   } = useForm();
 
+  // 👇 WATCH PAYMENT MODE
+  const paymentMode = watch("paymentMode");
+
   {
     /*below is the calculation part of the fee data */
   }
@@ -41,7 +44,8 @@ export default function PayFeeAdmin() {
   const totalFee = feeSummary?.total_fee;
   const alreadyPaid = feeSummary?.paid_amount || 0;
 
-  const newTotalPaid = totalFee !== undefined ? alreadyPaid + payingNow : null;
+  const newTotalPaid =
+    totalFee !== undefined ? alreadyPaid + payingNow : null;
 
   const newPending =
     totalFee !== undefined ? totalFee - (alreadyPaid + payingNow) : null;
@@ -73,9 +77,8 @@ export default function PayFeeAdmin() {
         `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       );
-      console.log(res.data);
       setFeeSummary(res.data.feeSummary);
     } catch (error) {
       setFeeSummary(null);
@@ -86,7 +89,7 @@ export default function PayFeeAdmin() {
     /* filter students by enrollment search */
   }
   const filteredStudents = students.filter((student) =>
-    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase()),
+    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase())
   );
 
   {
@@ -102,14 +105,15 @@ export default function PayFeeAdmin() {
           semester: semester,
           amount_paid: data.amount,
           payment_mode: data.paymentMode,
-          reference_no: data.referenceNumber,
+          reference_no:
+            data.paymentMode === "Cheque" ? data.referenceNumber : null,
           payment_date: data.paymentDate,
           remarks: data.remarks,
-          fee_structure_id:feeSummary.fee_id
+          fee_structure_id: feeSummary.fee_id,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       );
 
       alert("Payment Saved!");
@@ -174,59 +178,11 @@ export default function PayFeeAdmin() {
                 }}
               >
                 <option value="">Choose Student</option>
-
                 {filteredStudents.map((student) => (
                   <option key={student.student_id} value={student.student_id}>
                     {student.student_id} - {student.name}
                   </option>
                 ))}
-              </select>
-            </div>
-
-            {/* NEW Academic Year dropdown */}
-            <div>
-              <label className="custom-label mb-2">Academic Year</label>
-              <select
-                className="custom-input bg-[var(--bg-primary)] theme-transition"
-                value={academicYear}
-                onChange={(e) => {
-                  setAcademicYear(e.target.value);
-                  if (selectedStudent && semester) {
-                    fetchFeeStatus(selectedStudent, e.target.value, semester);
-                  }
-                }}
-              >
-                <option value="">Select Academic Year</option>
-                <option value="2024-25">2024-2025</option>
-                <option value="2025-26">2025-2026</option>
-                <option value="2026-27">2026-2027</option>
-              </select>
-            </div>
-
-            {/* NEW Semester dropdown */}
-            <div>
-              <label className="custom-label mb-2">Semester</label>
-              <select
-                className="custom-input bg-[var(--bg-primary)] theme-transition"
-                value={semester}
-                onChange={(e) => {
-                  setSemester(e.target.value);
-                  if (selectedStudent && academicYear) {
-                    fetchFeeStatus(
-                      selectedStudent,
-                      academicYear,
-                      e.target.value,
-                    );
-                  }
-                }}
-              >
-                <option value="">Select Semester</option>
-                <option value="1">Semester 1</option>
-                <option value="2">Semester 2</option>
-                <option value="3">Semester 3</option>
-                <option value="4">Semester 4</option>
-                <option value="5">Semester 5</option>
-                <option value="6">Semester 6</option>
               </select>
             </div>
           </div>
@@ -235,62 +191,6 @@ export default function PayFeeAdmin() {
         {/* SHOW BELOW CONTENT ONLY AFTER ALL SELECTED */}
         {selectedStudent && academicYear && semester && (
           <>
-            {/* this part is the fee summary card part */}
-            <div className="p-6 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800 transition-colors">
-              <div className="flex items-center gap-2 mb-4 text-blue-800 dark:text-blue-300 font-medium">
-                <CreditCard size={20} />
-                <h3>Fee Summary</h3>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {/* this is the total fee part */}
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Total Fee
-                  </p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {totalFee !== undefined
-                      ? `₹${totalFee.toLocaleString("en-IN")}`
-                      : "-"}
-                  </p>
-                </div>
-
-                {/* this is the paid amount part */}
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Paid
-                  </p>
-                  <p className="text-lg font-bold text-green-600 dark:text-green-400 transition-all">
-                    {newTotalPaid !== null
-                      ? `₹${newTotalPaid.toLocaleString("en-IN")}`
-                      : "-"}
-                  </p>
-                </div>
-
-                {/* this is the pending amount part */}
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Pending
-                  </p>
-                  <p className="text-lg font-bold text-red-500 dark:text-red-400">
-                    {newPending !== null
-                      ? `₹${newPending.toLocaleString("en-IN")}`
-                      : "-"}
-                  </p>
-                </div>
-
-                {/* this is the due date part */}
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                    Due Date
-                  </p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {feeSummary?feeSummary.due_date:"-"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* the payment form start from here */}
             <DashboardChildPageCard>
               <form onSubmit={handleSubmit(onSubmit)}>
@@ -303,13 +203,15 @@ export default function PayFeeAdmin() {
                     <input
                       type="number"
                       placeholder="Enter amount"
-                      className="custom-input bg-[var(--bg-primary)] theme-transition"
+                      className="custom-input"
                       {...register("amount", {
                         required: "Amount is required",
                       })}
                     />
                     {errors.amount && (
-                      <p className="custom-error">{errors.amount.message}</p>
+                      <p className="custom-error">
+                        {errors.amount.message}
+                      </p>
                     )}
                   </div>
 
@@ -317,7 +219,7 @@ export default function PayFeeAdmin() {
                   <div>
                     <label className="custom-label mb-2">Payment Mode</label>
                     <select
-                      className="custom-input bg-[var(--bg-primary)] theme-transition"
+                      className="custom-input"
                       {...register("paymentMode", {
                         required: "Select payment mode",
                       })}
@@ -334,37 +236,40 @@ export default function PayFeeAdmin() {
                   </div>
 
                   {/* this is the reference number part */}
-                  <div>
-                    <label className="custom-label mb-2">
-                      Reference Number
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter reference number"
-                      className="custom-input bg-[var(--bg-primary)] theme-transition"
-                      {...register("referenceNumber", {
-                        required: "Reference number is required",
-                      })}
-                    />
-                    {errors.referenceNumber && (
-                      <p className="custom-error">
-                        {errors.referenceNumber.message}
-                      </p>
-                    )}
-                  </div>
+                  {paymentMode === "Cheque" && (
+                    <div>
+                      <label className="custom-label mb-2">
+                        Reference Number
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter reference number"
+                        className="custom-input"
+                        {...register("referenceNumber", {
+                          required:
+                            paymentMode === "Cheque"
+                              ? "Reference number is required"
+                              : false,
+                        })}
+                      />
+                      {errors.referenceNumber && (
+                        <p className="custom-error">
+                          {errors.referenceNumber.message}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* this is the payment date part */}
                   <div>
                     <label className="custom-label mb-2">Payment Date</label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        className="custom-input w-full bg-[var(--bg-primary)] theme-transition"
-                        {...register("paymentDate", {
-                          required: "Date is required",
-                        })}
-                      />
-                    </div>
+                    <input
+                      type="date"
+                      className="custom-input"
+                      {...register("paymentDate", {
+                        required: "Date is required",
+                      })}
+                    />
                     {errors.paymentDate && (
                       <p className="custom-error">
                         {errors.paymentDate.message}
@@ -378,14 +283,13 @@ export default function PayFeeAdmin() {
                     <textarea
                       rows="3"
                       placeholder="Enter any additional remarks (optional)"
-                      className="custom-input bg-[var(--bg-primary)] theme-transition resize-none"
+                      className="custom-input resize-none"
                       {...register("remarks")}
                     ></textarea>
                   </div>
                 </div>
 
                 {/* below is the buttons part */}
-                {/* first is submit button */}
                 <div className="flex gap-4">
                   <button
                     type="submit"
@@ -395,7 +299,6 @@ export default function PayFeeAdmin() {
                     Submit Payment
                   </button>
 
-                  {/* this is the cancel button */}
                   <CancelButton onClick={() => reset()} />
                 </div>
               </form>
