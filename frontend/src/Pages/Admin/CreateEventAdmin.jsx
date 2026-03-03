@@ -15,7 +15,7 @@ export default function CreateEventAdmin() {
     reset,
     formState: { errors },
   } = useForm();
-  const token = localStorage.getItem("token");
+
   
   const onSubmit = (data) => {
     console.log(data);
@@ -28,8 +28,6 @@ export default function CreateEventAdmin() {
       event_time : data.time,
       event_date : data.date,
       attendees:data.attendees
-    },{
-      headers:{Authorization:`Bearer ${token}`}
     }).then((res)=>{
       alert("event created");
     }).catch((errors)=>{

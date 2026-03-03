@@ -11,7 +11,7 @@ const FeedbackEvaluationAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
+
 
   // ---------------------------
   // Fetch Pending Feedbacks
@@ -21,11 +21,7 @@ const FeedbackEvaluationAdmin = () => {
     setError("");
 
     try {
-      const response = await api.get("/api/feedback/pending", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/api/feedback/pending");
 
       setFeedbacks(response.data);
     } catch (err) {
@@ -41,14 +37,7 @@ const FeedbackEvaluationAdmin = () => {
   const handleAccept = async (id) => {
     try {
       await api.put(
-        `/api/feedback/accept/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        `/api/feedback/accept/${id}`);
 
       // Remove accepted feedback from list
       setFeedbacks((prev) => prev.filter((fb) => fb.id !== id));
@@ -63,14 +52,7 @@ const FeedbackEvaluationAdmin = () => {
   const handleReject = async (id) => {
     try {
       await api.put(
-        `/api/feedback/reject/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        `/api/feedback/reject/${id}`);
 
       // Remove rejected feedback from list
       setFeedbacks((prev) => prev.filter((fb) => fb.id !== id));

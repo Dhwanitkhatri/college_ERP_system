@@ -12,14 +12,12 @@ export default function ManageProfile() {
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
+
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get("api/profile/admininfo", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("api/profile/admininfo");
 
         setProfile(res.data.profile);
         setRole(res.data.role);

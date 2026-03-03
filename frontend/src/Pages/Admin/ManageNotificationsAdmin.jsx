@@ -17,18 +17,11 @@ const ManageNotificationsAdmin = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("token");
+        
 
         const res = await api.get(
-          "/api/notifications/my-notifications",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+          "/api/notifications/my-notifications");
 
-        console.log("API Response:", res.data);
 
         const data = res?.data?.notifications;
 

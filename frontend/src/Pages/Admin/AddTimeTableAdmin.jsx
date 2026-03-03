@@ -21,7 +21,6 @@ const AddTimetableAdmin = () => {
     reset();
   };
 
-  const token = localStorage.getItem("token");
   const selectedClass = watch("class");
   const [classes, setClasses] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -30,11 +29,7 @@ const AddTimetableAdmin = () => {
   // api to fetch classes for current academic year
   useEffect(() => {
     api
-      .get("api/timetables/current-year-classes", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/timetables/current-year-classes", )
       .then((response) => {
         setClasses(response.data.data);
       })
@@ -52,9 +47,6 @@ const AddTimetableAdmin = () => {
     if (selectedClass) {
       api
         .get("api/timetables/subjects", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           params: {
             semester: classSemester,
           },
@@ -70,11 +62,7 @@ const AddTimetableAdmin = () => {
 
   useEffect(() => {
     api
-      .get("api/timetables/faculties", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/timetables/faculties")
       .then((response) => {
         setFaculties(response.data);
       })
@@ -96,11 +84,6 @@ const AddTimetableAdmin = () => {
           start_time: data.startTime,
           end_time: data.endTime,
           day_of_week: data.day,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         },
       )
       .then((response) => {

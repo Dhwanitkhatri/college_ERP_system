@@ -10,7 +10,7 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 const EditSubjectAdmin = () => {
   const { subject_id } = useParams(); // get subject id from URL
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+
 
   const [subject, setSubject] = useState(null);
 
@@ -24,11 +24,7 @@ const EditSubjectAdmin = () => {
   // Fetch selected subject
   useEffect(() => {
     api
-      .get(`/api/subjects/${subject_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get(`/api/subjects/${subject_id}`)
       .then((res) => {
         setSubject(res.data.subject);
 
@@ -46,7 +42,7 @@ const EditSubjectAdmin = () => {
           err.response?.data || err.message
         );
       });
-  }, [subject_id, token, reset]);
+  }, [subject_id, reset]);
 
   // Update Subject
   const onSubmit = (data) => {
@@ -58,11 +54,6 @@ const EditSubjectAdmin = () => {
           semester: data.semester,
           credit: data.credit,
           lecture_per_week: data.lecture_per_week,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       )
       .then(() => {

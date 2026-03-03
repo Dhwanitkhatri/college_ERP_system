@@ -50,11 +50,7 @@ const AddClassAdmin = () => {
   const [faculties, setFaculties] = useState([]);
   useEffect(() => {
     api
-      .get("api/faculties/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/faculties/")
       .then((res) => {
         setFaculties(res.data); // backend sends array
         console.log("Fetched faculties:", res.data);
@@ -79,11 +75,6 @@ const AddClassAdmin = () => {
           sections: data.section,
           academic_year: data.academicYear,
           mentor_id: data.classMentor,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         },
       );
       setAddedClass({

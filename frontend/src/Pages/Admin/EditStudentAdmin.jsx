@@ -13,7 +13,6 @@ const EditStudentAdmin = () => {
   const [student, setStudent] = useState(null);
   const [showPassword, setShowPassword] = useState(false); //state for toggling password visibility
   const { studentId } = useParams(); //this holds student id from url
-  const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   const {
@@ -26,11 +25,7 @@ const EditStudentAdmin = () => {
   //useEffect for getting selected student details
   useEffect(() => {
     api
-      .get(`api/students/${studentId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get(`api/students/${studentId}`)
       .then((res) => {
         setStudent(res.data);
         console.log("Fetched Student:", res.data);
@@ -41,7 +36,7 @@ const EditStudentAdmin = () => {
           err.response?.data || err.message
         );
       });
-  }, [studentId, token]);
+  }, [studentId]);
 
   //useEffect for updating form values
   useEffect(() => {
@@ -71,11 +66,6 @@ const EditStudentAdmin = () => {
           admission_year: data.admission_year,
           year_of_study: data.year_of_study,
           password: data.password, //added password field
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       )
       .then(() => {

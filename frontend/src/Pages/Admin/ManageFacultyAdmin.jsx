@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import ActivateDeactivateButton from "../../ui/Buttons/ActivateDeactivateButton.jsx";
 
 const ManageFacultyAdmin = () => {
-  const token = localStorage.getItem("token"); // Get token from localStorage
+
   const navigate = useNavigate(); // this is for navigating
 
   const [faculties, setFaculties] = useState([]);
@@ -18,11 +18,7 @@ const ManageFacultyAdmin = () => {
   useEffect(() => {
     const fetchFaculties = async () => {
       try {
-        const res = await api.get("api/faculties/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get("api/faculties/");
 
         setFaculties(res.data); // backend sends array
         console.log("Fetched faculties:", res.data);
@@ -37,7 +33,7 @@ const ManageFacultyAdmin = () => {
     };
 
     fetchFaculties();
-  }, [token]);
+  }, []);
 
   /*
     This function toggles faculty active/inactive status.
@@ -52,11 +48,6 @@ const ManageFacultyAdmin = () => {
       const res = await api.put(
         `api/faculties/active-inactive/${userId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
       );
 
       console.log("Status updated:", res.data);
@@ -101,9 +92,7 @@ const ManageFacultyAdmin = () => {
       setActionLoading(facultyId); // Start row loading
 
       await api.delete(`api/faculties/${facultyId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+       
       });
 
       console.log("Faculty deleted successfully");

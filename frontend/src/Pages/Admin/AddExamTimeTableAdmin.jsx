@@ -42,12 +42,6 @@ const AddExamTimeTableAdmin = () => {
           exam_date: data.exam_date,
           start_time: data.start_time || null,
           end_time: data.end_time || null,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         }
       );
 

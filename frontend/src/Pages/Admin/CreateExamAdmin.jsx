@@ -28,7 +28,7 @@ const CreateExamAdmin = () => {
   // Submit function
   async function onSubmit(data) {
     try {
-      const token = localStorage.getItem("token");
+
 
       const res = await api.post(
         "/api/exams",
@@ -37,14 +37,7 @@ const CreateExamAdmin = () => {
           exam_type: data.exam_type,
           semester: Number(data.semester),
           academic_year: data.academic_year,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        });
 
       alert("Exam Created Successfully");
 

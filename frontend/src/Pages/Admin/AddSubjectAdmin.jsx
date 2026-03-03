@@ -27,14 +27,10 @@ const AddSubjectAdmin = () => {
 
   const navigate = useNavigate();
   const [faculties, setFaculties] = useState([]);
-  const token = localStorage.getItem("token");
+ 
   useEffect((async) => {
     api
-      .get("/api/faculties/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("/api/faculties/")
       .then((response) => {
         setFaculties(response.data);
       })
@@ -44,7 +40,6 @@ const AddSubjectAdmin = () => {
   }, []);
   async function onSubmit(data) {
     console.log("form data", data);
-    const token = localStorage.getItem("token");
     try {
       const res = await api.post(
         "/api/subjects/",
@@ -53,13 +48,7 @@ const AddSubjectAdmin = () => {
           semester: data.semester,
           lecture_per_week: data.lecturePerWeek,
           credit: data.credit,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
+        }
       );
       setAddedSubject({
         subject_name: data.subjectName,

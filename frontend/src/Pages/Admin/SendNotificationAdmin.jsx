@@ -16,23 +16,18 @@ export default function SendNotificationAdmin() {
   const sendTo = watch("sendTo");
   const [allUsers, setAllUsers] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const token = localStorage.getItem("token");
-
+ 
   useEffect(() => {
     if (sendTo === "Individual") {
       api
-        .get("api/notifications/users-for-notification", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        .get("api/notifications/users-for-notification")
         .then((res) => setAllUsers(res.data.allUsers))
         .catch((err) => console.error(err.response?.data || err.message));
     }
 
     if (sendTo === "Class") {
       api
-        .get("api/notifications/classes", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        .get("api/notifications/classes")
         .then((res) => setAllUsers(res.data))
         .catch((err) => console.error(err.response?.data || err.message));
     }
@@ -105,11 +100,6 @@ export default function SendNotificationAdmin() {
       await api.post(
         "/api/notifications/send",
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
       );
 
       alert("Notification sent successfully");

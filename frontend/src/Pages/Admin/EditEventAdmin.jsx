@@ -11,7 +11,7 @@ const EditEventAdmin = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  
 
   const {
     register,
@@ -21,9 +21,7 @@ const EditEventAdmin = () => {
   } = useForm();
 
   useEffect(() => {
-    api.get("/api/event/course/", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    api.get("/api/event/course/")
     .then((res) => {
       const event = res.data.find(e => e.event_id === parseInt(id));
       if (event) {
@@ -46,8 +44,6 @@ const EditEventAdmin = () => {
       event_date : data.date,
       event_time : data.time,
       location : data.location,
-    },{
-      headers:{Authorization:`Bearer ${token}`}
     })
     .then(()=>{
       alert("Event updated successfully");

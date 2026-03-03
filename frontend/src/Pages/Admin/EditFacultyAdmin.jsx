@@ -66,11 +66,6 @@ const EditFacultyAdmin = () => {
           phone: data.phoneNo,
           email: data.email,
           password: data.password, //added password field
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       )
       .then(() => {

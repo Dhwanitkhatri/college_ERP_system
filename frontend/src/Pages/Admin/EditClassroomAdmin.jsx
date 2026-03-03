@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 
 const ManageClassroomAdmin = () => {
-  const token = localStorage.getItem("token");
   const [classroom, setClassroom] = useState(null);
   const [faculties, setFaculties] = useState([]);
   const [mentorChanged, setMentorChanged] = useState(false);
@@ -24,16 +23,13 @@ const ManageClassroomAdmin = () => {
   } = useForm();
   useEffect(() => {
     const fetchData = async () => {
-      const classRes = await api.get(`/api/classes/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const classRes = await api.get(`/api/classes/${id}`);
 
       const facultyRes = await api.get("/api/faculties", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Classroom API response:", classRes.data);
-      console.log("Faculties API response:", facultyRes.data);
+     
 
       setClassroom(classRes.data);
       setFaculties(facultyRes.data);
@@ -52,7 +48,6 @@ const ManageClassroomAdmin = () => {
     await api.put(
       `/api/classes/${id}`,
       { mentor_id: data.mentor_id },
-      { headers: { Authorization: `Bearer ${token}` } },
     );
     navigate("/admin/Dashboard/Classroom");
   };

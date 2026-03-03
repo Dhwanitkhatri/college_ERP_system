@@ -6,7 +6,7 @@ import { FileText } from "lucide-react";
 import api from "../../api/axios.js";
 
 const OverallClassReportAdmin = () => {
-  const token = localStorage.getItem("token");
+ 
 
   const {
     register,
@@ -49,9 +49,7 @@ const OverallClassReportAdmin = () => {
   // fetch classes
   useEffect(() => {
     api
-      .get("api/reports/student/classes-for-datewise-report", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get("api/reports/student/classes-for-datewise-report")
       .then((res) => setClasses(res.data.data))
       .catch((err) => console.error(err.response?.data || err.message));
   }, []);
@@ -73,7 +71,7 @@ const OverallClassReportAdmin = () => {
 
     api
       .get("api/reports/student/overall-class-wise", {
-        headers: { Authorization: `Bearer ${token}` },
+      
         params: {
           class_id,
           semester,

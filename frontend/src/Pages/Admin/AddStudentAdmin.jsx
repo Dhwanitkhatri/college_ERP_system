@@ -44,13 +44,7 @@ const AddStudentAdmin = () => {
           gender: data.gender,
           admission_year: data.admissionYear,
           year_of_study: data.yearOfStudying,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
+        }
       );
       setAddedStudent({
         name: data.fullName,

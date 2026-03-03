@@ -18,20 +18,14 @@ const EditNotificationAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
+  
 
   /* ---------------- FETCH NOTIFICATION BY ID ---------------- */
   useEffect(() => {
     const fetchNotification = async () => {
       try {
         const res = await api.get(
-          `/api/notifications/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+          `/api/notifications/${id}`);
 
         setFormData({
           title: res.data.notification.title,
@@ -47,7 +41,7 @@ const EditNotificationAdmin = () => {
     };
 
     fetchNotification();
-  }, [id, token]);
+  }, [id]);
 
   /* ---------------- HANDLE INPUT CHANGE ---------------- */
   const handleChange = (e) => {
@@ -67,11 +61,6 @@ const EditNotificationAdmin = () => {
       await api.put(
         `/api/notifications/${id}`,
         formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
       );
 
       alert("Notification updated successfully!");

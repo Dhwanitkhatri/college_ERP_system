@@ -24,20 +24,14 @@ const AddFacultyAdmin = () => {
 
   async function onSubmit(data) {
     try {
-      const token = localStorage.getItem("token");
+     
       const res = await api.post(
         "/api/faculties",
         {
           name: data.fullName,
           phone: data.phoneNo,
           email: data.email,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
+        }
       );
 
       console.log(res.data);

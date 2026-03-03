@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
 
 const ManageStudentAdmin = () => {
-  const token = localStorage.getItem("token"); // Get token from localStorage
+
   const navigate = useNavigate(); //for navigating
 
   const [students, setStudents] = useState([]);
@@ -18,11 +18,7 @@ const ManageStudentAdmin = () => {
   // Fetch all students when component loads
   useEffect(() => {
     api
-      .get("api/students/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/students/")
       .then((res) => {
         setStudents(res.data); // backend sends array
         setLoading(false);
@@ -35,7 +31,7 @@ const ManageStudentAdmin = () => {
           err.response?.data || err.message
         );
       });
-  }, [token]);
+  }, []);
 
   /*
     This function deletes a student.
@@ -52,11 +48,7 @@ const ManageStudentAdmin = () => {
     try {
       setActionLoading(id); // Start row loading
 
-      await api.delete(`api/students/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await api.delete(`api/students/${id}`);
 
       console.log("Student deleted successfully");
 
@@ -85,11 +77,7 @@ const ManageStudentAdmin = () => {
       const res = await api.put(
         `api/students/active-inactive/${userId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+  
       );
 
       console.log("Status updated:", res.data);

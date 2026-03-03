@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import { sequelize } from "./src/config/db.js";
 import * as models from "./src/model/index.js";
 import authRoutes from "./src/routes/authRoutes.js";
@@ -31,12 +32,12 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: `http://${process.env.SERVER_IP}:5173`, // Your frontend URL
-    credentials: true, // allow cookies if needed
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"], // IMPORTANT: allow Bearer token
+    origin: `http://${process.env.SERVER_IP}:5173`,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+
 app.options("/", cors()); // Enable pre-flight for all routes
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); //serve static files from uploads directory
@@ -51,6 +52,7 @@ try {
   console.error("Database connection failed:", error);
 }
 app.use(responseTimeLogger);
+app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/faculties", facultyRoutes);

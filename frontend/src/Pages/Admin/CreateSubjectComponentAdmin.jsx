@@ -32,7 +32,7 @@ const CreateSubjectComponent = () => {
   // Form Submit Function
   async function onSubmit(data) {
     try {
-      const token = localStorage.getItem("token");
+     
 
       const res = await api.post(
         "/api/subject-components", // Make sure route matches backend
@@ -42,14 +42,7 @@ const CreateSubjectComponent = () => {
           type: data.type,
           max_marks: Number(data.max_marks),
           min_marks: Number(data.min_marks),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        });
 
       alert("Component Created Successfully");
 

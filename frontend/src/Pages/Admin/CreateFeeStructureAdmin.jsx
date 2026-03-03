@@ -22,7 +22,6 @@ export default function CreateFeeStructureAdmin() {
   const miscFee= watch("miscFee") || 0;
   const totalFeeAmount = Number(tutionFee) + Number(examFee) + Number(libraryFee) + Number(labFee) + Number(miscFee);
   const onSubmit = (data) => {
-    const token = localStorage.getItem("token");
     console.log("Form Submitted :", data);
     try {
       api.post("api/fee/fee-structure/create", {
@@ -33,8 +32,6 @@ export default function CreateFeeStructureAdmin() {
         library_fee: data.libraryFee,
         lab_fee: data.labFee,
         misc_fee: data.miscFee,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
         console.log("Fee Structure Created:", response.data);

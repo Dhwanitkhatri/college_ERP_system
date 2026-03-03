@@ -9,16 +9,12 @@ const ManageSubjectsAdmin = () => {
   const [subjects, setSubjects] = useState([]); // store all subjects
   const [activeSemester, setActiveSemester] = useState(1); // currently selected semester
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+
 
   // Fetch all subjects from backend
   useEffect(() => {
     api
-      .get("/api/subjects", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("/api/subjects")
       .then((res) => {
         setSubjects(res.data.subjects);
       })
@@ -28,7 +24,7 @@ const ManageSubjectsAdmin = () => {
           err.response?.data || err.message
         );
       });
-  }, [token]);
+  }, []);
 
   // Filter subjects based on selected semester
   const filteredSubjects = subjects.filter(

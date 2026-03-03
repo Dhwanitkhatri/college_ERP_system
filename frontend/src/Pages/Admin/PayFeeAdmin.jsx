@@ -19,7 +19,7 @@ export default function PayFeeAdmin() {
   const [academicYear, setAcademicYear] = useState("");
   const [semester, setSemester] = useState("");
 
-  const token = localStorage.getItem("token");
+
 
   {
     /* this is the react hook form part*/
@@ -56,9 +56,7 @@ export default function PayFeeAdmin() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const res = await api.get("/api/fee/students", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/api/fee/students");
         setStudents(res.data);
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -74,11 +72,7 @@ export default function PayFeeAdmin() {
   const fetchFeeStatus = async (studentId, year, sem) => {
     try {
       const res = await api.get(
-        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`);
       setFeeSummary(res.data.feeSummary);
     } catch (error) {
       setFeeSummary(null);

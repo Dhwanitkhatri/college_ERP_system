@@ -9,7 +9,7 @@ import api from "../../api/axios";
 
 export default function CheckFeeStatusAdmin() {
   // ================= TOKEN =================
-  const token = localStorage.getItem("token");
+
 
   // ================= STATE =================
   const [students, setStudents] = useState([]);
@@ -21,11 +21,7 @@ export default function CheckFeeStatusAdmin() {
   // ================= FETCH STUDENTS =================
   useEffect(() => {
     api
-      .get("api/fee/students", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/fee/students")
       .then((res) => {
         setStudents(res.data);
       })
@@ -44,9 +40,6 @@ export default function CheckFeeStatusAdmin() {
 
     api
       .get("api/fee/check-fee-status", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         params: {
           student_id: data.studentId,
           academic_year: data.academicYear,
