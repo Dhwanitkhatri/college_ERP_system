@@ -4,7 +4,7 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import { CreditCard, Search } from "lucide-react";
-import axios from "axios";
+import api from "../../api/axios";
 
 export default function PayFeeAdmin() {
   {
@@ -52,7 +52,7 @@ export default function PayFeeAdmin() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/fee/students", {
+        const res = await api.get("/api/fee/students", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setStudents(res.data);
@@ -69,13 +69,13 @@ export default function PayFeeAdmin() {
   }
   const fetchFeeStatus = async (studentId, year, sem) => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
+      const res = await api.get(
+        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-
+      console.log(res.data);
       setFeeSummary(res.data.feeSummary);
     } catch (error) {
       setFeeSummary(null);
@@ -94,8 +94,8 @@ export default function PayFeeAdmin() {
   }
   const onSubmit = async (data) => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/fee/pay",
+      await api.post(
+        "/api/fee/pay",
         {
           student_id: selectedStudent,
           academic_year: academicYear,
@@ -105,6 +105,7 @@ export default function PayFeeAdmin() {
           reference_no: data.referenceNumber,
           payment_date: data.paymentDate,
           remarks: data.remarks,
+          fee_structure_id:feeSummary.fee_id
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -196,9 +197,9 @@ export default function PayFeeAdmin() {
                 }}
               >
                 <option value="">Select Academic Year</option>
-                <option value="2024-2025">2024-2025</option>
-                <option value="2025-2026">2025-2026</option>
-                <option value="2026-2027">2026-2027</option>
+                <option value="2024-25">2024-2025</option>
+                <option value="2025-26">2025-2026</option>
+                <option value="2026-27">2026-2027</option>
               </select>
             </div>
 
@@ -284,7 +285,7 @@ export default function PayFeeAdmin() {
                     Due Date
                   </p>
                   <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {feeSummary ? "As Assigned" : "-"}
+                    {feeSummary?feeSummary.due_date:"-"}
                   </p>
                 </div>
               </div>

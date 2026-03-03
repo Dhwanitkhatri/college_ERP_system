@@ -116,6 +116,7 @@ export const payFee = async (req, res) => {
       payment_date,
       remarks,
     } = req.body;
+    console.log(req.body);
 
     const received_by = req.user.uid;
 
@@ -206,24 +207,25 @@ export const payFee = async (req, res) => {
 // ADMIN CHECK FEE STATUS
 export const adminCheckFeeStatus = async (req, res) => {
   try {
-    const { student_id, academic_year } = req.query;
+    const { student_id, academic_year , semester} = req.query;
+    
 
     if (!student_id || !academic_year) {
       return res.status(400).json({
         message: "Required fields",
       });
     }
-
+    const feeStructure = await FeeStructure.findOne({where:{semester , academic_year , course_id:req.user.course_id}});
     const studentFee = await StudentFee.findOne({
-      where: { student_id },
+      where: { student_id  },
       include: [
         {
           model: Student,
-          attributes: ["student_id", "name"],
+          attributes: ["student_id", "name" ],
         },
         {
           model: FeeStructure,
-          where: { academic_year },
+          where: { academic_year , semester },
         },
       ],
     });
@@ -235,7 +237,7 @@ export const adminCheckFeeStatus = async (req, res) => {
     }
 
     const student = studentFee.Student;
-    const feeStructure = studentFee.FeeStructure;
+    
 
     const payments = await FeePayment.findAll({
       where: {
@@ -272,11 +274,14 @@ export const adminCheckFeeStatus = async (req, res) => {
         remaining_amount,
         payment_status:
           remaining_amount === 0 ? "Paid" : "Pending",
+        due_date:studentFee.due_date,
+        fee_id:feeStructure.id
       },
       paymentHistory,
     });
 
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
