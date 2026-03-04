@@ -1,3 +1,4 @@
+// models/Exam.js
 import { sequelize } from "../config/db.js";
 import { DataTypes } from "sequelize";
 
@@ -6,6 +7,10 @@ export const Exam = sequelize.define("Exam", {
     type: DataTypes.INTEGER,
     autoIncrement: true,
     primaryKey: true
+  },
+  course_id: {
+    type: DataTypes.STRING(20),
+    allowNull: false
   },
   name: {
     type: DataTypes.STRING(100),
@@ -28,5 +33,11 @@ export const Exam = sequelize.define("Exam", {
     defaultValue: 'DRAFT'
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  indexes: [
+    {
+      unique: true,
+      fields: ['course_id', 'exam_type', 'semester', 'academic_year'] 
+    }
+  ]
 });
