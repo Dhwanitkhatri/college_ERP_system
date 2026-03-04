@@ -7,7 +7,6 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 import api from "../../api/axios";
 
 const EnterExamMarksFaculty = () => {
-
   // Store success data
   const [enteredMarks, setEnteredMarks] = useState(null);
 
@@ -31,25 +30,19 @@ const EnterExamMarksFaculty = () => {
   // =============================
   async function onSubmit(data) {
     try {
-      
-
-      const res = await api.post(
-        "/api/enter-marks",
-        {
-          student_id: Number(data.student_id),
-          subject_id: Number(data.subject_id),
-          component_id: Number(data.component_id),
-          exam_id: data.exam_id ? Number(data.exam_id) : null,
-          marks_obtained: Number(data.marks_obtained),
-        }
-      );
+      const res = await api.post("/api/enter-marks", {
+        student_id: Number(data.student_id),
+        subject_id: Number(data.subject_id),
+        component_id: Number(data.component_id),
+        exam_id: data.exam_id ? Number(data.exam_id) : null,
+        marks_obtained: Number(data.marks_obtained),
+      });
 
       alert(res.data.message);
 
       setEnteredMarks(res.data.data);
 
       reset();
-
     } catch (error) {
       alert(error?.response?.data?.message || "Error Entering Marks");
     }
@@ -61,24 +54,24 @@ const EnterExamMarksFaculty = () => {
       desc="Faculty can enter marks for students based on subject components"
     >
       <DashboardChildPageCard>
-
         <form onSubmit={handleSubmit(onSubmit)}>
-
           {/* STUDENT ID */}
           <div className="form-field">
             <label className="custom-label">Student ID</label>
-            <input
-              type="number"
-              placeholder="Enter Student ID"
+            <select
+              placeholder="Select Student ID"
               className="custom-input"
               {...register("student_id", {
                 required: "Student ID is required",
-                min: {
-                  value: 1,
-                  message: "Invalid Student ID"
-                }
               })}
-            />
+            >
+              <option value="">Select Student ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="1">1</option>
+              {/* Example static options for testing */}
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
             {errors.student_id && (
               <p className="custom-error">{errors.student_id.message}</p>
             )}
@@ -87,18 +80,20 @@ const EnterExamMarksFaculty = () => {
           {/* SUBJECT ID */}
           <div className="form-field">
             <label className="custom-label">Subject ID</label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Subject ID"
               className="custom-input"
               {...register("subject_id", {
                 required: "Subject ID is required",
-                min: {
-                  value: 1,
-                  message: "Invalid Subject ID"
-                }
               })}
-            />
+            >
+              <option value="">Select Subject ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="101">101</option>
+              {/* Example static options for testing */}
+              <option value="102">102</option>
+              <option value="103">103</option>
+            </select>
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>
             )}
@@ -107,18 +102,20 @@ const EnterExamMarksFaculty = () => {
           {/* COMPONENT ID */}
           <div className="form-field">
             <label className="custom-label">Component ID</label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Component ID"
               className="custom-input"
               {...register("component_id", {
-                required: "Component ID is required",
-                min: {
-                  value: 1,
-                  message: "Invalid Component ID"
-                }
+                required: "Component ID is required"
               })}
-            />
+            >
+              <option value="">Select Component ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="201">201</option>
+              {/* Example static options for testing */}
+              <option value="202">202</option>
+              <option value="203">203</option>
+            </select>
             {errors.component_id && (
               <p className="custom-error">{errors.component_id.message}</p>
             )}
@@ -129,12 +126,15 @@ const EnterExamMarksFaculty = () => {
             <label className="custom-label">
               Exam ID (Required only for EXAM component)
             </label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Exam ID (If applicable)"
               className="custom-input"
               {...register("exam_id")}
-            />
+            >
+              <option value="">Select Exam ID (If applicable)</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="301">301</option>
+            </select>
           </div>
 
           {/* MARKS OBTAINED */}
@@ -148,8 +148,12 @@ const EnterExamMarksFaculty = () => {
                 required: "Marks are required",
                 min: {
                   value: 0,
-                  message: "Marks cannot be negative"
-                }
+                  message: "Marks cannot be negative",
+                },
+                max: {
+                  value: 100,
+                  message: "Marks cannot exceed 100",
+                },
               })}
             />
             {errors.marks_obtained && (
@@ -162,14 +166,12 @@ const EnterExamMarksFaculty = () => {
             <AddButton />
             <CancelButton onClick={handleCancel} />
           </div>
-
         </form>
       </DashboardChildPageCard>
 
       {/* SUCCESS CARD */}
       {enteredMarks && (
         <DashboardChildPageCard className="mt-3">
-
           <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
             Marks Saved Successfully
           </h3>
@@ -198,7 +200,6 @@ const EnterExamMarksFaculty = () => {
               {enteredMarks.marks_obtained}
             </p>
           </div>
-
         </DashboardChildPageCard>
       )}
     </DashboardChildPageTemplate>
