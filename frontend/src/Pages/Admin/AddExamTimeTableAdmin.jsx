@@ -10,6 +10,7 @@ const AddExamTimeTableAdmin = () => {
 
   // Store created timetable entry for success card
   const [createdTimetable, setCreatedTimetable] = useState(null);
+  const today = new Date().toISOString().split("T")[0];
 
   // React Hook Form
   const {
@@ -68,14 +69,17 @@ const AddExamTimeTableAdmin = () => {
           {/* EXAM ID */}
           <div className="form-field">
             <label className="custom-label">Exam ID</label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Exam ID"
               className="custom-input"
               {...register("exam_id", {
                 required: "Exam ID is required",
               })}
-            />
+            >
+              <option value="">Select Exam ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="301">301</option>  
+            </select>
             {errors.exam_id && (
               <p className="custom-error">{errors.exam_id.message}</p>
             )}
@@ -84,14 +88,17 @@ const AddExamTimeTableAdmin = () => {
           {/* SUBJECT ID */}
           <div className="form-field">
             <label className="custom-label">Subject ID</label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Subject ID"
               className="custom-input"
               {...register("subject_id", {
                 required: "Subject ID is required",
               })}
-            />
+            >
+              <option value="">Select Subject ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="101">101</option>
+            </select>
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>
             )}
@@ -102,6 +109,7 @@ const AddExamTimeTableAdmin = () => {
             <label className="custom-label">Exam Date</label>
             <input
               type="date"
+              min={today}
               className="custom-input"
               {...register("exam_date", {
                 required: "Exam date is required",

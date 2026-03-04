@@ -67,14 +67,17 @@ const CreateSubjectComponent = () => {
           {/* SUBJECT ID */}
           <div className="form-field">
             <label className="custom-label">Subject ID</label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Subject ID"
               className="custom-input"
               {...register("subject_id", {
                 required: "Subject ID is required",
               })}
-            />
+            >
+              <option value="">Select Subject ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="101">101</option>
+            </select>
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>
             )}

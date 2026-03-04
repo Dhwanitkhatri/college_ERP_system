@@ -104,22 +104,23 @@ const CreateExamAdmin = () => {
           {/* SEMESTER */}
           <div className="form-field">
             <label className="custom-label">Semester</label>
-            <input
-              type="number"
+            <select
               placeholder="Enter Semester (1-8)"
               className="custom-input"
               {...register("semester", {
-                required: "Semester is required",
-                min: {
-                  value: 1,
-                  message: "Semester must be between 1 and 8",
-                },
-                max: {
-                  value: 8,
-                  message: "Semester must be between 1 and 8",
-                },
+                required: "Semester is required"
               })}
-            />
+            >
+              <option value="">Select Semester</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
             {errors.semester && (
               <p className="custom-error">{errors.semester.message}</p>
             )}
@@ -128,18 +129,18 @@ const CreateExamAdmin = () => {
           {/* ACADEMIC YEAR */}
           <div className="form-field">
             <label className="custom-label">Academic Year</label>
-            <input
-              type="text"
+            <select
               placeholder="Enter Academic Year (e.g. 2025-2026)"
               className="custom-input"
               {...register("academic_year", {
                 required: "Academic year is required",
-                pattern: {
-                  value: /^\d{4}-\d{4}$/,
-                  message: "Format must be YYYY-YYYY",
-                },
               })}
-            />
+            >
+              <option value="">Select Academic Year</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+              <option value="2024-2025">2024-2025</option>
+              <option value="2025-2026">2025-2026</option>
+            </select>
             {errors.academic_year && (
               <p className="custom-error">{errors.academic_year.message}</p>
             )}
