@@ -26,13 +26,9 @@ const FacultyFeedbackStudent = () => {
     setSelectedRating(0);
     setIsSubmitted(false);
   };
-  const token = localStorage.getItem("token");
+  
   useEffect(()=>{
-    api.get("/api/feedback/faculty-feedback",{
-      headers:{
-        Authorization:`Bearer ${token}`
-      }
-    }).then((res)=>{
+    api.get("/api/feedback/faculty-feedback").then((res)=>{
       setFaculties(res.data.data);
     }).catch((errors)=>{
       console.log(errors);
@@ -55,12 +51,6 @@ const FacultyFeedbackStudent = () => {
           faculty_id: data.faculty,
           rating: selectedRating,
           comments: data.comments,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         }
       );
 

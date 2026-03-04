@@ -42,7 +42,7 @@ function LoginPage() {
         password: data.password,
       });
 
-      localStorage.setItem("token", res.data.token);
+      
       console.log(res.data.token);
 
       const end = performance.now(); //  End time

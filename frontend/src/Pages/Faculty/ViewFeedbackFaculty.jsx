@@ -12,7 +12,7 @@ const ViewFeedbackFaculty = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const token = localStorage.getItem("token");
+
 
   // ---------------------------
   // Fetch Accepted Feedbacks
@@ -26,12 +26,7 @@ const ViewFeedbackFaculty = () => {
       
 
       const response = await api.get(
-        `/api/feedback/accepted`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/api/feedback/accepted`
       );
 
       setFeedbacks(response.data.data);

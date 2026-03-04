@@ -7,7 +7,7 @@ import api from "../../api/axios.js";
 import { useForm } from "react-hook-form";
 
 function TakeAttendanceFaculty() {
-  const token = localStorage.getItem("token");
+
 
   // get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split("T")[0];
@@ -41,9 +41,7 @@ function TakeAttendanceFaculty() {
   // Fetch classes on component mount
   useEffect(() => {
     api
-      .get("/api/attendance/classes", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get("/api/attendance/classes")
       .then((res) => {
         setClassesList(res.data.data);
         console.log("Fetched classes:", res.data.data);
@@ -56,9 +54,7 @@ function TakeAttendanceFaculty() {
     if (!selectedClass || !selectedDate || !selectedSubject) return;
 
     api
-      .get(`/api/attendance/students/${selectedClass}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(`/api/attendance/students/${selectedClass}`)
       .then((res) => {
         const formatted = res.data.data.map((student) => ({
           student_id: student.student_id,
@@ -76,10 +72,7 @@ function TakeAttendanceFaculty() {
     if (!selectedClass || !selectedDate) return;
     api
       .get(
-        `/api/attendance/subjects/${selectedClass}/${selectedDate}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        `/api/attendance/subjects/${selectedClass}/${selectedDate}`
       )
       .then((response) => {
         setSubjectList(response.data.data);
@@ -94,10 +87,7 @@ function TakeAttendanceFaculty() {
     if (!selectedClass || !selectedDate || !selectedSubject) return;
     api
       .get(
-        `/api/attendance/lectures/${selectedClass}/${selectedSubject}/${selectedDate}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        `/api/attendance/lectures/${selectedClass}/${selectedSubject}/${selectedDate}`
       )
       .then((response) => {
         setLectureCount(response.data.count);
@@ -138,9 +128,7 @@ function TakeAttendanceFaculty() {
     };
 
     api
-      .post("/api/attendance/", attendanceData, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .post("/api/attendance/", attendanceData)
       .then((response) => {
         console.log("Backend response:", response.data);
         if (response.status === 201) {

@@ -6,17 +6,13 @@ import { useEffect, useState } from "react";
 import api from "../api/axios.js";
 
 export default function Classroom() {
-  const token = localStorage.getItem("token"); // Get token from localStorage
+
   const [classes, setClasses] = useState([]);
   const role = getUserRole(); // Get role from decoded token
 
   useEffect(() => {
     api
-      .get("api/classes/current-year/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/classes/current-year/")
       .then((res) => {
         setClasses(res.data.data); // backend sends array
         console.log("Fetched faculties:", res.data);

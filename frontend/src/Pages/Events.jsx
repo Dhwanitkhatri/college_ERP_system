@@ -14,7 +14,7 @@ export default function Events() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    
 
     /* ===== Get role from token ===== */
     const role = getUserRole();
@@ -24,11 +24,7 @@ export default function Events() {
     }
 
     api
-      .get("/api/event/course/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("/api/event/course/")
       .then((res) => {
         setEvents(res.data);
       })
@@ -47,12 +43,10 @@ export default function Events() {
     );
     if (!confirmDelete) return;
 
-    const token = localStorage.getItem("token");
+   
 
     api
-      .delete(`/api/event/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .delete(`/api/event/${id}`)
       .then(() => {
         setEvents(events.filter((event) => event.event_id !== id));
         alert("Event deleted successfully");
@@ -63,7 +57,7 @@ export default function Events() {
       });
   };
 
-  console.log(events);
+
 
   return (
     <DashboardChildPageTemplate

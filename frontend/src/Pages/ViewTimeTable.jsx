@@ -47,14 +47,10 @@ export default function ViewTimetable() {
   const [lectureData  ,setLectureDate]=useState([]);
   const { register, watch, setValue } = useForm();
   const selectedClass = watch("selectedClass");
-  const token = localStorage.getItem("token");
+  
   useEffect(() => {
     api
-      .get("api/timetables/current-year-classes", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("api/timetables/current-year-classes")
       .then((response) => {
         setClasses(response.data.data);
         console.log(response.data.data);
@@ -67,11 +63,7 @@ export default function ViewTimetable() {
   if (!selectedClass) return;
 
   api
-    .get(`api/timetables/class/${selectedClass}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    .get(`api/timetables/class/${selectedClass}`)
     .then((response) => {
       console.log(response.data);
       const formatted = formatTimetable(response.data);

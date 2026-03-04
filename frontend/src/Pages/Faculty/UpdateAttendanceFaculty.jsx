@@ -33,9 +33,7 @@ const UpdateAttendanceFaculty = () => {
   // ---------------- FETCH CLASSES ----------------
   useEffect(() => {
     api
-      .get("/api/attendance/classes", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get("/api/attendance/classes")
       .then((res) => setClassesList(res.data.data))
       .catch((err) => console.error(err));
   }, []);
@@ -46,10 +44,7 @@ const UpdateAttendanceFaculty = () => {
 
     api
       .get(
-        `/api/attendance/subjects/${selectedClass}/${selectedDate}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        `/api/attendance/subjects/${selectedClass}/${selectedDate}`
       )
       .then((res) => setSubjectList(res.data.data))
       .catch((err) => console.error(err));
@@ -61,10 +56,7 @@ const UpdateAttendanceFaculty = () => {
 
     api
       .get(
-        `/api/attendance/lectures/${selectedClass}/${selectedSubject}/${selectedDate}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        `/api/attendance/lectures/${selectedClass}/${selectedSubject}/${selectedDate}`
       )
       .then((res) => setLectureCount(res.data.count))
       .catch((err) => console.error(err));
@@ -77,10 +69,7 @@ const UpdateAttendanceFaculty = () => {
 
     api
       .get(
-        `/api/attendance/dataforupdate/${selectedClass}/${selectedSubject}/${selectedLecture}/${selectedDate}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        `/api/attendance/dataforupdate/${selectedClass}/${selectedSubject}/${selectedLecture}/${selectedDate}`
       )
       .then((res) => {
         setStudentList(res.data);
@@ -126,10 +115,7 @@ const UpdateAttendanceFaculty = () => {
 
       const res = await api.put(
         "/api/attendance/update",
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        payload
       );
 
       alert(res.data.message || "Attendance updated successfully!");

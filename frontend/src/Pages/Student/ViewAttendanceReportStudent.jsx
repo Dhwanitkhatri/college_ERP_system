@@ -24,15 +24,10 @@ const ViewAttendanceReportStudent = () => {
 
   const fetchAttendance = async () => {
     try {
-      const token = localStorage.getItem("token");
+    
 
       const res = await api.get(
-        `/api/attendance/student`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        `/api/attendance/student`
       );
 
       const currentStudent = res.data.students;
@@ -45,7 +40,7 @@ const ViewAttendanceReportStudent = () => {
       setStudentData(currentStudent);
       setSubjectWiseData(currentStudent.subject_wise);
 
-      // ✅ Calculate overall percentage
+      //  Calculate overall percentage
       const percentage =
         currentStudent.total_classes > 0
           ? (

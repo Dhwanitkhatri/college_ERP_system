@@ -31,7 +31,7 @@ const EnterExamMarksFaculty = () => {
   // =============================
   async function onSubmit(data) {
     try {
-      const token = localStorage.getItem("token");
+      
 
       const res = await api.post(
         "/api/enter-marks",
@@ -41,12 +41,6 @@ const EnterExamMarksFaculty = () => {
           component_id: Number(data.component_id),
           exam_id: data.exam_id ? Number(data.exam_id) : null,
           marks_obtained: Number(data.marks_obtained),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
         }
       );
 

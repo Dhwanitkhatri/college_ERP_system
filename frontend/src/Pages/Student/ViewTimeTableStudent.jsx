@@ -39,18 +39,14 @@ const ViewTimeTableStudent = () => {
   /* ---------------- this is the state part ---------------- */
   const [activeTab, setActiveTab] = useState("menu");
   const [lectureData, setLectureData] = useState([]);
-  const token = localStorage.getItem("token");
+  
 
   /* ---------------- Fetch timetable automatically ---------------- */
   useEffect(() => {
     if (activeTab !== "lecture") return;
 
     api
-      .get("/api/timetables/my-timetable", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("/api/timetables/my-timetable")
       .then((response) => {
         const formatted = formatTimetable(response.data);
         console.log(formatted)

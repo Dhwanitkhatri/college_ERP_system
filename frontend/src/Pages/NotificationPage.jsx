@@ -6,14 +6,10 @@ import api from '../api/axios'
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
-  const token = localStorage.getItem("token");
+ 
 
   useEffect(()=>{
-    api.get("/api/notifications/my", {
-      headers:{
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    api.get("/api/notifications/my")
     .then((res)=>{
       setNotifications(res.data.notifications);
       console.log("Notifications: ",res.data);

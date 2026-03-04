@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios.js";
 
 export default function SessionPlanningFaculty() {
-  const token = localStorage.getItem("token");
+
 
   const {
     register,
@@ -24,18 +24,14 @@ export default function SessionPlanningFaculty() {
   // fetch teaching info
   useEffect(() => {
     api
-      .get("/api/session/teaching-info", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      .get("/api/session/teaching-info")
       .then((res) => {
         setData([res.data.data.teaching_info]);
       })
       .catch((error) => {
         console.log("error", error.response?.status, error.response?.data);
       });
-  }, [token]);
+  }, []);
 
   // extracting classes
   const classes = data.flat().map((item) => item.class);
@@ -81,11 +77,6 @@ export default function SessionPlanningFaculty() {
           lecture_no: Number(formData.lectureNumber),
           date: formData.date,
           topics: topicString, // ✅ sent as STRING (original behavior)
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       )
       .then(() => {

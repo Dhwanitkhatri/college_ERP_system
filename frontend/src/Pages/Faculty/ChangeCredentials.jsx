@@ -31,7 +31,7 @@ const ChangeCredentials = () => {
 
   const newPassword = watch("newPassword");
 
-  const token = localStorage.getItem("token");
+  
 
   // ---------------------------
   // Form Submit Handler
@@ -46,12 +46,7 @@ const ChangeCredentials = () => {
         {
           oldPassword: data.currentPassword,
           newPassword: data.newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
+        }
       );
 
       alert(response.data.message);
