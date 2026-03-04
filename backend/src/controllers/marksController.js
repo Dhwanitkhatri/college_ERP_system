@@ -21,6 +21,13 @@ export const enterMarks = async (req, res) => {
       marks_obtained
     } = req.body;
 
+    const course_id = req.user?.course_id; // from auth middleware
+
+    if (!course_id) {
+      await t.rollback();
+      return res.status(403).json({ success: false, message: "Access denied: No course associated" });
+    }
+
     // =============================
     // BASIC VALIDATION
     // =============================
@@ -41,13 +48,13 @@ export const enterMarks = async (req, res) => {
     }
 
     // =============================
-    // FETCH DATA
+    // FETCH DATA (with course filtering)
     // =============================
     const [component, student, subject, exam] = await Promise.all([
       SubjectComponent.findByPk(component_id),
-      Student.findOne({ where: { student_id } }),
-      Subject.findOne({ where: { subject_id } }),
-      exam_id ? Exam.findByPk(exam_id) : null
+      Student.findOne({ where: { student_id, course_id } }),          // student must be in same course
+      Subject.findOne({ where: { subject_id, course_id } }),          // subject must be in same course
+      exam_id ? Exam.findOne({ where: { exam_id, course_id } }) : null // exam must be in same course
     ]);
 
     if (!component) {
@@ -57,12 +64,12 @@ export const enterMarks = async (req, res) => {
 
     if (!student) {
       await t.rollback();
-      return res.status(404).json({ success: false, message: "Student not found" });
+      return res.status(404).json({ success: false, message: "Student not found or not in your course" });
     }
 
     if (!subject) {
       await t.rollback();
-      return res.status(404).json({ success: false, message: "Subject not found" });
+      return res.status(404).json({ success: false, message: "Subject not found or not in your course" });
     }
 
     // =============================
@@ -80,8 +87,7 @@ export const enterMarks = async (req, res) => {
     // COMPONENT TYPE HANDLING
     // =============================
 
-    // Define which component types require an exam_id and timetable validation
-    const examComponentTypes = ['INTERNAL', 'EXTERNAL', 'BACKLOG'];  // Add more if needed
+    const examComponentTypes = ['INTERNAL', 'EXTERNAL', 'BACKLOG'];
     const continuousComponentTypes = ['ASSIGNMENT', 'ATTENDANCE', 'QUIZ'];
 
     // CASE 1: Exam‑type component
@@ -96,7 +102,7 @@ export const enterMarks = async (req, res) => {
 
       if (!exam) {
         await t.rollback();
-        return res.status(404).json({ success: false, message: "Exam not found" });
+        return res.status(404).json({ success: false, message: "Exam not found or not in your course" });
       }
 
       // Verify that this subject is actually scheduled in this exam
@@ -113,9 +119,8 @@ export const enterMarks = async (req, res) => {
       }
     }
 
-    // CASE 2: Continuous component (attendance, assignment, quiz)
+    // CASE 2: Continuous component
     else if (continuousComponentTypes.includes(component.type)) {
-      // These components should NOT have an exam_id
       if (exam_id) {
         await t.rollback();
         return res.status(400).json({
@@ -125,7 +130,7 @@ export const enterMarks = async (req, res) => {
       }
     }
 
-    // If some other type appears (shouldn't happen if enum is correct), reject
+    // Unsupported type
     else {
       await t.rollback();
       return res.status(400).json({
@@ -148,7 +153,6 @@ export const enterMarks = async (req, res) => {
     // =============================
     // UPSERT MARKS
     // =============================
-    // For exam‑type components, store exam_id; for continuous, store null
     const storedExamId = examComponentTypes.includes(component.type) ? exam_id : null;
 
     const [record, created] = await StudentMarks.upsert({
@@ -176,5 +180,112 @@ export const enterMarks = async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+};
+
+// ======================
+// UPDATE MARKS CONTROLLER
+// ======================
+export const updateMarks = async (req, res) => {
+  const t = await sequelize.transaction();
+
+  try {
+    const {
+      student_id,
+      subject_id,
+      exam_id,
+      component_id,
+      marks_obtained
+    } = req.body;
+
+    const course_id = req.user?.course_id;
+
+    if (!course_id) {
+      await t.rollback();
+      return res.status(403).json({ success: false, message: "Access denied: No course associated" });
+    }
+
+    // Basic validation
+    if (!student_id || !subject_id || !component_id || marks_obtained === undefined) {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "student_id, subject_id, component_id, marks_obtained are required"
+      });
+    }
+
+    if (marks_obtained < 0) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: "Marks cannot be negative" });
+    }
+
+    // Fetch data with course filtering
+    const [component, student, subject, exam] = await Promise.all([
+      SubjectComponent.findByPk(component_id),
+      Student.findOne({ where: { student_id, course_id } }),
+      Subject.findOne({ where: { subject_id, course_id } }),
+      exam_id ? Exam.findOne({ where: { exam_id, course_id } }) : null
+    ]);
+
+    if (!component) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Component not found" });
+    }
+    if (!student) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Student not found or not in your course" });
+    }
+    if (!subject) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Subject not found or not in your course" });
+    }
+
+    // Component ↔ subject check
+    if (component.subject_id !== subject_id) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: "Component does not belong to this subject" });
+    }
+
+    // Check if marks record exists
+    const existingMarks = await StudentMarks.findOne({
+      where: {
+        student_id,
+        subject_id,
+        component_id,
+        exam_id: examComponentTypes.includes(component.type) ? exam_id : null
+      }
+    });
+
+    if (!existingMarks) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Marks record not found. Use enterMarks to create." });
+    }
+
+    // Additional check: if exam is published, prevent update
+    if (examComponentTypes.includes(component.type) && exam && exam.status === "PUBLISHED") {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: "Cannot update marks for a published exam" });
+    }
+
+    // Marks validation
+    if (marks_obtained > component.max_marks) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: `Marks cannot exceed ${component.max_marks}` });
+    }
+
+    // Update
+    await existingMarks.update({ marks_obtained }, { transaction: t });
+
+    await t.commit();
+
+    return res.status(200).json({
+      success: true,
+      message: "Marks updated successfully",
+      data: existingMarks
+    });
+
+  } catch (error) {
+    await t.rollback();
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
