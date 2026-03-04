@@ -7,7 +7,7 @@ import { StudentMarks } from "../model/StudentMarks.js";
 export const createExam = async (req, res) => {
   try {
     const { name, exam_type, semester, academic_year } = req.body;
-    const course_id = req.user?.course_id; // from auth middleware
+    const course_id = req.user?.course_id;
 
     if (!course_id) {
       return res.status(403).json({ success: false, message: "Access denied: No course associated" });
@@ -75,7 +75,7 @@ export const getAllExams = async (req, res) => {
     const parsedPage = parseInt(page);
     const parsedLimit = parseInt(limit);
 
-    const where = { course_id }; // always filter by course
+    const where = { course_id };
     if (status) where.status = status;
     if (exam_type) where.exam_type = exam_type;
     if (semester) where.semester = semester;
