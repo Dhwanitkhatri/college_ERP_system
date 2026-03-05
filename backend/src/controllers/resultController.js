@@ -27,37 +27,38 @@ const getGrade = (percentage) => {
 // ======================
 // CORE RESULT GENERATION FOR ONE STUDENT
 // ======================
-const generateResultForStudent = async (student_id, exam_id, transaction, options = { skipExisting: false }) => {
-  // Get student with class
+const generateResultForStudent = async (
+  student_id,
+  exam_id,
+  transaction,
+  options = { skipExisting: false }
+) => {
+  // ---------- Student + Class ----------
   const student = await Student.findOne({
     where: { student_id },
     include: [{ model: Class, attributes: ["semester"] }],
     transaction
   });
   if (!student) throw new Error("Student not found");
-
   const semester = student.Class?.semester;
-  if (!semester) throw new Error("Student has no class or semester");
+  if (!semester) throw new Error("Student semester not found");
 
-  // Get exam
+  // ---------- Exam ----------
   const exam = await Exam.findByPk(exam_id, { transaction });
   if (!exam) throw new Error("Exam not found");
   if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
 
-  // Check if result already exists for this student and exam
-  const existingSemesterResult = await SemesterResult.findOne({
+  // ---------- Prevent duplicate ----------
+  const existing = await SemesterResult.findOne({
     where: { student_id, exam_id },
     transaction
   });
-  if (existingSemesterResult) {
-    if (options.skipExisting) {
-      return null; // skip silently
-    } else {
-      throw new Error("Result already generated for this student and exam");
-    }
+  if (existing) {
+    if (options.skipExisting) return null;
+    throw new Error("Result already generated");
   }
 
-  // Get subjects for this semester and student's course
+  // ---------- Subjects for this semester & course ----------
   const subjects = await Subject.findAll({
     where: {
       semester,
@@ -65,13 +66,55 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
     },
     transaction
   });
+  if (!subjects.length) throw new Error("No subjects found");
+  const subjectIds = subjects.map(s => s.subject_id);
 
-  if (!subjects.length) throw new Error("No subjects found for this semester/course");
-
-  // Pre-fetch all marks for this student to avoid N+1 queries
-  const allMarks = await StudentMarks.findAll({
-    where: { student_id },
+  // ---------- Fetch all components (optimised) ----------
+  const components = await SubjectComponent.findAll({
+    where: { subject_id: subjectIds },
     transaction
+  });
+  const componentMap = {};
+  components.forEach(c => {
+    if (!componentMap[c.subject_id]) componentMap[c.subject_id] = [];
+    componentMap[c.subject_id].push(c);
+  });
+
+  // ========== FIX: Identify internal exams ==========
+  // Treat all other PUBLISHED 'REGULAR' exams in the same semester & course as internal.
+  const otherRegularExams = await Exam.findAll({
+    where: {
+      semester,
+      course_id: student.course_id,
+      exam_type: "REGULAR",
+      exam_id: { [Op.ne]: exam_id },
+      status: "PUBLISHED"
+    },
+    attributes: ["exam_id"],
+    transaction
+  });
+  const internalExamIds = otherRegularExams.map(e => e.exam_id);
+
+  // ---------- Fetch all relevant marks ----------
+  const allMarks = await StudentMarks.findAll({
+    where: {
+      student_id,
+      subject_id: { [Op.in]: subjectIds },
+      [Op.or]: [
+        { exam_id },                       // marks from the current exam
+        { exam_id: { [Op.in]: internalExamIds } }, // marks from internal exams
+        { exam_id: null }                   // continuous components (assignments, attendance)
+      ]
+    },
+    transaction
+  });
+
+  // ---------- Build marks map for O(1) access ----------
+  const marksMap = {};
+  allMarks.forEach(m => {
+    const key = `${m.subject_id}_${m.component_id}`;
+    if (!marksMap[key]) marksMap[key] = [];
+    marksMap[key].push(m);
   });
 
   let totalCredits = 0;
@@ -79,45 +122,42 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
   let totalGradePoints = 0;
   const subjectResults = [];
 
+  // ---------- Subject loop ----------
   for (const subject of subjects) {
-    const components = await SubjectComponent.findAll({
-      where: { subject_id: subject.subject_id },
-      transaction
-    });
-
-    if (!components.length) continue;
+    const comps = componentMap[subject.subject_id] || [];
+    if (!comps.length) continue;
 
     let totalMarks = 0;
     let maxTotal = 0;
     let isPass = true;
 
-    // Initialize breakdown with all possible component types
     const breakdown = {
       INTERNAL: 0,
       EXTERNAL: 0,
       ASSIGNMENT: 0,
-      ATTENDANCE: 0,
+      ATTENDANCE: 0
     };
 
-    for (const comp of components) {
-      const marks = allMarks.filter(
-        m => m.subject_id === subject.subject_id && m.component_id === comp.component_id
+    for (const comp of comps) {
+      const key = `${subject.subject_id}_${comp.component_id}`;
+      const marks = marksMap[key] || [];
+      const obtained = marks.reduce(
+        (sum, m) => sum + Number(m.marks_obtained || 0),
+        0
       );
-
-      const obtained = marks.reduce((sum, m) => sum + (Number(m.marks_obtained) || 0), 0);
 
       totalMarks += obtained;
       maxTotal += comp.max_marks;
-
-      // Add obtained marks to the corresponding type
       breakdown[comp.type] = (breakdown[comp.type] || 0) + obtained;
 
       if (obtained < comp.min_marks) isPass = false;
     }
 
-    const percentage = maxTotal ? parseFloat(((totalMarks / maxTotal) * 100).toFixed(2)) : 0;
+    if (maxTotal === 0) continue;
+
+    const percentage = parseFloat(((totalMarks / maxTotal) * 100).toFixed(2));
     const { grade, gp } = getGrade(percentage);
-    const credits = subject.credits || 1;
+    const credits = subject.credit || 1;
 
     totalCredits += credits;
     if (isPass) {
@@ -138,7 +178,7 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
       is_backlog: !isPass
     }, { transaction });
 
-    // Backlog logic
+    // ---------- Backlog Logic ----------
     const backlog = await Backlog.findOne({
       where: { student_id, subject_id: subject.subject_id },
       transaction
@@ -188,7 +228,6 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
 
     subjectResults.push({
       subject_id: subject.subject_id,
-      ...breakdown, // includes all types (INTERNAL, EXTERNAL, etc.)
       total_marks: totalMarks,
       percentage,
       grade,
@@ -196,13 +235,15 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
     });
   }
 
-  // SGPA
-  const sgpa = totalCredits ? parseFloat((totalGradePoints / totalCredits).toFixed(2)) : 0;
+  // ---------- SGPA ----------
+  const sgpa = totalCredits
+    ? parseFloat((totalGradePoints / totalCredits).toFixed(2))
+    : 0;
   const resultStatus = earnedCredits === totalCredits ? "PASS" : "FAIL";
 
-  // CGPA – fetch previous semester results
+  // ---------- CGPA (excluding current exam) ----------
   const previousResults = await SemesterResult.findAll({
-    where: { student_id },
+    where: { student_id, exam_id: { [Op.ne]: exam_id } },
     transaction
   });
   let totalAllCredits = totalCredits;
@@ -211,12 +252,15 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
     totalAllCredits += r.total_credits;
     totalAllGradePoints += r.sgpa * r.total_credits;
   });
-  const cgpa = totalAllCredits ? parseFloat((totalAllGradePoints / totalAllCredits).toFixed(2)) : sgpa;
+  const cgpa = totalAllCredits
+    ? parseFloat((totalAllGradePoints / totalAllCredits).toFixed(2))
+    : sgpa;
 
-  // Save semester result
+  // ---------- Save semester result (with semester) ----------
   await SemesterResult.create({
     student_id,
     exam_id,
+    semester,
     total_credits: totalCredits,
     earned_credits: earnedCredits,
     sgpa,
@@ -234,7 +278,7 @@ const generateResultForStudent = async (student_id, exam_id, transaction, option
 };
 
 // ======================
-// SINGLE STUDENT RESULT GENERATION
+// SINGLE STUDENT RESULT API
 // ======================
 export const generateStudentResult = async (req, res) => {
   const t = await sequelize.transaction();
@@ -244,70 +288,81 @@ export const generateStudentResult = async (req, res) => {
       throw new Error("student_id and exam_id are required");
     }
 
-    const result = await generateResultForStudent(student_id, exam_id, t, { skipExisting: false });
-
+    const result = await generateResultForStudent(student_id, exam_id, t);
     await t.commit();
-    return res.json({ success: true, data: result });
+    res.json({ success: true, data: result });
   } catch (err) {
     await t.rollback();
-    return res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
 // ======================
-// BULK RESULT GENERATION FOR ALL STUDENTS IN A SEMESTER/COURSE
+// BULK RESULT GENERATION API
 // ======================
 export const generateBulkResults = async (req, res) => {
   try {
     const { exam_id, semester } = req.body;
-    const course_id = req.user?.course_id; // from auth middleware
+    const course_id = req.user?.course_id;
 
-    if (!exam_id) throw new Error("exam_id is required");
-    if (!semester) throw new Error("semester is required");
-    if (!course_id) throw new Error("User course_id not found. Cannot generate results.");
+    if (!exam_id || !semester) {
+      throw new Error("exam_id and semester are required");
+    }
+    if (!course_id) {
+      throw new Error("Access denied: No course associated");
+    }
 
-    // Validate exam
-    const exam = await Exam.findByPk(exam_id);
-    if (!exam) throw new Error("Exam not found");
+    // Validate exam belongs to the user's course
+    const exam = await Exam.findOne({ where: { exam_id, course_id } });
+    if (!exam) throw new Error("Exam not found or not in your course");
     if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
 
-    // Build student filter using course_id from user token
-    const classWhere = { semester, course_id };
+    // Get all students in the given semester and course
     const students = await Student.findAll({
       include: [{
         model: Class,
-        where: classWhere,
+        where: { semester, course_id },
         required: true,
         attributes: []
       }],
-      attributes: ['student_id']
+      attributes: ["student_id"]
     });
 
-    if (!students.length) throw new Error("No students found for the given semester and your course");
+    if (!students.length) throw new Error("No students found");
 
-    const results = [];
-    const errors = [];
+    const generated = [];
+    const skipped = [];
+    const failed = [];
 
     for (const student of students) {
       const t = await sequelize.transaction();
       try {
-        const result = await generateResultForStudent(student.student_id, exam_id, t, { skipExisting: true });
+        const result = await generateResultForStudent(
+          student.student_id,
+          exam_id,
+          t,
+          { skipExisting: true }
+        );
         await t.commit();
-        if (result) results.push(result);
-        else results.push({ student_id: student.student_id, status: "skipped (already exists)" });
+        if (result) generated.push(student.student_id);
+        else skipped.push(student.student_id);
       } catch (err) {
         await t.rollback();
-        errors.push({ student_id: student.student_id, error: err.message });
+        failed.push({ student_id: student.student_id, error: err.message });
       }
     }
 
-    return res.json({
+    res.json({
       success: true,
-      total: students.length,
-      generated: results.length,
-      errors
+      summary: {
+        total: students.length,
+        generated: generated.length,
+        skipped: skipped.length,
+        failed: failed.length
+      },
+      failed_students: failed
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
-}
+};

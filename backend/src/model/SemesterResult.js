@@ -1,3 +1,4 @@
+// models/SemesterResult.js
 import { sequelize } from "../config/db.js";
 import { DataTypes } from "sequelize";
 
@@ -12,6 +13,10 @@ export const SemesterResult = sequelize.define("SemesterResult", {
     allowNull: false
   },
   exam_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  semester: {                              
     type: DataTypes.INTEGER,
     allowNull: false
   },
