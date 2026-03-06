@@ -1,4 +1,5 @@
 import { SubjectComponent } from '../model/SubjectComponent.js';
+import {Subject} from '../model/Subject.js'
 
 // ======================
 // CREATE COMPONENT
@@ -6,6 +7,7 @@ import { SubjectComponent } from '../model/SubjectComponent.js';
 export const createComponent = async (req, res) => {
   try {
     const { subject_id, type, max_marks, min_marks } = req.body;
+  
 
     // Required validation
     if (!subject_id || !type || !max_marks || !min_marks) {
@@ -59,6 +61,7 @@ export const createComponent = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+    console.log(error);
   }
 };
 
@@ -176,5 +179,31 @@ export const deleteComponent = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+//to fetch the subject to create the subject marks components 
+export const subjects = async (req, res) => {
+  const course_id = req.user.course_id;
+  console.log("COURSE ID:", course_id);
+
+  try {
+    const subject = await Subject.findAll({
+      where: { course_id },
+      attributes: ["subject_id", "subject_name"]
+    });
+
+    if (subject.length === 0) {
+      return res.status(404).json({
+        message: "No subjects found for this course"
+      });
+    }
+
+    res.status(200).json(subject);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };

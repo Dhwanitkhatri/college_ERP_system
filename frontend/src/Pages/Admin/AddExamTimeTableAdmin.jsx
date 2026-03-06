@@ -5,13 +5,16 @@ import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import api from "../../api/axios";
+import { useEffect } from "react";
+
 
 const AddExamTimeTableAdmin = () => {
 
   // Store created timetable entry for success card
   const [createdTimetable, setCreatedTimetable] = useState(null);
   const today = new Date().toISOString().split("T")[0];
-
+  const [Subjects, setSubjects] = useState([]);
+  const [exams , setExams] = useState([]);
   // React Hook Form
   const {
     register,
@@ -24,6 +27,25 @@ const AddExamTimeTableAdmin = () => {
   // Watch start_time for validation
   const startTime = watch("start_time");
 
+  // fetch the subejcts for the timetable 
+  useEffect(()=>{
+    api.get("/api/components/subjects")
+    .then((res)=>{
+      setSubjects(res.data);
+    }).catch((error)=>{
+      console.log(error)
+    })
+  },[])
+
+  useEffect(()=>{
+    api.get("/api/exams/current-year-exam")
+    .then((res)=>{
+      console.log(res);
+      setExams(res.data);
+    }).catch((error)=>{
+      console.log(error);
+    })
+  },[])
   // Cancel handler
   const handleCancel = () => {
     reset();
@@ -36,10 +58,10 @@ const AddExamTimeTableAdmin = () => {
       const token = localStorage.getItem("token");
 
       const res = await api.post(
-        "/api/exam-timetable",
+        "/api/exam-timetable/",
         {
-          exam_id: Number(data.exam_id),
-          subject_id: Number(data.subject_id),
+          exam_id: data.exam_id,
+          subject_id: data.subject_id,
           exam_date: data.exam_date,
           start_time: data.start_time || null,
           end_time: data.end_time || null,
@@ -78,7 +100,9 @@ const AddExamTimeTableAdmin = () => {
             >
               <option value="">Select Exam ID</option>
               {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="301">301</option>  
+              {exams.map((exam)=>(
+                <option value={exam.exam_id}>{exam.name} - {exam.exam_id}</option>
+              ))}
             </select>
             {errors.exam_id && (
               <p className="custom-error">{errors.exam_id.message}</p>
@@ -97,7 +121,10 @@ const AddExamTimeTableAdmin = () => {
             >
               <option value="">Select Subject ID</option>
               {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="101">101</option>
+            
+               {Subjects.map((subject)=>(
+              <option value={subject.subject_id}>{subject.subject_name} - {subject.subject_id}</option>
+             ))}
             </select>
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>

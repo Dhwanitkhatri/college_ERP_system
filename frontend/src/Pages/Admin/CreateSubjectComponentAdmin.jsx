@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
@@ -6,11 +6,15 @@ import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import api from "../../api/axios";
 
+
 const CreateSubjectComponent = () => {
 
   // State to show success message after component creation
   const [createdComponent, setCreatedComponent] = useState(null);
+  const [subjects , setSubjects]=useState([]);
 
+
+  
   // React Hook Form
   const {
     register,
@@ -28,17 +32,25 @@ const CreateSubjectComponent = () => {
     reset();
     setCreatedComponent(null);
   };
-
+//to fetch the subject for subject Id 
+  useEffect(()=>{
+    api.get("/api/components/subjects")
+    .then((res)=>{
+   
+      setSubjects(res.data);
+    }).catch((err)=>{
+      console.log(err);
+    })
+  },[])
   // Form Submit Function
   async function onSubmit(data) {
     try {
      
-
+console.log(data);  
       const res = await api.post(
-        "/api/subject-components", // Make sure route matches backend
+        "/api/components/", // Make sure route matches backend
         {
           subject_id: data.subject_id,
-          component_name: data.component_name,
           type: data.type,
           max_marks: Number(data.max_marks),
           min_marks: Number(data.min_marks),
@@ -76,7 +88,13 @@ const CreateSubjectComponent = () => {
             >
               <option value="">Select Subject ID</option>
               {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="101">101</option>
+           {Array.isArray(subjects) &&
+  subjects.map((subject) => (
+    <option key={subject.subject_id} value={subject.subject_id}>
+      {subject.subject_name} - {subject.subject_id}
+    </option>
+  ))
+}
             </select>
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>

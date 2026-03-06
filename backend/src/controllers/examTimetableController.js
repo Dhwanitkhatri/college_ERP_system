@@ -3,6 +3,7 @@ import { Subject } from "../model/Subject.js";
 import { ExamTimetable } from "../model/ExamTimetable.js";
 import { sequelize } from "../config/db.js";
 
+
 // =============================
 // ADD SUBJECT TO EXAM
 // =============================

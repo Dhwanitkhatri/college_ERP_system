@@ -1,5 +1,6 @@
 import { Exam } from "../model/Exam.js";
 import { StudentMarks } from "../model/StudentMarks.js";
+import { getCurrentAcademicYear , getSemesterType } from "../services/academicYear.js";
 
 // =============================
 // CREATE EXAM
@@ -261,3 +262,19 @@ export const publishExam = async (req, res) => {
   }
 };
 
+export const  getExams = async(req,res)=>{
+  try {
+    const currentAcademicYear = getCurrentAcademicYear() // fetch the current year 
+    
+
+    const course_id = req.user.course_id;
+    const exam = await Exam.findAll({
+      where:{course_id , academic_year: currentAcademicYear},
+    });
+
+    return res.status(200).json(exam);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json("internal server error");
+  }
+}
