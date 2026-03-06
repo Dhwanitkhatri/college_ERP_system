@@ -58,6 +58,8 @@ import CreateExamAdmin from "./Pages/Admin/CreateExamAdmin";
 import AddExamTimeTableAdmin from "./Pages/Admin/AddExamTimeTableAdmin";
 import EnterExamMarksFaculty from "./Pages/Faculty/EnterExamMarksFaculty";
 import ViewAttendanceReportStudent from "./Pages/Student/ViewAttendanceReportStudent";
+import UploadLearningMaterialFaculty from "./Pages/Faculty/UploadLearningMaterialFaculty";
+import LearningMaterialStudent from "./Pages/Student/LearningMaterialStudent";
 
 const router = createBrowserRouter([
   {
@@ -310,6 +312,10 @@ const router = createBrowserRouter([
         path: "EnterExamMarksFaculty",
         element: <EnterExamMarksFaculty />,
       },
+      {
+        path: "UploadLearningMaterialFaculty",
+        element: <UploadLearningMaterialFaculty />,
+      },
     ],
   },
   {
@@ -355,6 +361,10 @@ const router = createBrowserRouter([
       {
         path: "ViewAttendanceReportStudent",
         element: <ViewAttendanceReportStudent />,
+      },
+  {
+        path: "LearningMaterialStudent",
+        element: <LearningMaterialStudent />,
       },
     ],
   },

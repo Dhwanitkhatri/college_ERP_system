@@ -51,7 +51,9 @@ const AdminPanelDashboard = () => {
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Profile & Resources">
           <ActionButtonDashboard title="Manage Profile" />
-          <ActionButtonDashboard title="Upload Learning Material" />
+          <Link to="UploadLearningMaterialFaculty">
+            <ActionButtonDashboard title="Upload Learning Material" />
+          </Link>
           <Link to="SendNotification">
             <ActionButtonDashboard title="Send Notifications" />
           </Link>

@@ -38,7 +38,7 @@ const AdminPanelDashboard = () => {
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Learning & Resources">
-          <ActionButtonDashboard title="Learning Material" />
+          <Link to="LearningMaterialStudent"><ActionButtonDashboard title="Learning Material" /></Link>
           {/* <ActionButtonDashboard title="Homework" /> */}
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Online Fee Payment" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
