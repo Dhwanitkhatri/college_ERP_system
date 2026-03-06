@@ -16,8 +16,12 @@ export const SemesterResult = sequelize.define("SemesterResult", {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  semester: {                              
+  semester: {
     type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  academic_year: {                         
+    type: DataTypes.STRING(20),
     allowNull: false
   },
   total_credits: {

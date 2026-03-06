@@ -43,6 +43,9 @@ const generateResultForStudent = async (
   const semester = student.Class?.semester;
   if (!semester) throw new Error("Student semester not found");
 
+  const academic_year = student.Class?.academic_year;
+  if (!academic_year) throw new Error("Student academic year not found");
+
   // ---------- Exam ----------
   const exam = await Exam.findByPk(exam_id, { transaction });
   if (!exam) throw new Error("Exam not found");
@@ -272,7 +275,8 @@ const generateResultForStudent = async (
     student_id,
     exam_id,
     semester,
-    total_credits: totalPassedCredits,          // store only passed credits
+    academic_year,
+    total_credits: totalPassedCredits,          
     earned_credits: earnedCredits,
     sgpa,
     cgpa,
