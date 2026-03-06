@@ -25,7 +25,7 @@ const getGrade = (percentage) => {
 };
 
 // ======================
-// CORE RESULT GENERATION FOR ONE STUDENT
+// CORE RESULT GENERATION
 // ======================
 const generateResultForStudent = async (
   student_id,
@@ -69,7 +69,7 @@ const generateResultForStudent = async (
   if (!subjects.length) throw new Error("No subjects found");
   const subjectIds = subjects.map(s => s.subject_id);
 
-  // ---------- Fetch all components (optimised) ----------
+  // ---------- Fetch all components ----------
   const components = await SubjectComponent.findAll({
     where: { subject_id: subjectIds },
     transaction
@@ -80,8 +80,7 @@ const generateResultForStudent = async (
     componentMap[c.subject_id].push(c);
   });
 
-  // ========== FIX: Identify internal exams ==========
-  // Treat all other PUBLISHED 'REGULAR' exams in the same semester & course as internal.
+  // ---------- Identify internal exams ----------
   const otherRegularExams = await Exam.findAll({
     where: {
       semester,
@@ -101,15 +100,15 @@ const generateResultForStudent = async (
       student_id,
       subject_id: { [Op.in]: subjectIds },
       [Op.or]: [
-        { exam_id },                       // marks from the current exam
-        { exam_id: { [Op.in]: internalExamIds } }, // marks from internal exams
-        { exam_id: null }                   // continuous components (assignments, attendance)
+        { exam_id },
+        { exam_id: { [Op.in]: internalExamIds } },
+        { exam_id: null }
       ]
     },
     transaction
   });
 
-  // ---------- Build marks map for O(1) access ----------
+  // ---------- Build marks map ----------
   const marksMap = {};
   allMarks.forEach(m => {
     const key = `${m.subject_id}_${m.component_id}`;
@@ -117,9 +116,11 @@ const generateResultForStudent = async (
     marksMap[key].push(m);
   });
 
-  let totalCredits = 0;
-  let earnedCredits = 0;
-  let totalGradePoints = 0;
+  let totalCreditsAll = 0;               // sum of credits of all subjects
+  let totalPassedCredits = 0;             // sum of credits of passed subjects only
+  let totalPassedWeightedMarks = 0;        // Σ(credits × totalMarks) for passed subjects
+  let earnedCredits = 0;                   // same as totalPassedCredits (for result status)
+
   const subjectResults = [];
 
   // ---------- Subject loop ----------
@@ -159,10 +160,12 @@ const generateResultForStudent = async (
     const { grade, gp } = getGrade(percentage);
     const credits = subject.credit || 1;
 
-    totalCredits += credits;
+    totalCreditsAll += credits;
+
     if (isPass) {
       earnedCredits += credits;
-      totalGradePoints += credits * gp;
+      totalPassedCredits += credits;
+      totalPassedWeightedMarks += credits * totalMarks;
     }
 
     // Save subject result
@@ -228,6 +231,9 @@ const generateResultForStudent = async (
 
     subjectResults.push({
       subject_id: subject.subject_id,
+      credits,
+      grade_point: gp,
+      ...breakdown,
       total_marks: totalMarks,
       percentage,
       grade,
@@ -235,33 +241,38 @@ const generateResultForStudent = async (
     });
   }
 
-  // ---------- SGPA ----------
-  const sgpa = totalCredits
-    ? parseFloat((totalGradePoints / totalCredits).toFixed(2))
+  // ---------- SGPA (based only on passed subjects) ----------
+  const sgpa = totalPassedCredits
+    ? parseFloat((totalPassedWeightedMarks / totalPassedCredits / 10).toFixed(2))
     : 0;
-  const resultStatus = earnedCredits === totalCredits ? "PASS" : "FAIL";
 
-  // ---------- CGPA (excluding current exam) ----------
+  const resultStatus = earnedCredits === totalCreditsAll ? "PASS" : "FAIL";
+
+  // ---------- CGPA ----------
   const previousResults = await SemesterResult.findAll({
     where: { student_id, exam_id: { [Op.ne]: exam_id } },
     transaction
   });
-  let totalAllCredits = totalCredits;
-  let totalAllGradePoints = totalGradePoints;
+
+  let totalAllPassedCredits = totalPassedCredits;
+  let totalAllPassedWeighted = totalPassedWeightedMarks;
   previousResults.forEach(r => {
-    totalAllCredits += r.total_credits;
-    totalAllGradePoints += r.sgpa * r.total_credits;
+    // r.sgpa was computed as (passedWeighted / passedCredits / 10)
+    // So passedWeighted = r.sgpa * r.total_credits * 10
+    totalAllPassedCredits += r.total_credits;   // Note: total_credits stored in SemesterResult is passed credits
+    totalAllPassedWeighted += r.sgpa * r.total_credits * 10;
   });
-  const cgpa = totalAllCredits
-    ? parseFloat((totalAllGradePoints / totalAllCredits).toFixed(2))
+
+  const cgpa = totalAllPassedCredits
+    ? parseFloat((totalAllPassedWeighted / totalAllPassedCredits / 10).toFixed(2))
     : sgpa;
 
-  // ---------- Save semester result (with semester) ----------
+  // ---------- Save semester result (store passed credits as total_credits) ----------
   await SemesterResult.create({
     student_id,
     exam_id,
     semester,
-    total_credits: totalCredits,
+    total_credits: totalPassedCredits,          // store only passed credits
     earned_credits: earnedCredits,
     sgpa,
     cgpa,
@@ -312,12 +323,10 @@ export const generateBulkResults = async (req, res) => {
       throw new Error("Access denied: No course associated");
     }
 
-    // Validate exam belongs to the user's course
     const exam = await Exam.findOne({ where: { exam_id, course_id } });
     if (!exam) throw new Error("Exam not found or not in your course");
     if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
 
-    // Get all students in the given semester and course
     const students = await Student.findAll({
       include: [{
         model: Class,
