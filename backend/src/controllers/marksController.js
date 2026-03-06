@@ -289,3 +289,115 @@ export const updateMarks = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// ======================
+// BULK MARKS ENTRY (Admin)
+// ======================
+export const bulkEnterMarks = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    if (req.user?.role !== 'Admin') {
+      await t.rollback();
+      return res.status(403).json({ success: false, message: "Access denied: Admin only" });
+    }
+
+    const { subject_id, exam_id, component_id, marks } = req.body;
+    const course_id = req.user?.course_id;
+
+    if (!course_id) {
+      await t.rollback();
+      return res.status(403).json({ success: false, message: "Access denied: No course associated" });
+    }
+
+    if (!subject_id || !component_id || !Array.isArray(marks) || marks.length === 0) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: "subject_id, component_id, and marks array are required" });
+    }
+
+    // Validate common fields
+    const [component, subject, exam] = await Promise.all([
+      SubjectComponent.findOne({ where: { component_id, subject_id } }),
+      Subject.findOne({ where: { subject_id, course_id } }),
+      exam_id ? Exam.findOne({ where: { exam_id, course_id } }) : null
+    ]);
+
+    if (!component) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Component not found or does not belong to the subject" });
+    }
+    if (!subject) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: "Subject not found or not in your course" });
+    }
+
+    // Component type handling
+    const examComponentTypes = ['INTERNAL', 'EXTERNAL', 'BACKLOG'];
+    const continuousComponentTypes = ['ASSIGNMENT', 'ATTENDANCE', 'QUIZ'];
+
+    if (examComponentTypes.includes(component.type)) {
+      if (!exam_id) {
+        await t.rollback();
+        return res.status(400).json({ success: false, message: `Exam ID required for ${component.type} component` });
+      }
+      if (!exam) {
+        await t.rollback();
+        return res.status(404).json({ success: false, message: "Exam not found or not in your course" });
+      }
+      const timetable = await ExamTimetable.findOne({ where: { exam_id, subject_id } });
+      if (!timetable) {
+        await t.rollback();
+        return res.status(400).json({ success: false, message: "Subject NOT scheduled in this exam" });
+      }
+    } else if (continuousComponentTypes.includes(component.type)) {
+      if (exam_id) {
+        await t.rollback();
+        return res.status(400).json({ success: false, message: `Exam ID NOT allowed for ${component.type} component` });
+      }
+    } else {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: `Unsupported component type: ${component.type}` });
+    }
+
+    const storedExamId = examComponentTypes.includes(component.type) ? exam_id : null;
+    const results = [];
+    const errors = [];
+
+    for (const entry of marks) {
+      const { student_id, marks_obtained } = entry;
+      try {
+        if (!student_id || marks_obtained === undefined) {
+          throw new Error("student_id and marks_obtained required in each entry");
+        }
+        if (marks_obtained < 0) throw new Error("Marks cannot be negative");
+        if (marks_obtained > component.max_marks) throw new Error(`Marks cannot exceed ${component.max_marks}`);
+
+        const student = await Student.findOne({ where: { student_id, course_id } });
+        if (!student) throw new Error("Student not found or not in your course");
+
+        const [record] = await StudentMarks.upsert({
+          student_id,
+          subject_id,
+          exam_id: storedExamId,
+          component_id,
+          marks_obtained
+        }, { transaction: t, returning: true });
+
+        results.push(record);
+      } catch (err) {
+        errors.push({ student_id, error: err.message });
+      }
+    }
+
+    if (errors.length > 0) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: "Bulk entry failed", errors });
+    }
+
+    await t.commit();
+    return res.status(201).json({ success: true, message: "Bulk marks entered successfully", data: results });
+
+  } catch (error) {
+    await t.rollback();
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
