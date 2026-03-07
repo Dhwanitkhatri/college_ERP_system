@@ -6,7 +6,7 @@ import {
     getMaterialById,
     downloadMaterial,
     deleteMaterial
-} from '../controllers/learningMaterial.controller.js';
+} from '../controllers/learningMaterialController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
