@@ -7,11 +7,10 @@ import { Outlet } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
 import api from "../api/axios.js";
 import { useOutletContext } from "react-router-dom";
+import { set } from "react-hook-form";
 
 const Dashboard =  ({ children }) => {
-  const token = localStorage.getItem("token");
   const [dashboardData, setDashboardData] = useState(null);
-  console.log("Dashboard Token:", token);
   const { sidebarOpen } = useSidebar();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [role, setRole] = useState(null);
@@ -19,15 +18,11 @@ const Dashboard =  ({ children }) => {
     setShowLogoutModal(true);
   }
    useEffect(() => {
-    if (!token) return;
+    
 
     const fetchDashboard = async () => {
       try {
-        const res = await api.get("/api/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await api.get("/api/dashboard");
         console.log("Dashboard Data:", res.data);
         console.log(res.data.role)
         setDashboardData(res.data);
@@ -38,7 +33,7 @@ const Dashboard =  ({ children }) => {
     };
 
     fetchDashboard();
-  }, [token]);
+  }, []);
 
   return (
     <>
