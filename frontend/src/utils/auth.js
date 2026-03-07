@@ -1,19 +1,24 @@
-import { jwtDecode } from "jwt-decode";
+// src/utils/auth.js
 
-export const getUserFromToken = () => {
-  const token = localStorage.getItem("token");
+export const saveUser = (userData) => {
+  localStorage.setItem("user", JSON.stringify(userData));
+};
 
-  if (!token) return null;
-
-  try {
-    return jwtDecode(token);
-  } catch (error) {
-    console.error("Invalid token");
-    return null;
-  }
+export const getUser = () => {
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
 };
 
 export const getUserRole = () => {
-  const user = getUserFromToken();
+  const user = getUser();
   return user?.role || null;
+};
+
+export const getUserName = () => {
+  const user = getUser();
+  return user?.name || null;
+};
+
+export const logout = () => {
+  localStorage.removeItem("user");
 };

@@ -3,6 +3,7 @@ import api from "../api/axios.js";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ThemeButton from "../ui/Buttons/ThemeButton.jsx";
+import { saveUser } from "../utils/auth.js";
 import { useForm } from "react-hook-form";
 
 function LoginPage() {
@@ -41,9 +42,13 @@ function LoginPage() {
         username: data.username,
         password: data.password,
       });
-
+        
       
-      console.log(res.data.token);
+      saveUser({
+  role: res.data.role,
+  name: res.data.name,
+  course_id: res.data.course_id
+});
 
       const end = performance.now(); //  End time
       console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);

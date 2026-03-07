@@ -49,18 +49,20 @@ export const login = async (req, res) => {
     }
 
     const course_id = courseData?.course_id || null;
+    const name = courseData?.name || null;
 
     const token = jwt.sign(
       {
         uid: user.user_id,
         role,
         course_id,
+        name, // optional but useful
       },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
 
-    // ✅ Store token in HttpOnly Cookie
+    //  Store token in HttpOnly Cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -79,9 +81,11 @@ export const login = async (req, res) => {
     return res.json({
       message: "Login successful",
       role,
+      name,         
       course_id,
       redirectTo,
     });
+
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ message: "Internal server error" });
