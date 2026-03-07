@@ -28,6 +28,7 @@ import resultRoutes from "./src/routes/resultRoutes.js";
 import feedbackRoutes from "./src/routes/feedbackRoutes.js";
 import backlogRoutes from "./src/routes/backlogRoutes.js";
 import studentResultRoutes from "./src/routes/studentResultRoutes.js";
+import learningMaterialRoutes from "./src/routes/learningMaterialRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -76,6 +77,7 @@ app.use("/api/results", resultRoutes);
 app.use("/api/feedback",feedbackRoutes);
 app.use("/api/backlogs", backlogRoutes);
 app.use("/api/student-results", studentResultRoutes);
+app.use("/api/learning-materials", learningMaterialRoutes);
 
 
 app.get("/", (req, res) => {

@@ -31,6 +31,7 @@ import { SemesterResult } from './SemesterResult.js';
 import { StudentMarks } from './StudentMarks.js';
 import { SubjectComponent } from './SubjectComponent.js';
 import { SubjectResult } from './SubjectResult.js';
+import { LearningMaterial } from './LearningMaterial.js';
 
 /* =====================================================
    BASIC RELATIONSHIPS
@@ -269,6 +270,22 @@ Timetable.belongsTo(Subject, {
   foreignKey: "subject_id",
   targetKey: "subject_id"
 });
+
+// LearningMaterial ↔ Subject
+LearningMaterial.belongsTo(Subject, { foreignKey: 'subject_id', targetKey: 'subject_id' });
+Subject.hasMany(LearningMaterial, { foreignKey: 'subject_id', sourceKey: 'subject_id' });
+
+// LearningMaterial ↔ Faculty
+LearningMaterial.belongsTo(Faculty, { foreignKey: 'faculty_id', targetKey: 'faculty_id' });
+Faculty.hasMany(LearningMaterial, { foreignKey: 'faculty_id', sourceKey: 'faculty_id' });
+
+// LearningMaterial ↔ Class
+LearningMaterial.belongsTo(Class, { foreignKey: 'class_pk', targetKey: 'id' });
+Class.hasMany(LearningMaterial, { foreignKey: 'class_pk', sourceKey: 'id' });
+
+// LearningMaterial ↔ Course
+LearningMaterial.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
+Course.hasMany(LearningMaterial, { foreignKey: 'course_id', sourceKey: 'course_id' });
 
 
 
