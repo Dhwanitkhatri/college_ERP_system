@@ -6,7 +6,8 @@ import {
     getMaterialById,
     downloadMaterial,
     deleteMaterial,
-    getFacultySubjectsByClass
+    getFacultySubjectsByClass,
+    getSubjectsFromTimetable
 } from '../controllers/learningMaterialController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -19,6 +20,8 @@ const upload = multer({ dest: 'temp/' }); // files will be moved in controller
 router.use(authMiddleware);
 // to fetch the subjects
 router.get("/subject",authMiddleware , getFacultySubjectsByClass);
+
+router.get("/subjects-from-timetable", getSubjectsFromTimetable);
 
 // Upload material (faculty only)
 router.post('/', upload.single('file'), uploadMaterial);

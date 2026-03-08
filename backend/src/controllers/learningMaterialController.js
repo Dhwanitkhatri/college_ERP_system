@@ -2,6 +2,7 @@ import { LearningMaterial } from '../model/LearningMaterial.js';
 import { Subject } from '../model/Subject.js';
 import { Faculty } from '../model/Faculty.js';
 import { Class } from '../model/Class.js';
+import {Student} from "../model/Student.js"
 import { Timetable } from '../model/Timetable.js'; 
 import { Op } from 'sequelize';
 import path from 'path';
@@ -125,13 +126,12 @@ export const getMaterials = async (req, res) => {
         const user = req.user;
         const { subject_id, class_pk, course_id: queryCourseId } = req.query;
 
-        // Build where clause
         const where = {};
 
-        // If student or faculty, restrict to their course
-        if (user.role === 'Student' || user.role === 'Faculty') {
+        if (user.role === "Student" || user.role === "Faculty") {
             where.course_id = user.course_id;
-        } else if (user.role === 'Admin' && queryCourseId) {
+        } 
+        else if (user.role === "Admin" && queryCourseId) {
             where.course_id = queryCourseId;
         }
 
@@ -141,17 +141,33 @@ export const getMaterials = async (req, res) => {
         const materials = await LearningMaterial.findAll({
             where,
             include: [
-                { model: Subject, attributes: ['subject_name'] },
-                { model: Faculty, attributes: ['name'] },
-                { model: Class, attributes: ['class_id', 'section'] }
+                {
+                    model: Subject,
+                    attributes: ["subject_id", "subject_name"]
+                },
+                {
+                    model: Faculty,
+                    attributes: ["name"]
+                },
+                {
+                    model: Class,
+                    attributes: ["class_id", "section"]
+                }
             ],
-            order: [['uploaded_at', 'DESC']]
+            order: [["createdAt", "DESC"]]
         });
 
-        res.json({ success: true, data: materials });
+        res.json({
+            success: true,
+            data: materials
+        });
+
     } catch (error) {
-        console.error('Error fetching materials:', error);
-        res.status(500).json({ success: false, message: error.message });
+        console.error("Error fetching materials:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
@@ -190,32 +206,47 @@ export const getMaterialById = async (req, res) => {
 // ======================
 // DOWNLOAD MATERIAL
 // ======================
+
+
+
+
 export const downloadMaterial = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const user = req.user;
+  try {
+    const { id } = req.params;
 
-        const material = await LearningMaterial.findByPk(id);
-        if (!material) {
-            return res.status(404).json({ success: false, message: 'Material not found' });
-        }
+    const material = await LearningMaterial.findByPk(id);
 
-        // Check course access
-        if (user.role !== 'Admin' && material.course_id !== user.course_id) {
-            return res.status(403).json({ success: false, message: 'Access denied' });
-        }
-
-        const filePath = path.join(__dirname, '../../', material.file_path);
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ success: false, message: 'File not found on server' });
-        }
-
-        res.download(filePath, path.basename(filePath));
-    } catch (error) {
-        console.error('Error downloading material:', error);
-        res.status(500).json({ success: false, message: error.message });
+    if (!material) {
+      return res.status(404).json({
+        success: false,
+        message: "Material not found",
+      });
     }
+
+    const filePath = path.join(__dirname, "../../", material.file_path);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found on server",
+      });
+    }
+
+    // filename with extension
+    const fileName = `${material.title}.${material.file_type}`;
+
+    // this automatically sets correct headers
+    res.download(filePath, fileName);
+
+  } catch (error) {
+    console.error("Error downloading material:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
+
 
 // ======================
 // DELETE MATERIAL (Faculty only – must be owner)
@@ -300,4 +331,68 @@ export const getFacultySubjectsByClass = async (req, res) => {
       message: "Error fetching subjects"
     });
   }
+};
+export const getSubjectsFromTimetable = async (req, res) => {
+    try {
+        const user = req.user;
+
+        // Only students should access this
+        if (user.role !== "Student") {
+            return res.status(403).json({
+                success: false,
+                message: "Access denied. Only students can access subjects."
+            });
+        }
+        const student = await Student.findOne({where:{user_id : user.uid},
+            attributes:{
+                include:["class_pk"]
+            }
+        })
+        const classPk = student.class_pk;
+
+        if (!classPk) {
+            return res.status(400).json({
+                success: false,
+                message: "Student class not found"
+            });
+        }
+
+        // Find all timetable entries for the student's class
+        const timetableEntries = await Timetable.findAll({
+            where: { class_pk: classPk },
+            attributes: ["subject_id"]
+        });
+
+        if (!timetableEntries.length) {
+            return res.json({
+                success: true,
+                data: []
+            });
+        }
+
+        // Remove duplicate subject ids
+        const subjectIds = [
+            ...new Set(timetableEntries.map(item => item.subject_id))
+        ];
+
+        // Fetch subject details
+        const subjects = await Subject.findAll({
+            where: {
+                subject_id: subjectIds
+            },
+            attributes: ["subject_id", "subject_name"]
+        });
+
+        res.json({
+            success: true,
+            data: subjects
+        });
+
+    } catch (error) {
+        console.error("Error fetching subjects from timetable:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
 };

@@ -62,6 +62,6 @@ export const LearningMaterial = sequelize.define('LearningMaterial', {
     }
 }, {
     timestamps: true,
-    createdAt: 'uploaded_at',
+    createdAt: 'createdAt',
     updatedAt: 'updated_at'
 });
