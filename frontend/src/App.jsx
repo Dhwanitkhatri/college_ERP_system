@@ -60,6 +60,7 @@ import EnterExamMarksFaculty from "./Pages/Faculty/EnterExamMarksFaculty";
 import ViewAttendanceReportStudent from "./Pages/Student/ViewAttendanceReportStudent";
 import UploadLearningMaterialFaculty from "./Pages/Faculty/UploadLearningMaterialFaculty";
 import LearningMaterialStudent from "./Pages/Student/LearningMaterialStudent";
+import GenerateHallTicketStudent from "./Pages/Student/GenerateHallTicketStudent";
 
 const router = createBrowserRouter([
   {
@@ -362,10 +363,14 @@ const router = createBrowserRouter([
         path: "ViewAttendanceReportStudent",
         element: <ViewAttendanceReportStudent />,
       },
-  {
+      {
         path: "LearningMaterialStudent",
         element: <LearningMaterialStudent />,
       },
+      {
+        path: "GenerateHallTicketStudent",
+        element: <GenerateHallTicketStudent />,
+      }
     ],
   },
   {
