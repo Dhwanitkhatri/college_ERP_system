@@ -14,12 +14,11 @@ export default function PayFeeAdmin() {
   const [selectedStudent, setSelectedStudent] = useState("");
   const [searchEnrollment, setSearchEnrollment] = useState("");
   const [feeSummary, setFeeSummary] = useState(null);
+  const today = new Date().toISOString().split("T")[0];
 
   // NEW STATES
   const [academicYear, setAcademicYear] = useState("");
   const [semester, setSemester] = useState("");
-
-
 
   {
     /* this is the react hook form part*/
@@ -44,8 +43,7 @@ export default function PayFeeAdmin() {
   const totalFee = feeSummary?.total_fee;
   const alreadyPaid = feeSummary?.paid_amount || 0;
 
-  const newTotalPaid =
-    totalFee !== undefined ? alreadyPaid + payingNow : null;
+  const newTotalPaid = totalFee !== undefined ? alreadyPaid + payingNow : null;
 
   const newPending =
     totalFee !== undefined ? totalFee - (alreadyPaid + payingNow) : null;
@@ -72,7 +70,8 @@ export default function PayFeeAdmin() {
   const fetchFeeStatus = async (studentId, year, sem) => {
     try {
       const res = await api.get(
-        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`);
+        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
+      );
       setFeeSummary(res.data.feeSummary);
     } catch (error) {
       setFeeSummary(null);
@@ -83,7 +82,7 @@ export default function PayFeeAdmin() {
     /* filter students by enrollment search */
   }
   const filteredStudents = students.filter((student) =>
-    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase())
+    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase()),
   );
 
   {
@@ -104,9 +103,6 @@ export default function PayFeeAdmin() {
           payment_date: data.paymentDate,
           remarks: data.remarks,
           fee_structure_id: feeSummary.fee_id,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -179,6 +175,39 @@ export default function PayFeeAdmin() {
                 ))}
               </select>
             </div>
+
+            {/* academic year input */}
+            <div>
+              <label className="custom-label mb-2">Academic Year</label>
+              <select
+                className="custom-input"
+                placeholder="Select academic year"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+              >
+                <option value="">Select Academic Year</option>
+                <option value="2023-24">2023-24</option>
+                <option value="2024-25">2024-25</option>
+                <option value="2025-26">2025-26</option>
+              </select>
+            </div>
+            {/* semester dropdown */}
+            <div>
+              <label className="custom-label mb-2">Semester</label>
+              <select
+                className="custom-input"
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+              >
+                <option value="">Select Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+              </select>
+            </div>
           </div>
         </DashboardChildPageCard>
 
@@ -203,9 +232,7 @@ export default function PayFeeAdmin() {
                       })}
                     />
                     {errors.amount && (
-                      <p className="custom-error">
-                        {errors.amount.message}
-                      </p>
+                      <p className="custom-error">{errors.amount.message}</p>
                     )}
                   </div>
 
@@ -260,8 +287,13 @@ export default function PayFeeAdmin() {
                     <input
                       type="date"
                       className="custom-input"
+                      max={today}
                       {...register("paymentDate", {
                         required: "Date is required",
+                        max: {
+                          value: today,
+                          message: "Payment date cannot be in the future",
+                        },
                       })}
                     />
                     {errors.paymentDate && (
