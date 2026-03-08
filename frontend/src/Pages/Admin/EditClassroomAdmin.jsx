@@ -26,7 +26,6 @@ const ManageClassroomAdmin = () => {
       const classRes = await api.get(`/api/classes/${id}`);
 
       const facultyRes = await api.get("/api/faculties", {
-        headers: { Authorization: `Bearer ${token}` },
       });
 
      

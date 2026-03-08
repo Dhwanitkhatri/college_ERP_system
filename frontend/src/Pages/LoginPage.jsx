@@ -7,25 +7,26 @@ import { saveUser } from "../utils/auth.js";
 import { useForm } from "react-hook-form";
 
 function LoginPage() {
-  const navigate = useNavigate();  //for navigation
-  
-  const {          //react hook form
+  const navigate = useNavigate(); //for navigation
+
+  const {
+    //react hook form
     register,
     handleSubmit,
     setError,
     clearErrors,
     formState: { errors },
   } = useForm({
-    mode: "onSubmit",   //validate only when form is submitted
+    mode: "onSubmit", //validate only when form is submitted
   });
 
-  const [showPassword, setShowPassword] = useState(false);  //for password hide/unhide
+  const [showPassword, setShowPassword] = useState(false); //for password hide/unhide
 
   /*variable to store errors*/
   //  const usernamePattern = /^[a-zA-Z0-9]+$/;           /*aplhanumeric username pattern */
 
   const handleBackButtonClick = () => {
-    navigate("/");     //navigation to last page
+    navigate("/"); //navigation to last page
   };
 
   const onSubmit = async (data) => {
@@ -33,7 +34,7 @@ function LoginPage() {
 
     const start = performance.now(); //  Start time
 
-    clearErrors();   //clear previous manual errors before API call
+    clearErrors(); //clear previous manual errors before API call
 
     /*Backend Validations to match correct username and password */
     //calling API from backend (later)
@@ -42,13 +43,12 @@ function LoginPage() {
         username: data.username,
         password: data.password,
       });
-        
-      
+
       saveUser({
-  role: res.data.role,
-  name: res.data.name,
-  course_id: res.data.course_id
-});
+        role: res.data.role,
+        name: res.data.name,
+        course_id: res.data.course_id,
+      });
 
       const end = performance.now(); //  End time
       console.log(`Frontend Total Time: ${(end - start).toFixed(2)} ms`);
@@ -84,11 +84,9 @@ function LoginPage() {
       <form id="loginForm" onSubmit={handleSubmit(onSubmit)}>
         {/*Main login container */}
         <div className="loginContainer w-full bg-white dark:bg-gray-800 dark:text-white border-gray-200 p-5 rounded-xl shadow-lg justify-center items-center justify-items-center">
-          
           {/* login header*/}
           <div className="loginHeader justify-center items-center justify-items-center w-full m-2 mt-1">
             <div className="loginTitleHeader flex w-full justify-between items-center">
-              
               <div
                 onClick={handleBackButtonClick}
                 className="loginBackButton p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
@@ -99,7 +97,7 @@ function LoginPage() {
               <p className="loginTitle dark:text-white">College ERP Login</p>
 
               <div className="loginThemeButton p-1 rounded-full cursor-pointer">
-                  <ThemeButton />
+                <ThemeButton />
               </div>
             </div>
 
@@ -110,7 +108,6 @@ function LoginPage() {
 
           {/* login details container */}
           <div className="loginDetails justify-start items-center w-full m-2">
-            
             <p className="usernameLabel font-semibold text-sm my-1 dark:text-gray-200">
               Username
             </p>

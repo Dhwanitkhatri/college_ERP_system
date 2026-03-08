@@ -257,3 +257,47 @@ export const deleteMaterial = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+//fetch the suject for the faculty 
+export const getFacultySubjectsByClass = async (req, res) => {
+  try {
+    const { class_id } = req.query;
+    const faculty = await Faculty.findOne({where:{user_id : req.user.uid},
+        attributes:{
+            include:["faculty_id"]
+        }
+    });
+    const faculty_id = faculty.faculty_id;
+
+    if (!class_id) {
+      return res.status(400).json({
+        message: "class_id is required"
+      });
+    }
+
+    const subjects = await Timetable.findAll({
+      where: {
+        class_pk: class_id,
+        faculty_id: faculty_id
+      },
+      attributes: ["subject_id"],
+      include: [
+        {
+          model: Subject,
+          attributes: ["subject_id", "subject_name"]
+        }
+      ],
+      group: ["subject_id"]
+    });
+
+    res.status(200).json({
+      success: true,
+      data: subjects
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error fetching subjects"
+    });
+  }
+};

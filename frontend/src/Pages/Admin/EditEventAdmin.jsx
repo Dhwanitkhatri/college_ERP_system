@@ -33,7 +33,7 @@ const EditEventAdmin = () => {
         setValue("location", event.location);
       }
     });
-  }, [id, setValue, token]);
+  }, [id, setValue]);
 
   const onSubmit = (data) => {
 

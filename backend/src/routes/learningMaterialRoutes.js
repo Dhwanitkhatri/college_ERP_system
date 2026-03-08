@@ -5,7 +5,8 @@ import {
     getMaterials,
     getMaterialById,
     downloadMaterial,
-    deleteMaterial
+    deleteMaterial,
+    getFacultySubjectsByClass
 } from '../controllers/learningMaterialController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -16,6 +17,8 @@ const upload = multer({ dest: 'temp/' }); // files will be moved in controller
 
 // All routes require authentication
 router.use(authMiddleware);
+// to fetch the subjects
+router.get("/subject",authMiddleware , getFacultySubjectsByClass);
 
 // Upload material (faculty only)
 router.post('/', upload.single('file'), uploadMaterial);
@@ -31,5 +34,7 @@ router.get('/:id/download', downloadMaterial);
 
 // Delete material (faculty only – must be owner)
 router.delete('/:id', deleteMaterial);
+
+
 
 export default router;
