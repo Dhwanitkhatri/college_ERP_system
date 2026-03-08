@@ -198,6 +198,7 @@ export const payFee = async (req, res) => {
 
   } catch (error) {
     await t.rollback();
+    console.log(error);
     res.status(500).json({ error: error.message });
   }
 };

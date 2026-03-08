@@ -70,8 +70,9 @@ export default function PayFeeAdmin() {
   const fetchFeeStatus = async (studentId, year, sem) => {
     try {
       const res = await api.get(
-        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
+        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`
       );
+      console.log(res.data);
       setFeeSummary(res.data.feeSummary);
     } catch (error) {
       setFeeSummary(null);
@@ -79,10 +80,19 @@ export default function PayFeeAdmin() {
   };
 
   {
+    /* trigger fee status api when all three fields are selected */
+  }
+  useEffect(() => {
+    if (selectedStudent && academicYear && semester) {
+      fetchFeeStatus(selectedStudent, academicYear, semester);
+    }
+  }, [selectedStudent, academicYear, semester]);
+
+  {
     /* filter students by enrollment search */
   }
   const filteredStudents = students.filter((student) =>
-    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase()),
+    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase())
   );
 
   {
@@ -90,21 +100,24 @@ export default function PayFeeAdmin() {
   }
   const onSubmit = async (data) => {
     try {
-      await api.post(
-        "/api/fee/pay",
-        {
-          student_id: selectedStudent,
-          academic_year: academicYear,
-          semester: semester,
-          amount_paid: data.amount,
-          payment_mode: data.paymentMode,
-          reference_no:
-            data.paymentMode === "Cheque" ? data.referenceNumber : null,
-          payment_date: data.paymentDate,
-          remarks: data.remarks,
-          fee_structure_id: feeSummary.fee_id,
-        }
-      );
+      console.log(data);
+      console.log(selectedStudent);
+      console.log(academicYear);
+      console.log(semester);
+      console.log(feeSummary?.fee_id);
+
+      await api.post("/api/fee/pay", {
+        student_id: selectedStudent,
+        academic_year: academicYear,
+        semester: semester,
+        amount_paid: data.amount,
+        payment_mode: data.paymentMode,
+        reference_no:
+          data.paymentMode === "Cheque" ? data.referenceNumber : null,
+        payment_date: data.paymentDate,
+        remarks: data.remarks,
+        fee_structure_id: feeSummary?.fee_id,
+      });
 
       alert("Payment Saved!");
       reset();
@@ -160,12 +173,7 @@ export default function PayFeeAdmin() {
               <select
                 className="custom-input bg-[var(--bg-primary)] theme-transition"
                 value={selectedStudent}
-                onChange={(e) => {
-                  setSelectedStudent(e.target.value);
-                  if (academicYear && semester) {
-                    fetchFeeStatus(e.target.value, academicYear, semester);
-                  }
-                }}
+                onChange={(e) => setSelectedStudent(e.target.value)}
               >
                 <option value="">Choose Student</option>
                 {filteredStudents.map((student) => (
@@ -191,6 +199,7 @@ export default function PayFeeAdmin() {
                 <option value="2025-26">2025-26</option>
               </select>
             </div>
+
             {/* semester dropdown */}
             <div>
               <label className="custom-label mb-2">Semester</label>

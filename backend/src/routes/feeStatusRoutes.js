@@ -12,6 +12,13 @@ import {
     from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+router.post(
+  "/pay",
+  authMiddleware,
+  adminMiddleware,
+  payFee
+);
+
 
 router.post(
   "/fee-structure/create",
@@ -27,12 +34,6 @@ router.post(
   assignFeeToStudent
 );
 
-router.post(
-  "/pay",
-  authMiddleware,
-  adminMiddleware,
-  payFee
-);
 
 router.get(
   "/check-fee-status",
