@@ -236,6 +236,10 @@ const router = createBrowserRouter([
         path: "GenerateExamResultAdmin",
         element: <GenerateExamResultAdmin />,
       },
+      {
+        path: "EnterExamMarksFaculty",
+        element: <EnterExamMarksFaculty />,
+      },
     ],
   },
   {
@@ -313,10 +317,6 @@ const router = createBrowserRouter([
       {
         path: "ViewTimetable",
         element: <ViewTimeTableStudent />,
-      },
-      {
-        path: "EnterExamMarksFaculty",
-        element: <EnterExamMarksFaculty />,
       },
       {
         path: "UploadLearningMaterialFaculty",

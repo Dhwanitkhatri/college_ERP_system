@@ -41,9 +41,6 @@ const AdminPanelDashboard = () => {
           <Link to="ViewFeedbackFaculty">
             <ActionButtonDashboard title="View Feedback" />
           </Link>
-          <Link to="EnterExamMarksFaculty">
-            <ActionButtonDashboard title="Enter Exam Marks" />
-          </Link>
         </ActionContainerDashboard>
       </DashContentPanelDashboard>
 

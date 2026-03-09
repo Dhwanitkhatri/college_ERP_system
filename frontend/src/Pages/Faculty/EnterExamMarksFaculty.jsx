@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
@@ -7,10 +7,21 @@ import CancelButton from "../../ui/Buttons/CancelButton";
 import api from "../../api/axios";
 
 const EnterExamMarksFaculty = () => {
-  // Store success data
-  const [enteredMarks, setEnteredMarks] = useState(null);
+  // =============================
+  // STATE
+  // =============================
 
-  // React Hook Form
+  const [students, setStudents] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [components, setComponents] = useState([]);
+  const [exams, setExams] = useState([]);
+  const [marks, setMarks] = useState({});
+  const [result, setResult] = useState(null);
+
+  // =============================
+  // REACT HOOK FORM
+  // =============================
+
   const {
     register,
     handleSubmit,
@@ -19,149 +30,237 @@ const EnterExamMarksFaculty = () => {
     formState: { errors },
   } = useForm();
 
-  // Watch component type manually (optional logic improvement later)
+  const selectedSubject = watch("subject_id");
+
+  // =============================
+  // FETCH INITIAL DATA
+  // =============================
+
+  useEffect(() => {
+    fetchStudents();
+    fetchSubjects();
+    fetchComponents();
+    fetchExams();
+  }, []);
+
+  // =============================
+  // FETCH STUDENTS
+  // =============================
+
+  async function fetchStudents() {
+    try {
+      const res = await api.get("/api/students");
+      setStudents(res.data);
+    } catch (err) {
+      console.error("Error fetching students");
+    }
+  }
+
+  // =============================
+  // FETCH SUBJECTS
+  // =============================
+
+  async function fetchSubjects() {
+    try {
+      const res = await api.get("/api/subjects");
+      setSubjects(res.data.data || res.data);
+    } catch (err) {
+      console.error("Error fetching subjects");
+    }
+  }
+
+  // =============================
+  // FETCH COMPONENTS
+  // =============================
+
+  async function fetchComponents() {
+    try {
+      const res = await api.get("/api/components");
+      setComponents(res.data.data || res.data);
+    } catch (err) {
+      console.error("Error fetching components");
+    }
+  }
+
+  // =============================
+  // FETCH EXAMS
+  // =============================
+
+  async function fetchExams() {
+    try {
+      const res = await api.get("/api/exams");
+      setExams(res.data.data || []);
+    } catch (err) {
+      console.error("Error fetching exams");
+    }
+  }
+
+  // =============================
+  // HANDLE MARKS CHANGE
+  // =============================
+
+  const handleMarksChange = (student_id, value) => {
+    setMarks((prev) => ({
+      ...prev,
+      [student_id]: value,
+    }));
+  };
+
+  // =============================
+  // CANCEL HANDLER
+  // =============================
+
   const handleCancel = () => {
     reset();
-    setEnteredMarks(null);
+    setMarks({});
+    setResult(null);
   };
 
   // =============================
   // SUBMIT HANDLER
   // =============================
+
   async function onSubmit(data) {
     try {
-      const res = await api.post("/api/enter-marks", {
-        student_id: Number(data.student_id),
+      const payload = students.map((student) => ({
+        student_id: student.student_id,
+        marks_obtained: Number(marks[student.student_id] || 0),
+      }));
+
+      const res = await api.post("/api/bulk-enter-marks", {
         subject_id: Number(data.subject_id),
         component_id: Number(data.component_id),
         exam_id: data.exam_id ? Number(data.exam_id) : null,
-        marks_obtained: Number(data.marks_obtained),
+        marks: payload,
       });
 
       alert(res.data.message);
+      setResult(res.data.data);
 
-      setEnteredMarks(res.data.data);
-
-      reset();
+      setMarks({});
     } catch (error) {
-      alert(error?.response?.data?.message || "Error Entering Marks");
+      alert(error?.response?.data?.message || "Error entering marks");
     }
   }
 
   return (
     <DashboardChildPageTemplate
       title="Enter Exam Marks"
-      desc="Faculty can enter marks for students based on subject components"
+      desc="Admin can enter marks for multiple students"
     >
+      {/* =============================
+          FORM CARD
+      ============================= */}
+
       <DashboardChildPageCard>
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* STUDENT ID */}
+          {/* SUBJECT */}
           <div className="form-field">
-            <label className="custom-label">Student ID</label>
-            <select
-              placeholder="Select Student ID"
-              className="custom-input"
-              {...register("student_id", {
-                required: "Student ID is required",
-              })}
-            >
-              <option value="">Select Student ID</option>
-              {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="1">1</option>
-              {/* Example static options for testing */}
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </select>
-            {errors.student_id && (
-              <p className="custom-error">{errors.student_id.message}</p>
-            )}
-          </div>
+            <label className="custom-label">Subject</label>
 
-          {/* SUBJECT ID */}
-          <div className="form-field">
-            <label className="custom-label">Subject ID</label>
             <select
-              placeholder="Enter Subject ID"
               className="custom-input"
-              {...register("subject_id", {
-                required: "Subject ID is required",
-              })}
+              {...register("subject_id", { required: "Subject is required" })}
             >
-              <option value="">Select Subject ID</option>
-              {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="101">101</option>
-              {/* Example static options for testing */}
-              <option value="102">102</option>
-              <option value="103">103</option>
+              <option value="">Select Subject</option>
+
+              {Array.isArray(subjects) &&
+                subjects.map((sub) => (
+                  <option key={sub.subject_id} value={sub.subject_id}>
+                    {sub.subject_name}
+                  </option>
+                ))}
             </select>
+
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>
             )}
           </div>
 
-          {/* COMPONENT ID */}
+          {/* COMPONENT */}
           <div className="form-field">
-            <label className="custom-label">Component ID</label>
+            <label className="custom-label">Component</label>
+
             <select
-              placeholder="Enter Component ID"
               className="custom-input"
-              {...register("component_id", {
-                required: "Component ID is required"
-              })}
+              {...register("component_id", { required: "Component required" })}
             >
-              <option value="">Select Component ID</option>
-              {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="201">201</option>
-              {/* Example static options for testing */}
-              <option value="202">202</option>
-              <option value="203">203</option>
+              <option value="">Select Component</option>
+
+              {components.map((c) => (
+                <option key={c.component_id} value={c.component_id}>
+                  {c.type} ({c.max_marks})
+                </option>
+              ))}
             </select>
+
             {errors.component_id && (
               <p className="custom-error">{errors.component_id.message}</p>
             )}
           </div>
 
-          {/* EXAM ID (OPTIONAL – REQUIRED ONLY FOR EXAM TYPE COMPONENT) */}
+          {/* EXAM */}
           <div className="form-field">
-            <label className="custom-label">
-              Exam ID (Required only for EXAM component)
-            </label>
-            <select
-              placeholder="Enter Exam ID (If applicable)"
-              className="custom-input"
-              {...register("exam_id")}
-            >
-              <option value="">Select Exam ID (If applicable)</option>
-              {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="301">301</option>
+            <label className="custom-label">Exam (Optional)</label>
+
+            <select className="custom-input" {...register("exam_id")}>
+              <option value="">Select Exam</option>
+
+              {Array.isArray(exams) &&
+                exams.map((e) => (
+                  <option key={e.exam_id} value={e.exam_id}>
+                    {e.name}
+                  </option>
+                ))}
             </select>
           </div>
 
-          {/* MARKS OBTAINED */}
-          <div className="form-field">
-            <label className="custom-label">Marks Obtained</label>
-            <input
-              type="number"
-              placeholder="Enter Marks"
-              className="custom-input"
-              {...register("marks_obtained", {
-                required: "Marks are required",
-                min: {
-                  value: 0,
-                  message: "Marks cannot be negative",
-                },
-                max: {
-                  value: 100,
-                  message: "Marks cannot exceed 100",
-                },
-              })}
-            />
-            {errors.marks_obtained && (
-              <p className="custom-error">{errors.marks_obtained.message}</p>
-            )}
+          {/* =============================
+              STUDENT TABLE
+          ============================= */}
+
+          <div className="table-wrapper mt-6">
+            <table className="min-w-full text-sm">
+              <thead className="sticky-header">
+                <tr>
+                  <th className="table-row-style sticky-col">Student ID</th>
+
+                  <th className="table-row-style">Student Name</th>
+
+                  <th className="table-row-style">Marks</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {students.map((student) => (
+                  <tr key={student.student_id}>
+                    <td className="table-row-style sticky-col">
+                      {student.student_id}
+                    </td>
+
+                    <td className="table-row-style">{student.name}</td>
+
+                    <td className="table-row-style">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        className="custom-input"
+                        placeholder="0"
+                        value={marks[student.student_id] || ""}
+                        onChange={(e) =>
+                          handleMarksChange(student.student_id, e.target.value)
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           {/* ACTION BUTTONS */}
+
           <div className="form-actions">
             <AddButton />
             <CancelButton onClick={handleCancel} />
@@ -169,37 +268,19 @@ const EnterExamMarksFaculty = () => {
         </form>
       </DashboardChildPageCard>
 
-      {/* SUCCESS CARD */}
-      {enteredMarks && (
+      {/* =============================
+          SUCCESS CARD
+      ============================= */}
+
+      {result && (
         <DashboardChildPageCard className="mt-3">
           <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
             Marks Saved Successfully
           </h3>
 
-          <div className="space-y-1 text-sm text-[var(--text-secondary)]">
-            <p>
-              <span className="font-medium">Student ID:</span>{" "}
-              {enteredMarks.student_id}
-            </p>
-            <p>
-              <span className="font-medium">Subject ID:</span>{" "}
-              {enteredMarks.subject_id}
-            </p>
-            <p>
-              <span className="font-medium">Component ID:</span>{" "}
-              {enteredMarks.component_id}
-            </p>
-            {enteredMarks.exam_id && (
-              <p>
-                <span className="font-medium">Exam ID:</span>{" "}
-                {enteredMarks.exam_id}
-              </p>
-            )}
-            <p>
-              <span className="font-medium">Marks:</span>{" "}
-              {enteredMarks.marks_obtained}
-            </p>
-          </div>
+          <p className="text-sm text-[var(--text-secondary)]">
+            {result.length} records inserted successfully
+          </p>
         </DashboardChildPageCard>
       )}
     </DashboardChildPageTemplate>
