@@ -61,6 +61,7 @@ import ViewAttendanceReportStudent from "./Pages/Student/ViewAttendanceReportStu
 import UploadLearningMaterialFaculty from "./Pages/Faculty/UploadLearningMaterialFaculty";
 import LearningMaterialStudent from "./Pages/Student/LearningMaterialStudent";
 import GenerateHallTicketStudent from "./Pages/Student/GenerateHallTicketStudent";
+import GenerateExamResultAdmin from "./Pages/Admin/GenerateExamResultAdmin";
 
 const router = createBrowserRouter([
   {
@@ -230,6 +231,10 @@ const router = createBrowserRouter([
       {
         path: "AddExamTimeTableAdmin",
         element: <AddExamTimeTableAdmin />,
+      },
+      {
+        path: "GenerateExamResultAdmin",
+        element: <GenerateExamResultAdmin />,
       },
     ],
   },
