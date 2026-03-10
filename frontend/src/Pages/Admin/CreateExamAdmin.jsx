@@ -138,8 +138,8 @@ const CreateExamAdmin = () => {
             >
               <option value="">Select Academic Year</option>
               {/* In a real app, this would be populated dynamically from the backend */}
-              <option value="2024-2025">2024-2025</option>
-              <option value="2025-2026">2025-2026</option>
+              <option value="2024-25">2024-2025</option>
+              <option value="2025-26">2025-2026</option>
             </select>
             {errors.academic_year && (
               <p className="custom-error">{errors.academic_year.message}</p>

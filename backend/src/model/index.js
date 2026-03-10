@@ -33,6 +33,8 @@ import { SubjectComponent } from './SubjectComponent.js';
 import { SubjectResult } from './SubjectResult.js';
 import { LearningMaterial } from './LearningMaterial.js';
 
+import { ExamTimetable } from './ExamTimetable.js';
+
 /* =====================================================
    BASIC RELATIONSHIPS
 ===================================================== */
@@ -286,6 +288,28 @@ Class.hasMany(LearningMaterial, { foreignKey: 'class_pk', sourceKey: 'id' });
 // LearningMaterial ↔ Course
 LearningMaterial.belongsTo(Course, { foreignKey: 'course_id', targetKey: 'course_id' });
 Course.hasMany(LearningMaterial, { foreignKey: 'course_id', sourceKey: 'course_id' });
+
+
+
+Exam.hasMany(ExamTimetable, {
+  foreignKey: "exam_id"
+});
+
+ExamTimetable.belongsTo(Exam, {
+  foreignKey: "exam_id"
+});
+
+
+ExamTimetable.belongsTo(Subject, {
+  foreignKey: "subject_id",
+  targetKey: "subject_id"
+});
+
+Subject.hasMany(ExamTimetable, {
+  foreignKey: "subject_id",
+  sourceKey: "subject_id"
+});
+
 
 
 

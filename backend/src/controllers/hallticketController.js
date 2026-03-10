@@ -5,6 +5,7 @@ import { ExamTimetable } from "../model/ExamTimetable.js";
 import { Student } from "../model/Student.js";
 import { Class } from "../model/Class.js";
 import { Subject } from "../model/Subject.js";
+import { number } from "zod";
 
 // ==========================================
 // GENERATE HALL TICKETS (Admin only) – POST with body filters
@@ -127,7 +128,7 @@ export const getMyHallTickets = async (req, res) => {
     // Get student with class details
     const student = await Student.findOne({
       where: { user_id },
-      include: [{ model: Class, attributes: ["semester", "class_id", "section", "course_id", "academic_year"] }]
+      include: [{ model: Class, attributes: ["semester", "class_id", "section", "course_id","academic_year"] }]
     });
     if (!student) {
       return res.status(404).json({ success: false, message: "Student profile not found" });
@@ -135,23 +136,23 @@ export const getMyHallTickets = async (req, res) => {
     const course_id = student.Class?.course_id;
     const studentSemester = student.Class?.semester;
     const studentAcademicYear = student.Class?.academic_year;
+   
     if (!course_id || !studentSemester || !studentAcademicYear) {
       return res.status(400).json({ success: false, message: "Student not fully assigned to a class" });
     }
 
     // Default to student's current academic year and semester if not provided
-    if (!academic_year) academic_year = studentAcademicYear;
-    if (!semester) semester = studentSemester;
+   
 
     // Build exam filter
     const examWhere = { course_id };
     if (exam_id) {
-      examWhere.exam_id = exam_id;
+      examWhere.exam_id = Number(exam_id);
     } else {
-      examWhere.semester = parseInt(semester);
+      examWhere.semester = Number(semester);
       if (exam_type) examWhere.exam_type = exam_type;
     }
-
+console.log(examWhere);
     const exams = await Exam.findAll({ where: examWhere });
 
     if (!exams.length) {
@@ -212,5 +213,46 @@ export const getMyHallTickets = async (req, res) => {
   } catch (error) {
     console.error("Error fetching hall tickets:", error);
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+export const getExamsBySemesterAndAcademic = async (req, res) => {
+  try {
+    const { semester, academic_year  , exam_type} = req.query;
+    const course_id = req.user.course_id;
+
+    if (!semester || !academic_year || !exam_type) {
+      return res.status(400).json({
+        message: "semester and academic_year are required",
+      });
+    }
+
+    const exams = await Exam.findAll({
+      where: {
+        semester: semester,
+        academic_year: academic_year,
+        course_id,
+        status : "PUBLISHED",
+        exam_type:exam_type
+      },
+      attributes: [
+        "exam_id",
+        "name",       
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json({
+      success: true,
+      count: exams.length,
+      data: exams,
+    });
+  } catch (error) {
+    console.error("Error fetching exams:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };

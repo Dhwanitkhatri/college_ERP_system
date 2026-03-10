@@ -31,6 +31,7 @@ import studentResultRoutes from "./src/routes/studentResultRoutes.js";
 import learningMaterialRoutes from "./src/routes/learningMaterialRoutes.js";
 import hallticketRoutes from "./src/routes/hallticketRoutes.js";
 import rankingRoutes from "./src/routes/rankingRoutes.js";
+import apiLimiter from "./src/middleware/apiLimiter.js";
 
 dotenv.config();
 const app = express();
@@ -55,8 +56,10 @@ try {
 } catch (error) {
   console.error("Database connection failed:", error);
 }
+
 app.use(responseTimeLogger);
 app.use(cookieParser());
+app.use("/api",apiLimiter); //to limit the api request 
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/faculties", facultyRoutes);
