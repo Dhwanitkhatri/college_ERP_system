@@ -16,7 +16,7 @@ const AdminPanelDashboard = () => {
         <ActionContainerDashboard title="Account & Credentials">
           <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
           <ActionButtonDashboard title="Manage Profile" />
-          <ActionButtonDashboard title="Print Fee Chalan" />
+          <Link to="PrintFeeReceiptStudent"><ActionButtonDashboard title="Print Fee Chalan" /></Link>
           {/* <ActionButtonDashboard title="View Notices" /> */}
         </ActionContainerDashboard>
 

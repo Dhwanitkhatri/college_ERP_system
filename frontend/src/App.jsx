@@ -62,6 +62,10 @@ import UploadLearningMaterialFaculty from "./Pages/Faculty/UploadLearningMateria
 import LearningMaterialStudent from "./Pages/Student/LearningMaterialStudent";
 import GenerateHallTicketStudent from "./Pages/Student/GenerateHallTicketStudent";
 import GenerateExamResultAdmin from "./Pages/Admin/GenerateExamResultAdmin";
+import UpdateSessionPlanningFaculty from "./Pages/Faculty/UpdateSessionPlanningFaculty";
+import ForgotPassword from "./Pages/ForgotPassword";
+import ViewExamResultStudent from "./Pages/Student/ViewExamResultStudent";
+import PrintFeeReceiptStudent from "./Pages/Student/PrintFeeReceiptStudent";
 
 const router = createBrowserRouter([
   {
@@ -326,6 +330,10 @@ const router = createBrowserRouter([
         path: "UploadLearningMaterialFaculty",
         element: <UploadLearningMaterialFaculty />,
       },
+      {
+        path: "UpdateSessionPlanningFaculty",
+        element: <UpdateSessionPlanningFaculty />,
+      },
     ],
   },
   {
@@ -379,7 +387,15 @@ const router = createBrowserRouter([
       {
         path: "GenerateHallTicketStudent",
         element: <GenerateHallTicketStudent />,
-      }
+      },
+      {
+        path: "ViewExamResultStudent",
+        element: <ViewExamResultStudent />,
+      },
+      {
+        path: "PrintFeeReceiptStudent",
+        element: <PrintFeeReceiptStudent />,
+      },
     ],
   },
   {
@@ -389,6 +405,10 @@ const router = createBrowserRouter([
   {
     path: "/LoginPage",
     element: <LoginPage />,
+  },
+  {
+    path: "/ForgotPassword",
+    element: <ForgotPassword />,
   },
   {
     path: "/AboutUs",

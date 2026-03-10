@@ -154,6 +154,28 @@ const EnterExamMarksFaculty = () => {
 
       <DashboardChildPageCard>
         <form onSubmit={handleSubmit(onSubmit)}>
+          {/*Semester*/}
+          <div className="form-field">
+            <label className="custom-label">Semester</label>
+            <select
+              className="custom-input"
+              {...register("semester", { required: "Semester is required" })}
+            >
+              <option value="">Select Semester</option>
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+              <option value="3">Semester 3</option>
+              <option value="4">Semester 4</option>
+              <option value="5">Semester 5</option>
+              <option value="6">Semester 6</option>
+              <option value="7">Semester 7</option>
+              <option value="8">Semester 8</option>
+            </select>
+            {errors.semester && (
+              <p className="custom-error">{errors.semester.message}</p>
+            )}
+          </div>
+          
           {/* SUBJECT */}
           <div className="form-field">
             <label className="custom-label">Subject</label>

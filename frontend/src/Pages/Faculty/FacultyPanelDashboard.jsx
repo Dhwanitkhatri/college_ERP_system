@@ -22,7 +22,7 @@ const AdminPanelDashboard = () => {
           <Link to="SessionPlanningFaculty">
             <ActionButtonDashboard title="Session Planning" />
           </Link>
-          <ActionButtonDashboard title="Update Session Planning" />
+          <Link to="UpdateSessionPlanningFaculty"><ActionButtonDashboard title="Update Session Planning" /></Link>
           <Link to="ViewTimeTable">
             <ActionButtonDashboard title="View Time Table" />
           </Link>

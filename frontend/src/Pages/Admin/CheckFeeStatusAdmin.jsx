@@ -10,7 +10,6 @@ import api from "../../api/axios";
 export default function CheckFeeStatusAdmin() {
   // ================= TOKEN =================
 
-
   // ================= STATE =================
   const [students, setStudents] = useState([]);
   const [feeStatus, setFeeStatus] = useState(null);
@@ -140,26 +139,32 @@ export default function CheckFeeStatusAdmin() {
           <>
             {/* -------- Student Info -------- */}
             <DashboardChildPageCard>
-              <h2 className="text-lg font-semibold mb-6">
+              <h2 className="text-lg font-semibold mb-6 text-[var(--text-primary)]">
                 Student Information
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-sm text-gray-500">Student ID</p>
-                  <p className="font-medium">{feeStatus.student?.student_id}</p>
+                  <p className="text-sm text-[var(--text-muted)]">Student ID</p>
+                  <p className="font-medium text-[var(--text-primary)]">
+                    {feeStatus.student?.student_id}
+                  </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500">Student Name</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Student Name
+                  </p>
+                  <p className="font-medium text-[var(--text-primary)]">
                     {feeStatus.student?.student_name}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-500">Academic Year</p>
-                  <p className="font-medium">
+                  <p className="text-sm text-[var(--text-muted)]">
+                    Academic Year
+                  </p>
+                  <p className="font-medium text-[var(--text-primary)]">
                     {feeStatus.student?.academic_year}
                   </p>
                 </div>
@@ -168,33 +173,44 @@ export default function CheckFeeStatusAdmin() {
 
             {/* -------- Fee Summary -------- */}
             <DashboardChildPageCard>
-              <h2 className="text-lg font-semibold mb-6">Fee Summary</h2>
+              <h2 className="text-lg font-semibold mb-6 text-[var(--text-primary)]">
+                Fee Summary
+              </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="fee-summary-box">
-                  <p>Total Fee</p>
-                  <p className="font-bold">
+                <div className="fee-summary-box border border-[var(--border-light)] bg-[var(--bg-secondary)]">
+                  <p className="text-[var(--text-muted)]">Total Fee</p>
+                  <p className="font-bold text-[var(--text-primary)]">
                     ₹{feeStatus.feeSummary?.total_fee || 0}
                   </p>
                 </div>
 
-                <div className="fee-summary-box">
-                  <p>Paid Amount</p>
-                  <p className="font-bold text-green-600">
+                <div className="fee-summary-box border border-[var(--border-light)] bg-[var(--bg-secondary)]">
+                  <p className="text-[var(--text-muted)]">Paid Amount</p>
+                  <p className="font-bold text-green-600 dark:text-green-400">
                     ₹{feeStatus.feeSummary?.paid_amount || 0}
                   </p>
                 </div>
 
-                <div className="fee-summary-box">
-                  <p>Remaining Amount</p>
-                  <p className="font-bold text-orange-600">
+                <div className="fee-summary-box border border-[var(--border-light)] bg-[var(--bg-secondary)]">
+                  <p className="text-[var(--text-muted)]">Remaining Amount</p>
+                  <p className="font-bold text-orange-600 dark:text-orange-400">
                     ₹{feeStatus.feeSummary?.remaining_amount || 0}
                   </p>
                 </div>
 
-                <div className="fee-summary-box">
-                  <p>Payment Status</p>
-                  <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
+                <div className="fee-summary-box border border-[var(--border-light)] bg-[var(--bg-secondary)]">
+                  <p className="text-[var(--text-muted)]">Payment Status</p>
+
+                  <span
+                    className={`px-2 py-1 text-xs rounded font-medium
+      ${
+        feeStatus.feeSummary?.payment_status === "Pending"
+          ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+          : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+      }
+    `}
+                  >
                     {feeStatus.feeSummary?.payment_status || "N/A"}
                   </span>
                 </div>
@@ -203,32 +219,40 @@ export default function CheckFeeStatusAdmin() {
 
             {/* -------- Payment History -------- */}
             <DashboardChildPageCard>
-              <h2 className="text-lg font-semibold mb-6">Payment History</h2>
+              <h2 className="text-lg font-semibold mb-6 text-[var(--text-primary)]">
+                Payment History
+              </h2>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                  <thead>
-                    <tr className="border-b">
+                <table className="w-full text-sm text-left text-[var(--text-secondary)]">
+                  <thead className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
+                    <tr className="border-b border-[var(--border-light)]">
                       <th className="py-3 px-4">Installment</th>
                       <th className="py-3 px-4">Amount Paid</th>
                       <th className="py-3 px-4">Payment Mode</th>
                       <th className="py-3 px-4">Date</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {feeStatus.paymentHistory?.map((pay, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-3 px-4">
+                      <tr
+                        key={index}
+                        className="border-b border-[var(--border-light)] hover:bg-[var(--bg-hover)]"
+                      >
+                        <td className="py-3 px-4 text-[var(--text-secondary)]">
                           Installment {pay.installment_no}
                         </td>
 
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 text-[var(--text-secondary)]">
                           ₹{Number(pay.amount_paid).toLocaleString("en-IN")}
                         </td>
 
-                        <td className="py-3 px-4">{pay.payment_mode}</td>
+                        <td className="py-3 px-4 text-[var(--text-secondary)]">
+                          {pay.payment_mode}
+                        </td>
 
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 text-[var(--text-secondary)]">
                           {new Date(pay.payment_date).toLocaleDateString(
                             "en-IN",
                           )}
