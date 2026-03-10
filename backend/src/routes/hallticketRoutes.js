@@ -1,7 +1,8 @@
 import express from 'express';
 import {
   generateHallTickets,
-  getMyHallTickets
+  getMyHallTickets,
+  getExamsBySemesterAndAcademic
 } from '../controllers/hallticketController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -9,7 +10,7 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(authMiddleware);
-
+router.get("/get-exam-for-hallticket",getExamsBySemesterAndAcademic);
 // Admin: generate hall tickets with filters in body (POST)
 router.post('/generate', generateHallTickets);
 
