@@ -240,6 +240,10 @@ const router = createBrowserRouter([
         path: "EnterExamMarksFaculty",
         element: <EnterExamMarksFaculty />,
       },
+      {
+        path: "NotificationPage",
+        element: <NotificationPage />,
+      },
     ],
   },
   {
