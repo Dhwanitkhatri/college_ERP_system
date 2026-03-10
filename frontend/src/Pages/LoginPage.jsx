@@ -1,10 +1,10 @@
 import { useState } from "react";
 import api from "../api/axios.js";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import ThemeButton from "../ui/Buttons/ThemeButton.jsx";
 import { saveUser } from "../utils/auth.js";
 import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
 
 function LoginPage() {
   const navigate = useNavigate(); //for navigation
@@ -184,13 +184,11 @@ function LoginPage() {
 
           {/* forgot password conatiner */}
           <div className="bottomDiv p-3">
-            <a
-              href="#"
-              className="usernameLabel font-semibold text-sm my-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-              onClick={() => alert("Redirecting to password recovery page...")}
-            >
-              Forgot your Password?
-            </a>
+            <Link to="/ForgotPassword">
+              <span className="usernameLabel font-semibold text-sm my-1 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                Forgot your Password?
+              </span>
+            </Link>
           </div>
         </div>
       </form>

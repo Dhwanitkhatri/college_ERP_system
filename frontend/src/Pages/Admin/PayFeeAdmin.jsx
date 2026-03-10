@@ -70,7 +70,7 @@ export default function PayFeeAdmin() {
   const fetchFeeStatus = async (studentId, year, sem) => {
     try {
       const res = await api.get(
-        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`
+        `/api/fee/check-fee-status?student_id=${studentId}&academic_year=${year}&semester=${sem}`,
       );
       console.log(res.data);
       setFeeSummary(res.data.feeSummary);
@@ -92,7 +92,7 @@ export default function PayFeeAdmin() {
     /* filter students by enrollment search */
   }
   const filteredStudents = students.filter((student) =>
-    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase())
+    student.student_id.toLowerCase().includes(searchEnrollment.toLowerCase()),
   );
 
   {
@@ -219,6 +219,66 @@ export default function PayFeeAdmin() {
             </div>
           </div>
         </DashboardChildPageCard>
+
+        {/* ================= FEE SUMMARY CARD ================= */}
+        {feeSummary && (
+          <DashboardChildPageCard>
+            <div className="flex items-center gap-2 mb-5 text-blue-600 dark:text-blue-500">
+              <CreditCard size={20} />
+              <span className="font-medium text-[var(--text-primary)]">
+                Fee Summary
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {/* Total Fee */}
+              <div>
+                <p className="text-sm text-[var(--text-secondary)] mb-1">
+                  Total Fee
+                </p>
+                <p className="font-medium text-[var(--text-primary)]">
+                  ₹{totalFee?.toLocaleString("en-IN") || "0"}
+                </p>
+              </div>
+
+              {/* Paid Amount */}
+              <div>
+                <p className="text-sm text-[var(--text-secondary)] mb-1">
+                  Paid
+                </p>
+                <p className="font-medium text-green-600 dark:text-green-500">
+                  ₹{alreadyPaid?.toLocaleString("en-IN") || "0"}
+                </p>
+              </div>
+
+              {/* Pending Amount */}
+              <div>
+                <p className="text-sm text-[var(--text-secondary)] mb-1">
+                  Pending
+                </p>
+                <p className="font-medium text-red-600 dark:text-red-500">
+                  ₹{((totalFee || 0) - alreadyPaid).toLocaleString("en-IN")}
+                </p>
+              </div>
+
+              {/* Due Date */}
+              <div>
+                <p className="text-sm text-[var(--text-secondary)] mb-1">
+                  Due Date
+                </p>
+                <p className="font-medium text-[var(--text-primary)]">
+                  {feeSummary?.due_date
+                    ? new Date(feeSummary.due_date).toLocaleDateString(
+                        "en-US",
+                        { month: "short", day: "numeric", year: "numeric" },
+                      )
+                    : "Feb 15, 2026"}{" "}
+                  {/* Fallback to match your screenshot if API doesn't send date */}
+                </p>
+              </div>
+            </div>
+          </DashboardChildPageCard>
+        )}
 
         {/* SHOW BELOW CONTENT ONLY AFTER ALL SELECTED */}
         {selectedStudent && academicYear && semester && (

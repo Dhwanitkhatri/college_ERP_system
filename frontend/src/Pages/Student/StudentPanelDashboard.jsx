@@ -16,14 +16,14 @@ const AdminPanelDashboard = () => {
         <ActionContainerDashboard title="Account & Credentials">
           <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
           <ActionButtonDashboard title="Manage Profile" />
-          <ActionButtonDashboard title="Print Fee Chalan" />
+          <Link to="PrintFeeReceiptStudent"><ActionButtonDashboard title="Print Fee Chalan" /></Link>
           {/* <ActionButtonDashboard title="View Notices" /> */}
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Academic Reports">
           <Link to="ViewAttendanceReportStudent"><ActionButtonDashboard title="Attendance Report" /></Link>
           {/* <ActionButtonDashboard title="Generate Exam Result" /> */}
-          <ActionButtonDashboard title="Examination Result" />
+          <Link to="ViewExamResultStudent"><ActionButtonDashboard title="View Exam Result" /></Link>
           {/* <ActionButtonDashboard title="View Documents" /> */}
           <Link to="GenerateHallTicketStudent"><ActionButtonDashboard title="Generate Hall Ticket" /></Link>
         </ActionContainerDashboard>
