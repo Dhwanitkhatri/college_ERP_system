@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import NavigateBackButton from "../ui/Buttons/NavigateBackButton";
 import ThemeButton from "../ui/Buttons/ThemeButton";
 import EyeIconButton from "../ui/Buttons/EyeIconButton";
+import api from "../api/axios.js";
 
 const ForgotPassword = () => {
   const {
@@ -15,29 +16,49 @@ const ForgotPassword = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [token, setToken] = useState(null);
 
   const newPassword = watch("newPassword");
 
   /* ---------------- SEND OTP ---------------- */
 
-  const handleSendOtp = (data) => {
-    console.log("OTP sent to:", data.username);
+  const handleSendOtp = async (data) => {
+    try {
+      console.log("OTP sent to:", data.username);
 
-    // API call later
-    // await api.post("/auth/send-otp", { username: data.username })
+      // API call later
+      const res = await api.post("/reset-password/send-otp", {
+        username: data.username,
+      });
 
-    setOtpSent(true);
+      setToken(res.data.token);
+      setOtpSent(true);
+
+      alert("OTP sent to your registered email");
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Failed to send OTP");
+    }
   };
 
   /* ---------------- VERIFY OTP + CHANGE PASSWORD ---------------- */
 
-  const handleResetPassword = (data) => {
-    console.log("Reset Password Data:", data);
+  const handleResetPassword = async (data) => {
+    try {
+      console.log("Reset Password Data:", data);
 
-    // API call later
-    // await api.post("/auth/reset-password", data)
+      // API call later
+      await api.post("/reset-password/verify-otp", {
+        token: token,
+        otp: data.otp,
+        newPassword: data.newPassword,
+      });
 
-    alert("Password changed successfully!");
+      alert("Password changed successfully!");
+    } catch (error) {
+      console.error(error);
+      alert(error?.response?.data?.message || "Failed to reset password");
+    }
   };
 
   return (
@@ -112,13 +133,13 @@ const ForgotPassword = () => {
                 <input
                   type="text"
                   placeholder="Enter 4 digit OTP"
-                  maxLength={4}
+                  maxLength={6}
                   className="custom-input"
                   {...register("otp", {
                     required: "OTP is required",
                     pattern: {
-                      value: /^[0-9]{4}$/,
-                      message: "OTP must be 4 digits",
+                      value: /^[0-9]{6}$/,
+                      message: "OTP must be 6 digits",
                     },
                   })}
                 />

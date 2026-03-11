@@ -33,6 +33,7 @@ import hallticketRoutes from "./src/routes/hallticketRoutes.js";
 import rankingRoutes from "./src/routes/rankingRoutes.js";
 import {apiLimiter} from "./src/middleware/rateLimiter.js";
 import printFeeRoutes from "./src/routes/printFeeRoutes.js";
+import passwordResetRoutes from "./src/routes/passwordResetRoutes.js"
 
 dotenv.config();
 const app = express();
@@ -87,6 +88,7 @@ app.use("/api/learning-materials", learningMaterialRoutes);
 app.use("/api/hall-tickets", hallticketRoutes);
 app.use("/api/rankings", rankingRoutes);
 app.use("/api/fee-receipts", printFeeRoutes);
+app.use("/reset-password",passwordResetRoutes);
 
 
 app.get("/", (req, res) => {

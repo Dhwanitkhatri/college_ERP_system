@@ -5,6 +5,7 @@ import { Exam } from "../model/Exam.js";
 import { Subject } from "../model/Subject.js";
 import { ExamTimetable } from "../model/ExamTimetable.js";
 import { sequelize } from "../config/db.js";
+import { Class } from "../model/Class.js";
 
 // ======================
 // ENTER MARKS CONTROLLER
@@ -389,6 +390,7 @@ export const bulkEnterMarks = async (req, res) => {
     }
 
     if (errors.length > 0) {
+      console.log(errors);
       await t.rollback();
       return res.status(400).json({ success: false, message: "Bulk entry failed", errors });
     }
@@ -397,7 +399,138 @@ export const bulkEnterMarks = async (req, res) => {
     return res.status(201).json({ success: true, message: "Bulk marks entered successfully", data: results });
 
   } catch (error) {
+    console.log(error);
     await t.rollback();
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const getSubjectsBySemester = async (req, res) => {
+  try {
+    const { semester } = req.params;
+    const course_id = req.user.course_id;
+
+    const subjects = await Subject.findAll({
+      where: { semester , course_id},
+      attributes: ["subject_id", "subject_name"]
+    });
+
+    res.json({
+      success: true,
+      data: subjects
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+// ==========================================
+// FETCH COMPONENTS BASED ON SUBJECT
+// ==========================================
+export const getComponentsBySubject = async (req, res) => {
+  try {
+    const { subject_id } = req.params;
+
+    const components = await SubjectComponent.findAll({
+      where: { subject_id },
+      attributes: ["component_id", "type", "max_marks"]
+    });
+
+    res.json({
+      success: true,
+      data: components
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+
+// ==========================================
+// FETCH EXAMS BY SEMESTER + ACADEMIC YEAR
+// ==========================================
+export const getExamsBySemesterYear = async (req, res) => {
+  try {
+
+    const { semester, academic_year } = req.query;
+
+    const exams = await Exam.findAll({
+      where: {
+        semester,
+        academic_year
+      },
+      attributes: ["exam_id", "name"]
+    });
+
+    res.json({
+      success: true,
+      data: exams
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+
+// ==========================================
+// FETCH STUDENTS BASED ON EXAM
+// ==========================================
+export const getStudentsByExam = async (req, res) => {
+
+  try {
+
+    const { exam_id } = req.params;
+    const course_id = req.user.course_id;
+    const exam = await Exam.findByPk(exam_id);
+
+    if (!exam) {
+      return res.status(404).json({
+        success: false,
+        message: "Exam not found"
+      });
+    }
+
+    const students = await Student.findAll({
+      attributes: ["student_id", "name"],
+      include: [
+        {
+          model: Class,
+          attributes: [],
+          where: {
+            semester: exam.semester,
+            academic_year: exam.academic_year,
+            course_id
+            
+          }
+        }
+      ]
+    });
+
+    res.json({
+      success: true,
+      data: students
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };
