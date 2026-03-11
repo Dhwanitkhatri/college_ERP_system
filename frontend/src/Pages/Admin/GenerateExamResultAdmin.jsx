@@ -16,7 +16,8 @@ export default function GenerateResult() {
   } = useForm({
     defaultValues: {
       semester: "",
-      examType: "External Exam",
+      academicYear: "",
+      examType: "",
       student: "",
     },
   });
@@ -37,10 +38,10 @@ export default function GenerateResult() {
 
     if (data.student) {
       // Individual Generation Message
-      alertMessage = `Result generated successfully for ${data.student} - ${data.semester} - ${data.examType}`;
+      alertMessage = `Result generated successfully for ${data.student} - ${data.semester} - ${data.academicYear} - ${data.examType}`;
     } else {
       // Bulk Generation Message
-      alertMessage = `Result generated successfully for entire ${data.semester} - ${data.examType}`;
+      alertMessage = `Result generated successfully for entire ${data.semester} - ${data.academicYear} - ${data.examType}`;
     }
 
     // Triggering the standard browser alert
@@ -55,6 +56,8 @@ export default function GenerateResult() {
   };
 
   // this is the dummy data for the dropdowns
+  const academicYears = ["2023-24", "2024-25", "2025-26", "2026-27"];
+
   const semesters = [
     "Semester 1",
     "Semester 2",
@@ -65,7 +68,10 @@ export default function GenerateResult() {
     "Semester 7",
     "Semester 8",
   ];
-  const examTypes = ["Internal Exam", "External Exam", "Remedial / ATKT"];
+
+  // Updated exam types strictly per your instruction
+  const examTypes = ["REGULAR", "RE-EXAM", "BACKLOG"];
+
   const students = [
     "23CI2010001 - Emily Carter",
     "23CI2010002 - John Doe",
@@ -89,7 +95,9 @@ export default function GenerateResult() {
         >
           {/* this is the semester part */}
           <div className="form-field !my-0">
-            <label className="custom-label">Semester</label>
+            <label className="custom-label">
+              Semester <span className="text-red-500">*</span>
+            </label>
             <select
               className={`custom-input bg-[var(--bg-primary)] theme-transition ${
                 errors.semester
@@ -110,9 +118,38 @@ export default function GenerateResult() {
             )}
           </div>
 
+          {/* this is the newly added academic year part */}
+          <div className="form-field !my-0">
+            <label className="custom-label">
+              Academic Year <span className="text-red-500">*</span>
+            </label>
+            <select
+              className={`custom-input bg-[var(--bg-primary)] theme-transition ${
+                errors.academicYear
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : ""
+              }`}
+              {...register("academicYear", {
+                required: "Academic Year is required",
+              })}
+            >
+              <option value="">Select academic year</option>
+              {academicYears.map((year, idx) => (
+                <option key={idx} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+            {errors.academicYear && (
+              <p className="custom-error">{errors.academicYear.message}</p>
+            )}
+          </div>
+
           {/* this is the exam type part */}
           <div className="form-field !my-0">
-            <label className="custom-label">Exam Type</label>
+            <label className="custom-label">
+              Exam Type <span className="text-red-500">*</span>
+            </label>
             <select
               className={`custom-input bg-[var(--bg-primary)] theme-transition ${
                 errors.examType
