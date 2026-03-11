@@ -156,7 +156,9 @@ const EnterExamMarksFaculty = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           {/*Semester*/}
           <div className="form-field">
-            <label className="custom-label">Semester</label>
+            <label className="custom-label">
+              Semester <span className="text-red-500">*</span>
+            </label>
             <select
               className="custom-input"
               {...register("semester", { required: "Semester is required" })}
@@ -175,17 +177,38 @@ const EnterExamMarksFaculty = () => {
               <p className="custom-error">{errors.semester.message}</p>
             )}
           </div>
-          
+
+          {/* ACADEMIC YEAR (Newly added between Semester and Subject) */}
+          <div className="form-field">
+            <label className="custom-label">
+              Academic Year <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="custom-input"
+              {...register("academic_year", {
+                required: "Academic Year is required",
+              })}
+            >
+              <option value="">Select Academic Year</option>
+              <option value="2023-24">2023-24</option>
+              <option value="2024-25">2024-25</option>
+              <option value="2025-26">2025-26</option>
+            </select>
+            {errors.academic_year && (
+              <p className="custom-error">{errors.academic_year.message}</p>
+            )}
+          </div>
+
           {/* SUBJECT */}
           <div className="form-field">
-            <label className="custom-label">Subject</label>
-
+            <label className="custom-label">
+              Subject <span className="text-red-500">*</span>
+            </label>
             <select
               className="custom-input"
               {...register("subject_id", { required: "Subject is required" })}
             >
               <option value="">Select Subject</option>
-
               {Array.isArray(subjects) &&
                 subjects.map((sub) => (
                   <option key={sub.subject_id} value={sub.subject_id}>
@@ -193,7 +216,6 @@ const EnterExamMarksFaculty = () => {
                   </option>
                 ))}
             </select>
-
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>
             )}
@@ -201,33 +223,35 @@ const EnterExamMarksFaculty = () => {
 
           {/* COMPONENT */}
           <div className="form-field">
-            <label className="custom-label">Component</label>
-
+            <label className="custom-label">
+              Component <span className="text-red-500">*</span>
+            </label>
             <select
               className="custom-input"
               {...register("component_id", { required: "Component required" })}
             >
               <option value="">Select Component</option>
-
               {components.map((c) => (
                 <option key={c.component_id} value={c.component_id}>
                   {c.type} ({c.max_marks})
                 </option>
               ))}
             </select>
-
             {errors.component_id && (
               <p className="custom-error">{errors.component_id.message}</p>
             )}
           </div>
 
-          {/* EXAM */}
+          {/* EXAM (Updated to be required) */}
           <div className="form-field">
-            <label className="custom-label">Exam (Optional)</label>
-
-            <select className="custom-input" {...register("exam_id")}>
+            <label className="custom-label">
+              Exam <span className="text-red-500">*</span>
+            </label>
+            <select
+              className="custom-input"
+              {...register("exam_id", { required: "Exam is required" })}
+            >
               <option value="">Select Exam</option>
-
               {Array.isArray(exams) &&
                 exams.map((e) => (
                   <option key={e.exam_id} value={e.exam_id}>
@@ -235,6 +259,9 @@ const EnterExamMarksFaculty = () => {
                   </option>
                 ))}
             </select>
+            {errors.exam_id && (
+              <p className="custom-error">{errors.exam_id.message}</p>
+            )}
           </div>
 
           {/* =============================
@@ -246,22 +273,17 @@ const EnterExamMarksFaculty = () => {
               <thead className="sticky-header">
                 <tr>
                   <th className="table-row-style sticky-col">Student ID</th>
-
                   <th className="table-row-style">Student Name</th>
-
                   <th className="table-row-style">Marks</th>
                 </tr>
               </thead>
-
               <tbody>
                 {students.map((student) => (
                   <tr key={student.student_id}>
                     <td className="table-row-style sticky-col">
                       {student.student_id}
                     </td>
-
                     <td className="table-row-style">{student.name}</td>
-
                     <td className="table-row-style">
                       <input
                         type="number"
@@ -282,8 +304,7 @@ const EnterExamMarksFaculty = () => {
           </div>
 
           {/* ACTION BUTTONS */}
-
-          <div className="form-actions">
+          <div className="form-actions mt-6">
             <AddButton />
             <CancelButton onClick={handleCancel} />
           </div>
@@ -299,7 +320,6 @@ const EnterExamMarksFaculty = () => {
           <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
             Marks Saved Successfully
           </h3>
-
           <p className="text-sm text-[var(--text-secondary)]">
             {result.length} records inserted successfully
           </p>
