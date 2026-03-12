@@ -33,7 +33,7 @@ export const Subject = sequelize.define("Subject",{
         type:DataTypes.INTEGER,
         allowNull:true,
         validate:{
-            min:1 ,max:6
+            min:1 ,max:8
         }
     },
     lecture_per_week:{

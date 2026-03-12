@@ -33,6 +33,18 @@ const getReceiptData = async (payment_id, course_id) => {
   });
   if (!feeStructure) throw new Error("Fee structure not found");
 
+  // Fetch ALL payments for this student and fee structure (to calculate total paid)
+  const allPayments = await FeePayment.findAll({
+    where: {
+      student_id: payment.student_id,
+      fee_structure_id: payment.fee_structure_id
+    }
+  });
+
+  const totalPaid = allPayments.reduce((sum, p) => sum + parseFloat(p.amount_paid), 0);
+  const totalFee = parseFloat(feeStructure.total_fee);
+  const balanceDue = totalFee - totalPaid > 0 ? totalFee - totalPaid : 0;
+
   // Fetch student fee (due date)
   const studentFee = await StudentFee.findOne({
     where: {
@@ -41,11 +53,12 @@ const getReceiptData = async (payment_id, course_id) => {
     }
   });
 
+  // Determine if this specific payment was late
   const isLate = studentFee?.due_date && new Date(payment.payment_date) > new Date(studentFee.due_date);
-  const lateFee = isLate ? (parseFloat(payment.amount_paid) - parseFloat(feeStructure.total_fee)) : 0;
-  const totalPaid = parseFloat(payment.amount_paid);
-  const totalFee = parseFloat(feeStructure.total_fee);
-  const balanceDue = totalFee - totalPaid > 0 ? totalFee - totalPaid : 0;
+  // Simple late fee: if the payment is late and the amount paid exceeds the total fee, treat excess as late fee
+  const lateFee = isLate && parseFloat(payment.amount_paid) > totalFee
+    ? parseFloat(payment.amount_paid) - totalFee
+    : 0;
 
   return {
     receipt_no: `RCP-${payment.id}-${payment.payment_date.replace(/-/g, '')}`,
@@ -53,7 +66,6 @@ const getReceiptData = async (payment_id, course_id) => {
     student: {
       student_id: student.student_id,
       name: student.name,
-      enrollment_no: student.enrollment_no,
       class: classData?.class_id,
       section: classData?.section,
       semester: classData?.semester,
@@ -77,6 +89,7 @@ const getReceiptData = async (payment_id, course_id) => {
       received_by: payment.received_by,
       remarks: payment.remarks
     },
+    total_paid_so_far: totalPaid,      // optional, for frontend use
     due_date: studentFee?.due_date,
     is_late: isLate,
     late_fee: lateFee,
@@ -145,6 +158,17 @@ export const getStudentReceipts = async (req, res) => {
       });
       const totalFee = feeStructure ? parseFloat(feeStructure.total_fee) : 0;
       const amountPaid = parseFloat(payment.amount_paid);
+
+      // Get all payments for this student and fee structure to compute total paid
+      const allPayments = await FeePayment.findAll({
+        where: {
+          student_id: student.student_id,
+          fee_structure_id: payment.fee_structure_id
+        }
+      });
+      const totalPaid = allPayments.reduce((sum, p) => sum + parseFloat(p.amount_paid), 0);
+      const balanceDue = totalFee - totalPaid > 0 ? totalFee - totalPaid : 0;
+
       return {
         payment_id: payment.id,
         receipt_no: `RCP-${payment.id}-${payment.payment_date.replace(/-/g, '')}`,
@@ -157,7 +181,7 @@ export const getStudentReceipts = async (req, res) => {
         } : null,
         due_date: studentFee?.due_date,
         is_late: studentFee?.due_date && new Date(payment.payment_date) > new Date(studentFee.due_date),
-        balance_due: totalFee - amountPaid > 0 ? totalFee - amountPaid : 0
+        balance_due: balanceDue
       };
     }));
 
