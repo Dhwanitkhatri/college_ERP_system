@@ -25,7 +25,7 @@ export const getMyResults = async (req, res) => {
     // fetch student with some basic details
     const student = await Student.findOne({
       where: { user_id },
-      attributes: ["student_id", "student_name", "enrollment_no", "course_id"]
+      attributes: ["student_id", "name", "course_id"]
     });
     if (!student) {
       return res
@@ -63,7 +63,7 @@ export const getMyResults = async (req, res) => {
         success: true,
         student: {
           student_id: student.student_id,
-          student_name: student.student_name,
+          student_name: student.name,
           course_id: student.course_id
         },
         data: []
@@ -150,6 +150,7 @@ export const getMyResults = async (req, res) => {
         exam_id: sr.Exam.exam_id,
         exam_name: sr.Exam.name,
         exam_type: sr.Exam.exam_type,
+        semester: sr.Exam.semester,
         academic_year: sr.Exam.academic_year || sr.academic_year,
         sgpa: sr.sgpa,
         cgpa: sr.cgpa,
@@ -170,8 +171,7 @@ export const getMyResults = async (req, res) => {
       success: true,
       student: {
         student_id: student.student_id,
-        student_name: student.student_name,
-        // enrollment_no: student.enrollment_no,
+        student_name: student.name,
         course_id: student.course_id
       },
       data: result

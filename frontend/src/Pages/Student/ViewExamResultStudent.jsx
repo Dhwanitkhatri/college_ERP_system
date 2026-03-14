@@ -3,16 +3,15 @@ import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { Printer, Download, GraduationCap, User } from "lucide-react";
+import api from "../../api/axios";
 
 export default function ViewExamResult() {
-  {
-    /* this is the state to show the result only after form submission */
-  }
-  const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [examsList, setExamsList] = useState([]); // list of exams from API
+  const [selectedExam, setSelectedExam] = useState(null); // the exam data to display
+  const [studentInfo, setStudentInfo] = useState(null); // student details from API
 
-  {
-    /* this is the react hook form part */
-  }
   const {
     register,
     handleSubmit,
@@ -21,124 +20,68 @@ export default function ViewExamResult() {
     defaultValues: {
       academicYear: "",
       semester: "",
-      examId: "",
     },
   });
 
-  {
-    /* this is the dummy data for the dropdowns (expanded as requested) */
-  }
   const academicYears = ["2023-24", "2024-25", "2025-26", "2026-27", "2027-28"];
-  const semesters = [
-    "Semester 1",
-    "Semester 2",
-    "Semester 3",
-    "Semester 4",
-    "Semester 5",
-    "Semester 6",
-    "Semester 7",
-    "Semester 8",
-  ];
-  const examIds = [
-    "Internal Exam - 1",
-    "Internal Exam - 2",
-    "External Exam - Winter",
-    "External Exam - Spring",
-    "Remedial / ATKT Exam",
-  ];
+  const semesters = Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`);
 
-  // ================= DUMMY DATA =================
-  // Ready to be replaced by API data later
-  const studentData = {
-    name: "EMILY CARTER",
-    examination: "BCA-SEMESTER-1",
-    heldIn: "MARCH-2025",
-    enrollmentNumber: "23CI2010001",
-    abcId: "261741569056",
-    courseName: "BACHELOR OF COMPUTER APPLICATIONS",
-    branchName: "BCA",
-    branchCode: "CI201",
-    date: "22/05/2025",
+  // Handle first form submit (academic year & semester)
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError("");
+    setExamsList([]);
+    setSelectedExam(null);
+    try {
+      const semesterNum = parseInt(data.semester.split(" ")[1]);
+      const res = await api.get("/api/student-results/my-results", {
+        params: {
+          academic_year: data.academicYear,
+          semester: semesterNum,
+        },
+      });
+
+      if (!res.data.success || !res.data.data.length) {
+        throw new Error("No results found for the selected period.");
+      }
+
+      // The API returns grouped by semester; we expect one semester group.
+      // Flatten exams from the first semester group.
+      const firstSemester = res.data.data[0];
+      const exams = firstSemester.exams;
+
+      setExamsList(exams);
+      setStudentInfo(res.data.student); // store student info
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const courseGrades = [
-    {
-      code: "232010241",
-      title: "SEARCH ENGINE OPTIMIZATION",
-      credits: 4,
-      grade: "A",
-    },
-    {
-      code: "232010242",
-      title: "WORDPRESS WEBSITE DEVELOPMENT",
-      credits: 3,
-      grade: "O",
-    },
-    {
-      code: "232011241",
-      title: "INDIAN KNOWLEDGE SYSTEM",
-      credits: 2,
-      grade: "O+",
-    },
-    { code: "232010343", title: "ADVANCED DBMS", credits: 2, grade: "O" },
-    {
-      code: "232010344",
-      title: "VISUAL PROGRAMMING USING C SHARP",
-      credits: 2,
-      grade: "O+",
-    },
-    {
-      code: "232010342",
-      title: "SYSTEM ANALYSIS AND MODELING",
-      credits: 3,
-      grade: "A",
-    },
-    {
-      code: "232010341",
-      title: "COMPUTER NETWORKING",
-      credits: 3,
-      grade: "B+",
-    },
-    {
-      code: "232011041",
-      title: "INTRODUCTION TO ARTIFICIAL INTELLIGENCE",
-      credits: 3,
-      grade: "C",
-    },
-  ];
-
-  const performanceData = {
-    current: {
-      totalCredits: 22,
-      earnedCredits: 22,
-      gradePoints: "182.00",
-      sgpa: "8.27",
-    },
-    cumulative: {
-      totalCredits: 93,
-      earnedCredits: 93,
-      gradePoints: "679.30",
-      cgpa: "7.30",
-    },
-    result: "Pass",
-  };
-  // ==============================================
-
-  {
-    /* this is the submit function part */
-  }
-  const onSubmit = (data) => {
-    console.log("View Exam Result Data Submitted:", data);
-    setShowResult(true);
+  // Handle exam selection from dropdown
+  const handleExamSelect = (examId) => {
+    const exam = examsList.find(ex => ex.exam_id === examId);
+    setSelectedExam(exam);
   };
 
-  {
-    /* the main designing part start from here */
-  }
+  // Helper to format exam name for display
+  const getExamDisplayName = (exam) => {
+    return `${exam.exam_name} (${exam.exam_type})`;
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    window.print(); // temporary; replace with PDF download later
+  };
+
   return (
     <DashboardChildPageTemplate
       title="View Examination Result"
-      desc="Select exam details to view your semester grade sheet"
+      desc="Select academic year and semester to view your grade sheet"
       width="max-w-7xl"
     >
       <div className="pb-20 space-y-6">
@@ -146,25 +89,17 @@ export default function ViewExamResult() {
         <DashboardChildPageCard>
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              Exam Details
+              Select Academic Year & Semester
             </h3>
           </div>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            noValidate
-            className="space-y-6"
-          >
+          <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
             <div className="flex flex-col md:flex-row gap-6">
-              {/* this is the academic year part */}
+              {/* Academic Year */}
               <div className="flex-1 form-field !my-0">
-                <label className="custom-label">
-                  Academic Year
-                </label>
+                <label className="custom-label">Academic Year</label>
                 <select
                   className={`custom-input bg-[var(--bg-primary)] theme-transition ${
-                    errors.academicYear
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                    errors.academicYear ? "border-red-500" : ""
                   }`}
                   {...register("academicYear", { required: "Required" })}
                 >
@@ -180,16 +115,12 @@ export default function ViewExamResult() {
                 )}
               </div>
 
-              {/* this is the semester part */}
+              {/* Semester */}
               <div className="flex-1 form-field !my-0">
-                <label className="custom-label">
-                  Semester 
-                </label>
+                <label className="custom-label">Semester</label>
                 <select
                   className={`custom-input bg-[var(--bg-primary)] theme-transition ${
-                    errors.semester
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                    errors.semester ? "border-red-500" : ""
                   }`}
                   {...register("semester", { required: "Required" })}
                 >
@@ -204,59 +135,66 @@ export default function ViewExamResult() {
                   <p className="custom-error">{errors.semester.message}</p>
                 )}
               </div>
-
-              {/* this is the exam ID part */}
-              <div className="flex-1 form-field !my-0">
-                <label className="custom-label">
-                  Exam ID
-                </label>
-                <select
-                  className={`custom-input bg-[var(--bg-primary)] theme-transition ${
-                    errors.examId
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }`}
-                  {...register("examId", { required: "Required" })}
-                >
-                  <option value="">Select Exam ID</option>
-                  {examIds.map((id, idx) => (
-                    <option key={idx} value={id}>
-                      {id}
-                    </option>
-                  ))}
-                </select>
-                {errors.examId && (
-                  <p className="custom-error">{errors.examId.message}</p>
-                )}
-              </div>
             </div>
 
-            {/* below is the action button of the view result */}
             <div className="mt-8">
               <button
                 type="submit"
-                className="px-6 py-2.5 rounded-md text-white dark:text-black font-medium bg-black dark:bg-white hover:opacity-90 transition-opacity"
+                disabled={loading}
+                className="px-6 py-2.5 rounded-md text-white dark:text-black font-medium bg-black dark:bg-white hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                View Result
+                {loading ? "Loading..." : "Get Exams"}
               </button>
             </div>
           </form>
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+              {error}
+            </div>
+          )}
         </DashboardChildPageCard>
 
+        {/* ================= EXAM SELECTION (if exams available) ================= */}
+        {examsList.length > 0 && !selectedExam && (
+          <DashboardChildPageCard>
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                Select an Exam to View Result
+              </h3>
+            </div>
+            <div className="space-y-2">
+              {examsList.map((exam) => (
+                <button
+                  key={exam.exam_id}
+                  onClick={() => handleExamSelect(exam.exam_id)}
+                  className="w-full text-left p-3 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <p className="font-medium text-gray-900 dark:text-gray-100">
+                    {getExamDisplayName(exam)}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    SGPA: {exam.sgpa} | Result: {exam.result_status}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </DashboardChildPageCard>
+        )}
+
         {/* ================= RESULT DISPLAY ================= */}
-        {showResult && (
+        {selectedExam && studentInfo && (
           <div className="space-y-4 animate-in fade-in duration-500">
-            {/* Action Buttons in Black & White theme */}
             <div className="flex flex-wrap items-center gap-4">
               <button
-                type="button"
+                onClick={handlePrint}
                 className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <Printer size={18} />
                 Print Marksheet
               </button>
               <button
-                type="button"
+                onClick={handleDownload}
                 className="flex items-center gap-2 px-6 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium hover:opacity-90 transition-opacity"
               >
                 <Download size={18} />
@@ -264,22 +202,15 @@ export default function ViewExamResult() {
               </button>
             </div>
 
-            {/* The Actual Grade Sheet Container */}
+            {/* Grade Sheet Container */}
             <div className="bg-white text-black p-2 overflow-x-auto shadow-sm theme-transition">
               <div className="min-w-[900px]">
-                {/* Thick Outer Border */}
                 <div className="border-[4px] border-black p-2">
-                  {/* Thin Inner Border */}
                   <div className="border border-black p-8">
                     {/* Header */}
                     <div className="flex items-center pb-4 mb-6 relative">
                       <div className="w-20 h-20 rounded-full border-[1.5px] border-black flex items-center justify-center flex-shrink-0 absolute left-0 top-0">
-                        {/* Changed icon color to black to match theme */}
-                        <GraduationCap
-                          size={40}
-                          className="text-black"
-                          strokeWidth={1.5}
-                        />
+                        <GraduationCap size={40} className="text-black" strokeWidth={1.5} />
                       </div>
                       <div className="flex-1 text-center px-24">
                         <h1 className="text-[22px] font-sans font-bold uppercase tracking-wide">
@@ -289,14 +220,11 @@ export default function ViewExamResult() {
                           Institute of Computer Applications (ICA)
                         </p>
                         <p className="text-[12px] mt-1">
-                          Technology Campus, Innovation Drive - University Road,
-                          Education City,
-                          <br /> Techville - 380015
+                          Technology Campus, Innovation Drive - University Road, Education City,
+                          Techville - 380015
                         </p>
                         <div className="inline-block mt-4 border-y border-black py-1 px-4">
-                          <h2 className="text-lg font-bold">
-                            Semester Grade Sheet
-                          </h2>
+                          <h2 className="text-lg font-bold">Semester Grade Sheet</h2>
                         </div>
                       </div>
                     </div>
@@ -305,28 +233,14 @@ export default function ViewExamResult() {
                     <table className="w-full text-[13px] border-collapse border border-black mb-6">
                       <thead>
                         <tr className="bg-gray-200">
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            COURSE NAME
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold w-1/4">
-                            BRANCH NAME
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold w-1/4">
-                            BRANCH CODE
-                          </th>
+                          <th className="border border-black py-1.5 px-2 font-bold">COURSE NAME</th>
+                          <th className="border border-black py-1.5 px-2 font-bold w-1/4">BRANCH CODE</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr className="text-center">
-                          <td className="border border-black py-1.5 px-2">
-                            {studentData.courseName}
-                          </td>
-                          <td className="border border-black py-1.5 px-2">
-                            {studentData.branchName}
-                          </td>
-                          <td className="border border-black py-1.5 px-2">
-                            {studentData.branchCode}
-                          </td>
+                          <td className="border border-black py-1.5 px-2">{studentInfo.course_id}</td>
+                          <td className="border border-black py-1.5 px-2">{studentInfo.course_id}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -335,31 +249,21 @@ export default function ViewExamResult() {
                     <div className="flex justify-between items-start mb-6">
                       <div className="text-[13px] space-y-2 uppercase">
                         <p>
-                          <span className="font-bold">NAME :</span>{" "}
-                          {studentData.name}
+                          <span className="font-bold">NAME :</span> {studentInfo.student_name}
                         </p>
                         <p>
-                          <span className="font-bold">EXAMINATION :</span>{" "}
-                          {studentData.examination}
+                          <span className="font-bold">EXAMINATION :</span> {selectedExam.exam_name} ({selectedExam.exam_type})
                         </p>
                         <p>
-                          <span className="font-bold">HELD IN :</span>{" "}
-                          {studentData.heldIn}
+                          <span className="font-bold">HELD IN :</span> {selectedExam.academic_year}
                         </p>
+                        <p>
+                          <span className="font-bold">SEMESTER :</span> {selectedExam.semester}
+                        </p>
+
                         <div className="flex gap-12">
-                          <p>
-                            <span className="font-bold">
-                              ENROLLMENT NUMBER :
-                            </span>{" "}
-                            {studentData.enrollmentNumber}
-                          </p>
-                          <p>
-                            <span className="font-bold">ABC ID :</span>{" "}
-                            {studentData.abcId}
-                          </p>
                         </div>
                       </div>
-                      {/* Photo Placeholder */}
                       <div className="w-24 h-28 border border-black bg-gray-50 flex items-center justify-center text-gray-400 flex-shrink-0">
                         <User size={48} strokeWidth={1.5} />
                       </div>
@@ -369,35 +273,19 @@ export default function ViewExamResult() {
                     <table className="w-full text-[13px] border-collapse border border-black mb-6 text-center">
                       <thead>
                         <tr className="bg-gray-200">
-                          <th className="border border-black py-1.5 px-2 font-bold w-32">
-                            Course Code
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold text-left">
-                            Course Title
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold w-24">
-                            Credits
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold w-24">
-                            Grade
-                          </th>
+                          <th className="border border-black py-1.5 px-2 font-bold w-32">Course Code</th>
+                          <th className="border border-black py-1.5 px-2 font-bold text-left">Course Title</th>
+                          <th className="border border-black py-1.5 px-2 font-bold w-24">Credits</th>
+                          <th className="border border-black py-1.5 px-2 font-bold w-24">Grade</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {courseGrades.map((course, index) => (
+                        {selectedExam.subjects.map((sub, index) => (
                           <tr key={index}>
-                            <td className="border border-black py-1 px-2">
-                              {course.code}
-                            </td>
-                            <td className="border border-black py-1 px-2 text-left">
-                              {course.title}
-                            </td>
-                            <td className="border border-black py-1 px-2">
-                              {course.credits}
-                            </td>
-                            <td className="border border-black py-1 px-2 font-semibold">
-                              {course.grade}
-                            </td>
+                            <td className="border border-black py-1 px-2">{sub.subject_id}</td>
+                            <td className="border border-black py-1 px-2 text-left">{sub.subject_name}</td>
+                            <td className="border border-black py-1 px-2">{sub.credits}</td>
+                            <td className="border border-black py-1 px-2 font-semibold">{sub.grade}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -407,78 +295,40 @@ export default function ViewExamResult() {
                     <table className="w-full text-[13px] border-collapse border-[2px] border-black mb-6 text-center">
                       <thead>
                         <tr className="bg-gray-200">
-                          <th
-                            colSpan="4"
-                            className="border border-black py-1.5 px-2 font-bold border-b-[2px]"
-                          >
+                          <th colSpan="4" className="border border-black py-1.5 px-2 font-bold border-b-[2px]">
                             Current Semester Performance
                           </th>
-                          <th
-                            colSpan="5"
-                            className="border border-black py-1.5 px-2 font-bold border-b-[2px]"
-                          >
+                          <th colSpan="5" className="border border-black py-1.5 px-2 font-bold border-b-[2px]">
                             Cumulative Performance
                           </th>
                         </tr>
                         <tr className="bg-gray-200">
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Total Credits
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Credits Earned
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Grade Points Earned
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            SGPA
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Total Credits
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Credits Earned
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Grade Points Earned
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            CGPA
-                          </th>
-                          <th className="border border-black py-1.5 px-2 font-bold">
-                            Result
-                          </th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Total Credits</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Credits Earned</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Grade Points Earned</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">SGPA</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Total Credits</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Credits Earned</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Grade Points Earned</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">CGPA</th>
+                          <th className="border border-black py-1.5 px-2 font-bold">Result</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr>
+                          <td className="border border-black py-1.5 px-2">{selectedExam.total_credits}</td>
+                          <td className="border border-black py-1.5 px-2">{selectedExam.earned_credits}</td>
                           <td className="border border-black py-1.5 px-2">
-                            {performanceData.current.totalCredits}
+                            {selectedExam.subjects.reduce((sum, s) => sum + (s.grade_point * s.credits), 0).toFixed(2)}
                           </td>
+                          <td className="border border-black py-1.5 px-2 font-bold">{selectedExam.sgpa.toFixed(2)}</td>
+                          <td className="border border-black py-1.5 px-2">{selectedExam.total_credits}</td>
+                          <td className="border border-black py-1.5 px-2">{selectedExam.earned_credits}</td>
                           <td className="border border-black py-1.5 px-2">
-                            {performanceData.current.earnedCredits}
+                            {(selectedExam.cgpa * selectedExam.total_credits).toFixed(2)}
                           </td>
-                          <td className="border border-black py-1.5 px-2">
-                            {performanceData.current.gradePoints}
-                          </td>
-                          <td className="border border-black py-1.5 px-2 font-bold">
-                            {performanceData.current.sgpa}
-                          </td>
-                          <td className="border border-black py-1.5 px-2">
-                            {performanceData.cumulative.totalCredits}
-                          </td>
-                          <td className="border border-black py-1.5 px-2">
-                            {performanceData.cumulative.earnedCredits}
-                          </td>
-                          <td className="border border-black py-1.5 px-2">
-                            {performanceData.cumulative.gradePoints}
-                          </td>
-                          <td className="border border-black py-1.5 px-2 font-bold">
-                            {performanceData.cumulative.cgpa}
-                          </td>
-                          <td className="border border-black py-1.5 px-2 font-bold uppercase">
-                            {performanceData.result}
-                          </td>
+                          <td className="border border-black py-1.5 px-2 font-bold">{selectedExam.cgpa.toFixed(2)}</td>
+                          <td className="border border-black py-1.5 px-2 font-bold uppercase">{selectedExam.result_status}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -488,12 +338,10 @@ export default function ViewExamResult() {
                       <p className="font-bold mb-1">Grade Point System:</p>
                       <div className="flex justify-between">
                         <p>
-                          O+ / O (Outstanding) = 10 | A+ (Excellent) = 9 | A
-                          (Very Good) = 8
+                          O+ / O (Outstanding) = 10 | A+ (Excellent) = 9 | A (Very Good) = 8
                         </p>
                         <p>
-                          B+ (Good) = 7 | B (Above Average) = 6 | C (Average) =
-                          5 | D (Pass) = 4 | F (Fail) = 0
+                          B+ (Good) = 7 | B (Above Average) = 6 | C (Average) = 5 | D (Pass) = 4 | F (Fail) = 0
                         </p>
                       </div>
                     </div>
@@ -501,8 +349,7 @@ export default function ViewExamResult() {
                     {/* Signatures & Footer */}
                     <div className="flex justify-between items-end text-[14px]">
                       <p>
-                        <span className="font-bold">Date :</span>{" "}
-                        {studentData.date}
+                        <span className="font-bold">Date :</span> {new Date().toLocaleDateString('en-GB')}
                       </p>
                       <div className="text-center">
                         <div className="w-32 border-b-[1.5px] border-black mb-1"></div>
@@ -511,8 +358,7 @@ export default function ViewExamResult() {
                     </div>
 
                     <p className="text-center text-[11px] mt-8 pt-4 border-t border-gray-300">
-                      This is a computer-generated grade sheet and does not
-                      require a physical signature.
+                      This is a computer-generated grade sheet and does not require a physical signature.
                     </p>
                   </div>
                 </div>

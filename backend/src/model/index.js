@@ -310,6 +310,10 @@ Subject.hasMany(ExamTimetable, {
   sourceKey: "subject_id"
 });
 
+// SubjectResult ↔ Subject
+SubjectResult.belongsTo(Subject, { foreignKey: 'subject_id', targetKey: 'subject_id' });
+Subject.hasMany(SubjectResult, { foreignKey: 'subject_id', sourceKey: 'subject_id' });
+
 
 
 
