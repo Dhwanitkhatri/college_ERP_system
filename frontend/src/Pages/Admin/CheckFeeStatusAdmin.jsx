@@ -223,45 +223,49 @@ export default function CheckFeeStatusAdmin() {
                 Payment History
               </h2>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left text-[var(--text-secondary)]">
-                  <thead className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
-                    <tr className="border-b border-[var(--border-light)]">
-                      <th className="py-3 px-4">Installment</th>
-                      <th className="py-3 px-4">Amount Paid</th>
-                      <th className="py-3 px-4">Payment Mode</th>
-                      <th className="py-3 px-4">Date</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {feeStatus.paymentHistory?.map((pay, index) => (
-                      <tr
-                        key={index}
-                        className="border-b border-[var(--border-light)] hover:bg-[var(--bg-hover)]"
-                      >
-                        <td className="py-3 px-4 text-[var(--text-secondary)]">
-                          Installment {pay.installment_no}
-                        </td>
-
-                        <td className="py-3 px-4 text-[var(--text-secondary)]">
-                          ₹{Number(pay.amount_paid).toLocaleString("en-IN")}
-                        </td>
-
-                        <td className="py-3 px-4 text-[var(--text-secondary)]">
-                          {pay.payment_mode}
-                        </td>
-
-                        <td className="py-3 px-4 text-[var(--text-secondary)]">
-                          {new Date(pay.payment_date).toLocaleDateString(
-                            "en-IN",
-                          )}
-                        </td>
+              {feeStatus.paymentHistory?.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left text-[var(--text-secondary)]">
+                    <thead className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">
+                      <tr className="border-b border-[var(--border-light)]">
+                        <th className="py-3 px-4">Installment</th>
+                        <th className="py-3 px-4">Amount Paid</th>
+                        <th className="py-3 px-4">Payment Mode</th>
+                        <th className="py-3 px-4">Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+
+                    <tbody>
+                      {feeStatus.paymentHistory.map((pay, index) => (
+                        <tr
+                          key={index}
+                          className="border-b border-[var(--border-light)] hover:bg-[var(--bg-hover)]"
+                        >
+                          <td className="py-3 px-4">
+                            Installment {pay.installment_no}
+                          </td>
+
+                          <td className="py-3 px-4">
+                            ₹{Number(pay.amount_paid).toLocaleString("en-IN")}
+                          </td>
+
+                          <td className="py-3 px-4">{pay.payment_mode}</td>
+
+                          <td className="py-3 px-4">
+                            {new Date(pay.payment_date).toLocaleDateString(
+                              "en-IN",
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-[var(--text-muted)]">
+                  No payment history found
+                </div>
+              )}
             </DashboardChildPageCard>
           </>
         )}
