@@ -1,14 +1,12 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
-import { useState, useEffect } from "react";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { FileText } from "lucide-react";
 import api from "../../api/axios.js";
+import { generatePDF } from "../../utils/pdfGenerator";
 
 const DatewiseReportAdmin = () => {
- 
-
   const {
     register,
     handleSubmit,
@@ -17,7 +15,7 @@ const DatewiseReportAdmin = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      class: "", //this means select class will have default value of empty placeholder
+      class: "",
       subject: "",
       month: "",
       student: "",
@@ -38,10 +36,12 @@ const DatewiseReportAdmin = () => {
     "November",
     "December",
   ];
+
   const getMonthName = (monthNumber) => {
     if (!monthNumber) return "";
     return monthsArray[monthNumber - 1];
   };
+
   const months = monthsArray.map((name, index) => ({
     name,
     number: index + 1,
@@ -50,25 +50,27 @@ const DatewiseReportAdmin = () => {
   const [classes, setClasses] = useState([]);
   const [subjectsByClass, setSubjectsByClass] = useState([]);
   const [studentsByClassAndSubject, setStudentsByClassAndSubject] = useState(
-    [],
+    []
   );
   const [reportData, setReportData] = useState([]);
+  const [isReportGenerated, setIsReportGenerated] = useState(false);
 
-  //this api is called for to get classes for datewise report
+  const reportContainerRef = useRef(null);
+
+  // Fetch classes for datewise report
   useEffect(() => {
-    // Fetch classes for datewise report
     api
       .get("api/reports/student/classes-for-datewise-report")
       .then((res) => setClasses(res.data.data))
       .catch((err) => console.error(err.response?.data || err.message));
   }, []);
-  const selectedClass = watch("class"); //this will store the selected class of dropdown
 
+  const selectedClass = watch("class");
   const [class_id, semester] = selectedClass
     ? selectedClass.split("|")
     : [null, null];
 
-  // this api is called to get subjects and students based on class and semester
+  // Fetch subjects and students for selected class/semester
   useEffect(() => {
     if (!selectedClass) return;
 
@@ -81,29 +83,26 @@ const DatewiseReportAdmin = () => {
         setStudentsByClassAndSubject(res.data.students);
       })
       .catch((err) => console.error(err.response?.data || err.message));
-  }, [selectedClass]);
+  }, [selectedClass, class_id, semester]);
 
-  const selectedSubject = watch("subject"); // this will watch the dropdown's selected subject
-
+  const selectedSubject = watch("subject");
   const selectedMonth = watch("month");
-
   const selectedStudent = watch("student");
 
   useEffect(() => {
     setValue("month", "");
     setValue("student", "");
-  }, [selectedClass]);
+  }, [selectedClass, setValue]);
 
   useEffect(() => {
     setValue("month", "");
     setValue("student", "");
-  }, [selectedSubject]);
+  }, [selectedSubject, setValue]);
 
   useEffect(() => {
     setValue("student", "");
-  }, [selectedMonth]);
-  const [isReportGenerated, setIsReportGenerated] = useState(false);
-  //onsubmit kaam kaaj
+  }, [selectedMonth, setValue]);
+
   const onSubmit = (data) => {
     console.log("Generating report with data:", data);
 
@@ -126,6 +125,48 @@ const DatewiseReportAdmin = () => {
       .catch((err) => console.error(err.response?.data || err.message));
   };
 
+  const handleDownload = async () => {
+    const originalContainer = reportContainerRef.current;
+    if (!originalContainer) return;
+
+    // Clone the whole report so we can change styles safely for PDF only
+    const cloneWrapper = document.createElement("div");
+    cloneWrapper.style.position = "fixed";
+    cloneWrapper.style.left = "-9999px";
+    cloneWrapper.style.top = "0";
+    cloneWrapper.style.backgroundColor = "#ffffff";
+    cloneWrapper.style.zIndex = "-1";
+
+    const clonedReport = originalContainer.cloneNode(true);
+
+    // Remove scroll constraints in the clone so all rows render for html2canvas
+    const clonedTableWrapper = clonedReport.querySelector(".table-wrapper");
+    if (clonedTableWrapper) {
+      clonedTableWrapper.style.maxHeight = "none";
+      clonedTableWrapper.style.overflowY = "visible";
+      clonedTableWrapper.style.overflowX = "visible";
+      clonedTableWrapper.style.width = "auto";
+    }
+
+    cloneWrapper.appendChild(clonedReport);
+    document.body.appendChild(cloneWrapper);
+
+    await generatePDF(
+      cloneWrapper,
+      `datewise_report_${selectedStudent || "student"}_${
+        selectedSubject || "subject"
+      }_${selectedMonth || "month"}.pdf`,
+      {
+        scale: 1.5,
+        orientation: "portrait", // summary + table are vertical; change to 'landscape' if you prefer
+        fitToWidth: true,
+        imageType: "image/jpeg",
+        imageQuality: 0.8,
+      }
+    );
+
+    document.body.removeChild(cloneWrapper);
+  };
 
   return (
     <DashboardChildPageTemplate
@@ -134,13 +175,14 @@ const DatewiseReportAdmin = () => {
       width="max-w-6xl"
     >
       <div className="cardContainer grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* LEFT SIDE FORM */}
         <div className="containerLeft lg:col-span-4">
           <form
             className="datewiseReportForm"
             onSubmit={handleSubmit(onSubmit)}
           >
             <DashboardChildPageCard>
-              {/*Select Class Field ahiya chhe */}
+              {/*Select Class Field*/}
               <div className="form-field selectClass">
                 <label className="selectClassLabel custom-label">
                   Select Class
@@ -155,25 +197,21 @@ const DatewiseReportAdmin = () => {
                   <option value="" disabled>
                     Select a Class
                   </option>
-                  {classes.map(
-                    (
-                      cls, //<--- class mapping ahiya karvi
-                    ) => (
-                      <option
-                        key={`${cls.id}|${cls.semester}`}
-                        value={`${cls.id}|${cls.semester}`}
-                      >
-                        {cls.class_id} semester {cls.semester}
-                      </option>
-                    ),
-                  )}
+                  {classes.map((cls) => (
+                    <option
+                      key={`${cls.id}|${cls.semester}`}
+                      value={`${cls.id}|${cls.semester}`}
+                    >
+                      {cls.class_id} semester {cls.semester}
+                    </option>
+                  ))}
                 </select>
                 {errors.class && (
                   <p className="custom-error">{errors.class.message}</p>
                 )}
               </div>
 
-              {/*Select subject field ahiya chhe*/}
+              {/*Select subject field*/}
               <div className="form-field selectSubject">
                 <label className="custom-label selectSubjectLabel">
                   Select Subject
@@ -189,22 +227,18 @@ const DatewiseReportAdmin = () => {
                   <option value="" disabled>
                     Select a Subject
                   </option>
-                  {subjectsByClass.map(
-                    (
-                      sub, //<--- ahiya subject list map karvi
-                    ) => (
-                      <option key={sub.subject_id} value={sub.subject_id}>
-                        {sub.subject_name}
-                      </option>
-                    ),
-                  )}
+                  {subjectsByClass.map((sub) => (
+                    <option key={sub.subject_id} value={sub.subject_id}>
+                      {sub.subject_name}
+                    </option>
+                  ))}
                 </select>
                 {errors.subject && (
                   <p className="custom-error">{errors.subject.message}</p>
                 )}
               </div>
 
-              {/* Select Month field ahiya chhe */}
+              {/* Select Month field */}
               <div className="form-field selectMonth">
                 <label className="custom-label selectMonthLabel">
                   Select Month
@@ -234,7 +268,7 @@ const DatewiseReportAdmin = () => {
                 )}
               </div>
 
-              {/*select student field ahiya chhe*/}
+              {/*select student field*/}
               <div className="form-field selectStudent">
                 <label className="custom-label selectStudentLabel">
                   Select Student
@@ -284,23 +318,30 @@ const DatewiseReportAdmin = () => {
           </form>
         </div>
 
-        {/*report part here */}
+        {/* RIGHT SIDE REPORT */}
         <div className="containerRight grid lg:col-span-8 gap-6">
           {!isReportGenerated ? (
-            /*No Report Generated */
             <DashboardChildPageCard>
               <div className="flex flex-col items-center justify-center h-64 text-center gap-2">
-                {/* Dynamic Icon Color */}
                 <FileText size={40} className="text-[var(--text-muted)]" />
-
-                {/* Dynamic Text Color */}
                 <p className="font-semibold text-[var(--text-secondary)]">
                   No Report Generated
                 </p>
               </div>
             </DashboardChildPageCard>
           ) : (
-            <>
+            <div ref={reportContainerRef} className="space-y-4">
+              {/* Download button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={handleDownload}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+                >
+                  <FileText size={16} />
+                  Download PDF
+                </button>
+              </div>
+
               {/* Report Summary */}
               <DashboardChildPageCard>
                 <div className="summaryReportDiv rounded-xl p-1 flex flex-col gap-y-6">
@@ -404,7 +445,7 @@ const DatewiseReportAdmin = () => {
                   }}
                 >
                   {/* Scroll container */}
-                  <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+                  <div className="table-wrapper overflow-x-auto max-h-[600px] overflow-y-auto">
                     <table className="w-full border-collapse">
                       {/* Table Head */}
                       <thead
@@ -474,8 +515,8 @@ const DatewiseReportAdmin = () => {
                                   style={{
                                     backgroundColor:
                                       record.status === "Present"
-                                        ? "rgba(34,197,94,0.15)" // green color
-                                        : "rgba(239,68,68,0.15)", // red color
+                                        ? "rgba(34,197,94,0.15)"
+                                        : "rgba(239,68,68,0.15)",
                                     color:
                                       record.status === "Present"
                                         ? "#16a34a"
@@ -486,14 +527,14 @@ const DatewiseReportAdmin = () => {
                                 </span>
                               </td>
                             </tr>
-                          ),
+                          )
                         )}
                       </tbody>
                     </table>
                   </div>
                 </div>
               </DashboardChildPageCard>
-            </>
+            </div>
           )}
         </div>
       </div>

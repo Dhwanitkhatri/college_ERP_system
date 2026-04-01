@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
 import { FileText } from "lucide-react";
 import api from "../../api/axios.js";
+import { generatePDF } from "../../utils/pdfGenerator";
 
 const ClasswiseReportAdmin = () => {
   const {
@@ -44,8 +45,8 @@ const ClasswiseReportAdmin = () => {
   const [subjectsByClass, setSubjectsByClass] = useState([]);
   const [reportData, setReportData] = useState([]);
   const [isReportGenerated, setIsReportGenerated] = useState(false);
+  const reportContainerRef = useRef(null);
 
-  // this api is called for to get classes for classwise report
   useEffect(() => {
     api
       .get("api/reports/student/classes-for-datewise-report")
@@ -60,10 +61,8 @@ const ClasswiseReportAdmin = () => {
     ? selectedClass.split("|")
     : [null, null];
 
-  // this api is called to get subjects based on class & semester
   useEffect(() => {
     if (!selectedClass) return;
-
     api
       .get("/api/reports/student/subjects-and-students-for-datewise-report", {
         params: { class_id, semester },
@@ -72,21 +71,18 @@ const ClasswiseReportAdmin = () => {
         setSubjectsByClass(res.data.subjects);
       })
       .catch((err) => console.error(err.response?.data || err.message));
-  }, [selectedClass]);
+  }, [selectedClass, class_id, semester]);
 
   useEffect(() => {
     setValue("subject", "");
     setValue("month", "");
-  }, [selectedClass]);
+  }, [selectedClass, setValue]);
 
   useEffect(() => {
     setValue("month", "");
-  }, [selectedSubject]);
+  }, [selectedSubject, setValue]);
 
-  // onsubmit kaam kaaj
   const onSubmit = (data) => {
-    console.log("Generating classwise report with data:", data);
-
     api
       .get("api/reports/student/class-wise-report", {
         params: {
@@ -102,9 +98,51 @@ const ClasswiseReportAdmin = () => {
       .catch((err) => {
         console.error(
           "Error generating report:",
-          err.response?.data || err.message,
+          err.response?.data || err.message
         );
       });
+  };
+
+  const handleDownload = async () => {
+    const originalContainer = reportContainerRef.current;
+    if (!originalContainer) return;
+
+    // Clone the whole report so we can safely change styles for PDF only
+    const cloneWrapper = document.createElement("div");
+    cloneWrapper.style.position = "fixed";
+    cloneWrapper.style.left = "-9999px";
+    cloneWrapper.style.top = "0";
+    cloneWrapper.style.backgroundColor = "#ffffff";
+    cloneWrapper.style.zIndex = "-1";
+
+    const clonedReport = originalContainer.cloneNode(true);
+
+    // In the clone, remove scroll constraints so all rows are rendered
+    const clonedTableWrapper = clonedReport.querySelector(".table-wrapper");
+    if (clonedTableWrapper) {
+      clonedTableWrapper.style.maxHeight = "none";
+      clonedTableWrapper.style.overflowY = "visible";
+      clonedTableWrapper.style.overflowX = "visible";
+      clonedTableWrapper.style.width = "auto";
+    }
+
+    cloneWrapper.appendChild(clonedReport);
+    document.body.appendChild(cloneWrapper);
+
+    // Generate PDF from the off‑screen, fully expanded clone
+    await generatePDF(
+      cloneWrapper,
+      `classwise_report_${class_id}_${selectedSubject}_${watch("month")}.pdf`,
+      {
+        scale: 1.5,
+        orientation: "landscape",
+        fitToWidth: true,
+        imageType: "image/jpeg",
+        imageQuality: 0.8,
+      }
+    );
+
+    document.body.removeChild(cloneWrapper);
   };
 
   return (
@@ -118,7 +156,6 @@ const ClasswiseReportAdmin = () => {
         <div className="containerLeft lg:col-span-4">
           <form onSubmit={handleSubmit(onSubmit)}>
             <DashboardChildPageCard>
-              {/* Select Class */}
               <div className="form-field selectClass">
                 <label className="custom-label">Select Class</label>
                 <select
@@ -143,7 +180,6 @@ const ClasswiseReportAdmin = () => {
                 )}
               </div>
 
-              {/* Select Subject */}
               <div className="form-field selectSubject">
                 <label className="custom-label">Select Subject</label>
                 <select
@@ -168,16 +204,13 @@ const ClasswiseReportAdmin = () => {
                 )}
               </div>
 
-              {/* Select Month */}
               <div className="form-field selectMonth">
                 <label className="custom-label">Select Month</label>
                 <select
                   className="custom-input"
                   defaultValue=""
                   disabled={!selectedSubject}
-                  {...register("month", {
-                    required: "Please select month",
-                  })}
+                  {...register("month", { required: "Please select month" })}
                 >
                   <option value="" disabled>
                     Select Month
@@ -193,7 +226,6 @@ const ClasswiseReportAdmin = () => {
                 )}
               </div>
 
-              {/* Generate Report Button */}
               <button
                 type="submit"
                 className="generateReportButton bg-[var(--Submit-Btn-General)] w-full p-2 rounded-md"
@@ -212,87 +244,90 @@ const ClasswiseReportAdmin = () => {
           {!isReportGenerated ? (
             <DashboardChildPageCard>
               <div className="flex flex-col items-center justify-center h-64 text-center gap-2">
-                {/* Dynamic Icon Color */}
                 <FileText size={40} className="text-[var(--text-muted)]" />
-
-                {/* Dynamic Text Color */}
                 <p className="font-semibold text-[var(--text-secondary)]">
                   No Report Generated
                 </p>
               </div>
             </DashboardChildPageCard>
           ) : (
-            <DashboardChildPageCard>
-              {/* Classwise Attendance Table */}
-              <div className="table-wrapper max-h-[600px] overflow-y-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="table-row-style sticky-header">Sr. No</th>
-
-                      {/* ✅ Sticky Enrollment Column */}
-                      <th className="table-row-style sticky-header sticky-col">
-                        Enrollment
-                      </th>
-
-                      <th className="table-row-style sticky-header">
-                        Student Name
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Total Present
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Total Absent
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Total Lectures
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Attendance %
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {reportData.map((student, index) => (
-                      <tr
-                        key={student.student_id}
-                        className="hover:bg-[var(--bg-hover)] transition"
-                      >
-                        <td className="text-center table-row-style">
-                          {index + 1}
-                        </td>
-
-                        {/* Sticky Enrollment Cell */}
-                        <td className="text-center table-row-style sticky-col">
-                          {student.student_id}
-                        </td>
-
-                        <td className="text-center table-row-style">
-                          {student.name}
-                        </td>
-
-                        <td className="text-center table-row-style">
-                          {student.total_attendance.total_present}
-                        </td>
-
-                        <td className="text-center table-row-style">
-                          {student.total_attendance.total_absent}
-                        </td>
-
-                        <td className="text-center table-row-style">
-                          {student.total_attendance.classes_conducted}
-                        </td>
-
-                        <td className="text-center table-row-style">
-                          {student.total_attendance.attendance_percentage}%
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <button
+                  onClick={handleDownload}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+                >
+                  <FileText size={16} />
+                  Download PDF
+                </button>
               </div>
-            </DashboardChildPageCard>
+              <div ref={reportContainerRef}>
+                <DashboardChildPageCard>
+                  <div className="table-wrapper max-h-[600px] overflow-y-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr>
+                          <th className="table-row-style sticky-header">
+                            Sr. No
+                          </th>
+                          <th className="table-row-style sticky-header sticky-col">
+                            Enrollment
+                          </th>
+                          <th className="table-row-style sticky-header">
+                            Student Name
+                          </th>
+                          <th className="table-row-style sticky-header">
+                            Total Present
+                          </th>
+                          <th className="table-row-style sticky-header">
+                            Total Absent
+                          </th>
+                          <th className="table-row-style sticky-header">
+                            Total Lectures
+                          </th>
+                          <th className="table-row-style sticky-header">
+                            Attendance %
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {reportData.map((student, index) => (
+                          <tr
+                            key={student.student_id}
+                            className="hover:bg-[var(--bg-hover)] transition"
+                          >
+                            <td className="text-center table-row-style">
+                              {index + 1}
+                            </td>
+                            <td className="text-center table-row-style sticky-col">
+                              {student.student_id}
+                            </td>
+                            <td className="text-center table-row-style">
+                              {student.name}
+                            </td>
+                            <td className="text-center table-row-style">
+                              {student.total_attendance.total_present}
+                            </td>
+                            <td className="text-center table-row-style">
+                              {student.total_attendance.total_absent}
+                            </td>
+                            <td className="text-center table-row-style">
+                              {student.total_attendance.classes_conducted}
+                            </td>
+                            <td className="text-center table-row-style">
+                              {
+                                student.total_attendance
+                                  .attendance_percentage
+                              }
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </DashboardChildPageCard>
+              </div>
+            </div>
           )}
         </div>
       </div>

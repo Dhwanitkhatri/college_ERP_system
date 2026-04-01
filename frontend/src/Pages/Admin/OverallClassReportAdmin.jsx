@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
 import { FileText } from "lucide-react";
 import api from "../../api/axios.js";
+import { generatePDF } from "../../utils/pdfGenerator";
 
 const OverallClassReportAdmin = () => {
- 
-
   const {
     register,
     handleSubmit,
@@ -46,6 +45,8 @@ const OverallClassReportAdmin = () => {
   const [students, setStudents] = useState([]); // report data
   const [isReportGenerated, setIsReportGenerated] = useState(false);
 
+  const reportContainerRef = useRef(null);
+
   // fetch classes
   useEffect(() => {
     api
@@ -63,7 +64,7 @@ const OverallClassReportAdmin = () => {
 
   useEffect(() => {
     setValue("month", "");
-  }, [selectedClass]);
+  }, [selectedClass, setValue]);
 
   // submit handler
   const onSubmit = (data) => {
@@ -71,7 +72,6 @@ const OverallClassReportAdmin = () => {
 
     api
       .get("api/reports/student/overall-class-wise", {
-      
         params: {
           class_id,
           semester,
@@ -86,9 +86,52 @@ const OverallClassReportAdmin = () => {
       .catch((err) =>
         console.error(
           "Error generating report:",
-          err.response?.data || err.message,
-        ),
+          err.response?.data || err.message
+        )
       );
+  };
+
+  const handleDownload = async () => {
+    const originalContainer = reportContainerRef.current;
+    if (!originalContainer) return;
+
+    // Clone the report so we can safely change styles just for PDF
+    const cloneWrapper = document.createElement("div");
+    cloneWrapper.style.position = "fixed";
+    cloneWrapper.style.left = "-9999px";
+    cloneWrapper.style.top = "0";
+    cloneWrapper.style.backgroundColor = "#ffffff";
+    cloneWrapper.style.zIndex = "-1";
+
+    const clonedReport = originalContainer.cloneNode(true);
+
+    // In the clone, remove scroll constraints so all rows render for html2canvas
+    const clonedTableWrapper = clonedReport.querySelector(".table-wrapper");
+    if (clonedTableWrapper) {
+      clonedTableWrapper.style.maxHeight = "none";
+      clonedTableWrapper.style.overflowY = "visible";
+      clonedTableWrapper.style.overflowX = "visible";
+      clonedTableWrapper.style.width = "auto";
+    }
+
+    cloneWrapper.appendChild(clonedReport);
+    document.body.appendChild(cloneWrapper);
+
+    await generatePDF(
+      cloneWrapper,
+      `overall_class_report_${class_id || "class"}_${
+        selectedMonth || "month"
+      }.pdf`,
+      {
+        scale: 1.5,
+        orientation: "landscape", // many subject columns → landscape
+        fitToWidth: true,
+        imageType: "image/jpeg",
+        imageQuality: 0.8,
+      }
+    );
+
+    document.body.removeChild(cloneWrapper);
   };
 
   return (
@@ -178,84 +221,100 @@ const OverallClassReportAdmin = () => {
               </div>
             </DashboardChildPageCard>
           ) : (
-            <DashboardChildPageCard>
-              <div className="table-wrapper max-h-[600px] overflow-y-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr>
-                      <th className="table-row-style sticky-header">Sr. No</th>
+            <div ref={reportContainerRef} className="space-y-4">
+              {/* Download button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={handleDownload}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+                >
+                  <FileText size={16} />
+                  Download PDF
+                </button>
+              </div>
 
-                      {/* Sticky Enrollment Column */}
-                      <th className="table-row-style sticky-header sticky-col">
-                        Enrollment
-                      </th>
+              <DashboardChildPageCard>
+                <div className="table-wrapper max-h-[600px] overflow-y-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr>
+                        <th className="table-row-style sticky-header">Sr. No</th>
 
-                      <th className="table-row-style sticky-header">Name</th>
-
-                      {/* subject column ni mapping */}
-                      {subjects.map((sub) => (
-                        <th
-                          key={sub.subject_id}
-                          className="table-row-style sticky-header"
-                        >
-                          {sub.subject_name}
+                        {/* Sticky Enrollment Column */}
+                        <th className="table-row-style sticky-header sticky-col">
+                          Enrollment
                         </th>
-                      ))}
 
-                      <th className="table-row-style sticky-header">
-                        Total Absent
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Total Present
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Total lectures
-                      </th>
-                      <th className="table-row-style sticky-header">
-                        Attendance %
-                      </th>
-                    </tr>
-                  </thead>
+                        <th className="table-row-style sticky-header">Name</th>
 
-                  <tbody>
-                    {students.map((stu, index) => (
-                      <tr
-                        key={stu.student_id}
-                        className="hover:bg-[var(--bg-hover)] transition"
-                      >
-                        <td className="table-row-style">{index + 1}</td>
+                        {/* subject column ni mapping */}
+                        {subjects.map((sub) => (
+                          <th
+                            key={sub.subject_id}
+                            className="table-row-style sticky-header"
+                          >
+                            {sub.subject_name}
+                          </th>
+                        ))}
 
-                        <td className="table-row-style sticky-col">
-                          {stu.student_id}
-                        </td>
+                        <th className="table-row-style sticky-header">
+                          Total Absent
+                        </th>
+                        <th className="table-row-style sticky-header">
+                          Total Present
+                        </th>
+                        <th className="table-row-style sticky-header">
+                          Total lectures
+                        </th>
+                        <th className="table-row-style sticky-header">
+                          Attendance %
+                        </th>
+                      </tr>
+                    </thead>
 
-                        <td className="table-row-style">{stu.name}</td>
+                    <tbody>
+                      {students.map((stu, index) => (
+                        <tr
+                          key={stu.student_id}
+                          className="hover:bg-[var(--bg-hover)] transition"
+                        >
+                          <td className="table-row-style">{index + 1}</td>
 
-                        {/* subject data mapping */}
-                        {stu.subject_wise.map((sub) => {
-                          return (
+                          <td className="table-row-style sticky-col">
+                            {stu.student_id}
+                          </td>
+
+                          <td className="table-row-style">{stu.name}</td>
+
+                          {/* subject data mapping */}
+                          {stu.subject_wise.map((sub) => (
                             <td
                               key={sub.subject_id}
                               className="table-row-style"
                             >
                               {sub.present}/{sub.total_classes}
                             </td>
-                          );
-                        })}
+                          ))}
 
-                        <td className="table-row-style">{stu.absent}</td>
-                        <td className="table-row-style">{stu.present}</td>
-                        <td className="table-row-style">{stu.total_classes}</td>
-                        <td className="table-row-style">
-                          {((stu.present / stu.total_classes) * 100).toFixed(2)}
-                          %
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </DashboardChildPageCard>
+                          <td className="table-row-style">{stu.absent}</td>
+                          <td className="table-row-style">{stu.present}</td>
+                          <td className="table-row-style">
+                            {stu.total_classes}
+                          </td>
+                          <td className="table-row-style">
+                            {(
+                              (stu.present / stu.total_classes) *
+                              100
+                            ).toFixed(2)}
+                            %
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </DashboardChildPageCard>
+            </div>
           )}
         </div>
       </div>
