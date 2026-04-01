@@ -66,6 +66,8 @@ import UpdateSessionPlanningFaculty from "./Pages/Faculty/UpdateSessionPlanningF
 import ForgotPassword from "./Pages/ForgotPassword";
 import ViewExamResultStudent from "./Pages/Student/ViewExamResultStudent";
 import PrintFeeReceiptStudent from "./Pages/Student/PrintFeeReceiptStudent";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import Unauthorized from "./Pages/Unauthorized";
 
 const router = createBrowserRouter([
   {
@@ -82,7 +84,11 @@ const router = createBrowserRouter([
   },
   {
     path: "admin/Dashboard", //Temporary Route
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute allowedRole="Admin">
+        <Dashboard />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true, //default admin dash page
@@ -252,7 +258,11 @@ const router = createBrowserRouter([
   },
   {
     path: "faculty/dashboard",
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute allowedRole="Faculty">
+        <Dashboard />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -338,7 +348,11 @@ const router = createBrowserRouter([
   },
   {
     path: "student/dashboard",
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute allowedRole="Student">
+        <Dashboard />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -421,6 +435,10 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <PageNotFound />,
+  },
+  {
+    path: "/unauthorized",
+    element: <Unauthorized />,
   },
 ]);
 function App() {

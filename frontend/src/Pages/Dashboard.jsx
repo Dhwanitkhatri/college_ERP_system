@@ -9,7 +9,7 @@ import api from "../api/axios.js";
 import { useOutletContext } from "react-router-dom";
 import { set } from "react-hook-form";
 
-const Dashboard =  ({ children }) => {
+const Dashboard = ({ children }) => {
   const [dashboardData, setDashboardData] = useState(null);
   const { sidebarOpen } = useSidebar();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -17,14 +17,12 @@ const Dashboard =  ({ children }) => {
   function handleSidebarLogout() {
     setShowLogoutModal(true);
   }
-   useEffect(() => {
-    
-
+  useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const res = await api.get("/api/dashboard");
         console.log("Dashboard Data:", res.data);
-        console.log(res.data.role)
+        console.log(res.data.role);
         setDashboardData(res.data);
         setRole(res.data.role);
       } catch (err) {
@@ -44,10 +42,13 @@ const Dashboard =  ({ children }) => {
             : "h-screen flex flex-col"
         }
       >
-        <NavbarDashboard userRole={dashboardData?.role} userName={dashboardData?.data?.name}/>
+        <NavbarDashboard
+          userRole={dashboardData?.role}
+          userName={dashboardData?.data?.name}
+        />
 
         <div className="flex flex-1 overflow-hidden">
-          <SideBarDashboard onLogoutClick={handleSidebarLogout} role={role}/>
+          <SideBarDashboard onLogoutClick={handleSidebarLogout} role={role} />
 
           <main
             className={`flex-1 h-full overflow-hidden transition-all duration-300`}
@@ -75,9 +76,15 @@ const Dashboard =  ({ children }) => {
 
               <button
                 className="px-4 py-2 rounded-lg bg-red-600 text-white"
-                onClick={() => {
-                  sessionStorage.clear();
-                  window.location.href = "/LoginPage";
+                onClick={async () => {
+                  // Call logout API
+                  try {
+                    await api.post("/api/auth/logout");
+                    localStorage.clear();
+                    window.location.href = "/LoginPage";
+                  } catch (error) {
+                    console.error("Logout Error:", error);
+                  }
                 }}
               >
                 Yes, Logout

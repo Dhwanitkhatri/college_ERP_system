@@ -4,7 +4,7 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "light"
+    sessionStorage.getItem("theme") || "light"
   );
 
   // Apply theme to <html>
@@ -17,7 +17,7 @@ export function ThemeProvider({ children }) {
       root.classList.remove("dark");
     }
 
-    localStorage.setItem("theme", theme);
+    sessionStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () =>
