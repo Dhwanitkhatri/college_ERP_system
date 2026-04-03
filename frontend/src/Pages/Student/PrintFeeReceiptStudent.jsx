@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
 import api from "../../api/axios";
+import { generatePDF } from "../../utils/pdfGenerator";
 
 const PrintFeeReceiptStudent = () => {
   const {
@@ -18,14 +19,22 @@ const PrintFeeReceiptStudent = () => {
   const [receiptsList, setReceiptsList] = useState([]);
   // Stores the full details of the currently selected receipt
   const [selectedReceipt, setSelectedReceipt] = useState(null);
-  // ID of the selected receipt (for download)
+  // ID of the selected receipt (still useful for tracking, but not for PDF API)
   const [selectedPaymentId, setSelectedPaymentId] = useState(null);
   // Flag to show receipt details
   const [showReceipt, setShowReceipt] = useState(false);
 
+  // Ref to the receipt area we want to export to PDF
+  const receiptRef = useRef(null);
+
   // Helper to format currency
   const formatCurrency = (amount) => {
-    return "₹" + Number(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return (
+      "₹" +
+      Number(amount)
+        .toFixed(2)
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    );
   };
 
   // Handle form submit: fetch list of receipts
@@ -48,8 +57,6 @@ const PrintFeeReceiptStudent = () => {
       }
 
       setReceiptsList(listRes.data.data);
-      // Automatically select the first receipt? Or wait for user choice.
-      // Let's not auto-select; require user to pick.
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -64,7 +71,9 @@ const PrintFeeReceiptStudent = () => {
     try {
       const detailRes = await api.get(`/api/fee-receipts/${paymentId}`);
       if (!detailRes.data.success) {
-        throw new Error(detailRes.data.message || "Failed to fetch receipt details");
+        throw new Error(
+          detailRes.data.message || "Failed to fetch receipt details"
+        );
       }
       const receipt = detailRes.data.data;
 
@@ -115,6 +124,42 @@ const PrintFeeReceiptStudent = () => {
     window.print();
   };
 
+  // NEW: client‑side PDF download using html2canvas + jsPDF
+  const handleDownloadPdf = async () => {
+    if (!receiptRef.current || !selectedReceipt) return;
+
+    const original = receiptRef.current;
+
+    // Clone the receipt so we can tweak styles if needed without affecting UI
+    const cloneWrapper = document.createElement("div");
+    cloneWrapper.style.position = "fixed";
+    cloneWrapper.style.left = "-9999px";
+    cloneWrapper.style.top = "0";
+    cloneWrapper.style.backgroundColor = "#ffffff";
+    cloneWrapper.style.zIndex = "-1";
+
+    const clonedReceipt = original.cloneNode(true);
+    cloneWrapper.appendChild(clonedReceipt);
+    document.body.appendChild(cloneWrapper);
+
+    await generatePDF(
+      cloneWrapper,
+      `fee_receipt_${selectedReceipt.student.studentId || "student"}_${
+        selectedReceipt.receiptNo || "receipt"
+      }.pdf`,
+      {
+        scale: 2.0,          // good balance of sharpness vs size
+        orientation: "portrait",
+        fitToWidth: true,
+        imageType: "image/jpeg",
+        imageQuality: 0.8,
+        singlePage: true,    // receipt should easily fit on one page
+      }
+    );
+
+    document.body.removeChild(cloneWrapper);
+  };
+
   return (
     <DashboardChildPageTemplate
       title="Print Fee Receipt"
@@ -127,7 +172,9 @@ const PrintFeeReceiptStudent = () => {
             <label className="custom-label">Academic Year</label>
             <select
               className="custom-input"
-              {...register("academicYear", { required: "Academic year is required" })}
+              {...register("academicYear", {
+                required: "Academic year is required",
+              })}
             >
               <option value="">Select Academic Year</option>
               <option value="2023-24">2023-24</option>
@@ -195,7 +242,10 @@ const PrintFeeReceiptStudent = () => {
                         {item.receipt_no}
                       </p>
                       <p className="text-sm text-[var(--text-muted)]">
-                        Date: {new Date(item.payment_date).toLocaleDateString("en-GB")}
+                        Date:{" "}
+                        {new Date(item.payment_date).toLocaleDateString(
+                          "en-GB"
+                        )}
                       </p>
                     </div>
                     <div className="text-right">
@@ -217,7 +267,8 @@ const PrintFeeReceiptStudent = () => {
       {/* Receipt Detail Section */}
       {showReceipt && selectedReceipt && selectedPaymentId && (
         <DashboardChildPageCard className="mt-4">
-          <div id="receiptArea">
+          {/* This is the area we convert to PDF */}
+          <div id="receiptArea" ref={receiptRef}>
             {/* Institute Header */}
             <div className="text-center mb-6">
               <h2 className="text-xl font-semibold text-[var(--text-primary)]">
@@ -371,15 +422,13 @@ const PrintFeeReceiptStudent = () => {
           </div>
 
           {/* Buttons */}
-          <div className="form-actions mt-6">
-            <a
-              href={`${api.defaults.baseURL}/api/fee-receipts/${selectedPaymentId}/pdf`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-2 rounded-lg bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90 transition inline-block"
+          <div className="form-actions mt-6 space-x-3">
+            <button
+              onClick={handleDownloadPdf}
+              className="px-5 py-2 rounded-lg bg-[var(--btn-primary-bg)] text-[var(--btn-primary-text)] hover:opacity-90 transition"
             >
               Download PDF
-            </a>
+            </button>
             <button
               onClick={handlePrint}
               className="px-5 py-2 rounded-lg bg-[var(--btn-blue-bg)] text-[var(--btn-blue-text)] hover:bg-[var(--btn-blue-hover)] transition"

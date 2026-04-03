@@ -7,11 +7,12 @@ export const generatePDF = async (
   options = {}
 ) => {
   const {
-    scale = 1.5,              // smaller than 3 → smaller PDF
+    scale = 1.5,
     orientation = "portrait",
     fitToWidth = true,
-    imageType = "image/jpeg",  // JPEG reduces size vs PNG
-    imageQuality = 0.8,        // 0–1
+    imageType = "image/jpeg",
+    imageQuality = 0.8,
+    singlePage = false, // force everything onto one page if true
   } = options;
 
   if (!element) return;
@@ -31,8 +32,7 @@ export const generatePDF = async (
     const imgHeight = canvas.height;
 
     // A4 size in mm
-    let pdfWidth;
-    let pdfHeight;
+    let pdfWidth, pdfHeight;
     if (orientation === "landscape") {
       pdfWidth = 297;
       pdfHeight = 210;
@@ -43,9 +43,10 @@ export const generatePDF = async (
 
     const margin = 5;
     const usableWidth = pdfWidth - margin * 2;
+    const usableHeight = pdfHeight - margin * 2;
 
-    let finalWidth;
-    let finalHeight;
+    // Base scaling (fit to width by default)
+    let finalWidth, finalHeight;
     if (fitToWidth) {
       finalWidth = usableWidth;
       finalHeight = (imgHeight * usableWidth) / imgWidth;
@@ -54,43 +55,55 @@ export const generatePDF = async (
       finalHeight = (imgHeight * usableWidth) / imgWidth;
     }
 
+    // If we want a SINGLE page and it is too tall, shrink proportionally to fit height
+    if (singlePage && finalHeight > usableHeight) {
+      const shrinkFactor = usableHeight / finalHeight;
+      finalWidth *= shrinkFactor;
+      finalHeight *= shrinkFactor;
+    }
+
     const pdf = new jsPDF(
       orientation === "landscape" ? "l" : "p",
       "mm",
       "a4"
     );
 
-    let heightLeft = finalHeight;
-    let position = margin;
+    // For singlePage: vertically center a bit; for multi-page: start near top
+    const yStart = singlePage
+      ? margin + Math.max(0, (usableHeight - finalHeight) / 2)
+      : margin;
 
-    // First page
     pdf.addImage(
       imgData,
       imgFormat,
       margin,
-      position,
+      yStart,
       finalWidth,
       finalHeight,
       "",
-      "FAST" // extra compression
+      "FAST"
     );
-    heightLeft -= pdfHeight;
 
-    // Additional pages if content is taller than one page
-    while (heightLeft > 0) {
-      position = heightLeft - finalHeight + margin;
-      pdf.addPage();
-      pdf.addImage(
-        imgData,
-        imgFormat,
-        margin,
-        position,
-        finalWidth,
-        finalHeight,
-        "",
-        "FAST"
-      );
-      heightLeft -= pdfHeight;
+    // Only add extra pages when NOT forcing singlePage
+    if (!singlePage) {
+      let heightLeft = finalHeight - pdfHeight;
+      let position = yStart;
+
+      while (heightLeft > 0) {
+        position = heightLeft - finalHeight + yStart;
+        pdf.addPage();
+        pdf.addImage(
+          imgData,
+          imgFormat,
+          margin,
+          position,
+          finalWidth,
+          finalHeight,
+          "",
+          "FAST"
+        );
+        heightLeft -= pdfHeight;
+      }
     }
 
     pdf.save(filename);

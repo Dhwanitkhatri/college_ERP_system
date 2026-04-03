@@ -55,6 +55,7 @@ const DatewiseReportAdmin = () => {
   const [reportData, setReportData] = useState([]);
   const [isReportGenerated, setIsReportGenerated] = useState(false);
 
+  // Only the printable content (summary + table) is inside this ref
   const reportContainerRef = useRef(null);
 
   // Fetch classes for datewise report
@@ -129,7 +130,11 @@ const DatewiseReportAdmin = () => {
     const originalContainer = reportContainerRef.current;
     if (!originalContainer) return;
 
-    // Clone the whole report so we can change styles safely for PDF only
+    // Decide if this is a “long” report based on number of records
+    const detailedRecords = reportData?.data?.detailed_records || [];
+    const isLongReport = detailedRecords.length > 18; // tweak threshold as needed
+
+    // Clone ONLY the report content (no buttons)
     const cloneWrapper = document.createElement("div");
     cloneWrapper.style.position = "fixed";
     cloneWrapper.style.left = "-9999px";
@@ -139,7 +144,7 @@ const DatewiseReportAdmin = () => {
 
     const clonedReport = originalContainer.cloneNode(true);
 
-    // Remove scroll constraints in the clone so all rows render for html2canvas
+    // Remove scroll constraints in the clone so all rows render
     const clonedTableWrapper = clonedReport.querySelector(".table-wrapper");
     if (clonedTableWrapper) {
       clonedTableWrapper.style.maxHeight = "none";
@@ -157,11 +162,12 @@ const DatewiseReportAdmin = () => {
         selectedSubject || "subject"
       }_${selectedMonth || "month"}.pdf`,
       {
-        scale: 1.5,
-        orientation: "portrait", // summary + table are vertical; change to 'landscape' if you prefer
+        scale: isLongReport ? 1.6 : 2.0,
+        orientation: "portrait",
         fitToWidth: true,
         imageType: "image/jpeg",
         imageQuality: 0.8,
+        singlePage: !isLongReport, // short = 1 page, long = multi-page
       }
     );
 
@@ -330,8 +336,8 @@ const DatewiseReportAdmin = () => {
               </div>
             </DashboardChildPageCard>
           ) : (
-            <div ref={reportContainerRef} className="space-y-4">
-              {/* Download button */}
+            <div className="space-y-4">
+              {/* Download button (not inside ref) */}
               <div className="flex justify-end">
                 <button
                   onClick={handleDownload}
@@ -342,198 +348,202 @@ const DatewiseReportAdmin = () => {
                 </button>
               </div>
 
-              {/* Report Summary */}
-              <DashboardChildPageCard>
-                <div className="summaryReportDiv rounded-xl p-1 flex flex-col gap-y-6">
-                  <div className="summaryReportTitle flex items-center justify-between text-[var(--text-primary)]">
-                    Summary Report
-                  </div>
-                  <div className="studentDetails mb-4 p-4 grid lg:grid-cols-2 gap-y-2 bg-slate-200 dark:bg-gray-700 rounded-lg">
-                    <div className="studentName text-[var(--text-muted)]">
-                      Name:{" "}
-                      <span className="text-[var(--text-primary)]">
-                        {reportData.data.student_info.name}
-                      </span>{" "}
+              {/* Printable content */}
+              <div ref={reportContainerRef} className="space-y-4">
+                {/* Report Summary */}
+                <DashboardChildPageCard>
+                  <div className="summaryReportDiv rounded-xl p-1 flex flex-col gap-y-6">
+                    <div className="summaryReportTitle flex items-center justify-between text-[var(--text-primary)]">
+                      Summary Report
+                    </div>
+                    <div className="studentDetails mb-4 p-4 grid lg:grid-cols-2 gap-y-2 bg-slate-200 dark:bg-gray-700 rounded-lg">
+                      <div className="studentName text-[var(--text-muted)]">
+                        Name:{" "}
+                        <span className="text-[var(--text-primary)]">
+                          {reportData.data.student_info.name}
+                        </span>{" "}
+                      </div>
+
+                      <div className="studentClass text-[var(--text-muted)]">
+                        Class:{" "}
+                        <span className="text-[var(--text-primary)]">
+                          {reportData.data.student_info.class_id}
+                        </span>
+                      </div>
+
+                      <div className="subjectName text-[var(--text-muted)]">
+                        Subject:
+                        <span className="text-[var(--text-primary)]">
+                          {" "}
+                          {reportData.data.subject_info.subject_name}
+                        </span>
+                      </div>
+
+                      <div className="month text-[var(--text-muted)]">
+                        Month:{" "}
+                        <span className="text-[var(--text-primary)]">
+                          {getMonthName(selectedMonth)}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="studentClass text-[var(--text-muted)]">
-                      Class:{" "}
-                      <span className="text-[var(--text-primary)]">
-                        {reportData.data.student_info.class_id}
-                      </span>
-                    </div>
-
-                    <div className="subjectName text-[var(--text-muted)]">
-                      Subject:
-                      <span className="text-[var(--text-primary)]">
-                        {" "}
-                        {reportData.data.subject_info.subject_name}
-                      </span>
-                    </div>
-
-                    <div className="month text-[var(--text-muted)]">
-                      Month:{" "}
-                      <span className="text-[var(--text-primary)]">
-                        {getMonthName(selectedMonth)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="attendanceDetails grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div
-                      className="totalLectures datewiseReportSummaryMiniBox border border-opacity-70 bg-blue-50 dark:bg-blue-900
+                    <div className="attendanceDetails grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div
+                        className="totalLectures datewiseReportSummaryMiniBox border border-opacity-70 bg-blue-50 dark:bg-blue-900
                     border-blue-200 dark:border-blue-800"
-                    >
-                      <div className="title text-[var(--text-muted)]">
-                        Total Lectures
-                      </div>
-                      <div className="value text-[var(--text-primary)]">
-                        {reportData.data.attendance_summary.total_classes}
-                      </div>
-                    </div>
-                    <div
-                      className="totalPresent datewiseReportSummaryMiniBox border border-opacity-70 bg-green-50 dark:bg-green-900
-                    border-green-200 dark:border-green-800"
-                    >
-                      <div className="title text-[var(--text-muted)]">
-                        Total Present
-                      </div>
-                      <div className="value text-[var(--text-primary)]">
-                        {reportData.data.attendance_summary.total_present}
-                      </div>
-                    </div>
-                    <div
-                      className="totalAbsent datewiseReportSummaryMiniBox border border-opacity-70 bg-red-50 dark:bg-red-900
-                    border-red-200 dark:border-red-800"
-                    >
-                      <div className="title text-[var(--text-muted)]">
-                        Total Absent
-                      </div>
-                      <div className="value text-[var(--text-primary)]">
-                        {reportData.data.attendance_summary.total_absent}
-                      </div>
-                    </div>
-                    <div
-                      className="attendance datewiseReportSummaryMiniBox border border-opacity-70 bg-purple-50 dark:bg-purple-900
-                    border-purple-200 dark:border-purple-800"
-                    >
-                      <div className="title text-[var(--text-muted)]">
-                        Attendance
-                      </div>
-                      <div className="value text-[var(--text-primary)]">
-                        {
-                          reportData.data.attendance_summary
-                            .attendance_percentage
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </DashboardChildPageCard>
-
-              {/* Datewise Report Table */}
-              <DashboardChildPageCard>
-                <h3 className="text-[var(--text-primary)] mb-4">
-                  Datewise Attendance
-                </h3>
-
-                <div
-                  className="rounded-xl border overflow-hidden"
-                  style={{
-                    backgroundColor: "var(--bg-primary)",
-                    borderColor: "var(--border-light)",
-                  }}
-                >
-                  {/* Scroll container */}
-                  <div className="table-wrapper overflow-x-auto max-h-[600px] overflow-y-auto">
-                    <table className="w-full border-collapse">
-                      {/* Table Head */}
-                      <thead
-                        className="sticky top-0 z-10"
-                        style={{
-                          backgroundColor: "var(--bg-secondary)",
-                        }}
                       >
-                        <tr>
-                          <th
-                            className="text-left px-4 py-3 border-b"
-                            style={{
-                              color: "var(--text-primary)",
-                              borderColor: "var(--border-light)",
-                            }}
-                          >
-                            Day / Date
-                          </th>
-                          <th
-                            className="text-left px-4 py-3 border-b"
-                            style={{
-                              color: "var(--text-primary)",
-                              borderColor: "var(--border-light)",
-                            }}
-                          >
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-
-                      {/* Table Body */}
-                      <tbody>
-                        {reportData?.data?.detailed_records?.map(
-                          (record, index) => (
-                            <tr
-                              key={index}
-                              className="transition-colors"
-                              style={{
-                                borderBottom: "1px solid var(--border-light)",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "var(--bg-hover)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "transparent")
-                              }
-                            >
-                              <td
-                                className="px-4 py-3"
-                                style={{ color: "var(--text-primary)" }}
-                              >
-                                {record.date} ({record.day})
-                                <br />
-                                <span
-                                  className="text-sm"
-                                  style={{ color: "var(--text-muted)" }}
-                                >
-                                  Lecture {record.lecture_no}
-                                </span>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <span
-                                  className="inline-block px-3 py-1 rounded-full text-sm font-medium"
-                                  style={{
-                                    backgroundColor:
-                                      record.status === "Present"
-                                        ? "rgba(34,197,94,0.15)"
-                                        : "rgba(239,68,68,0.15)",
-                                    color:
-                                      record.status === "Present"
-                                        ? "#16a34a"
-                                        : "#dc2626",
-                                  }}
-                                >
-                                  {record.status}
-                                </span>
-                              </td>
-                            </tr>
-                          )
-                        )}
-                      </tbody>
-                    </table>
+                        <div className="title text-[var(--text-muted)]">
+                          Total Lectures
+                        </div>
+                        <div className="value text-[var(--text-primary)]">
+                          {reportData.data.attendance_summary.total_classes}
+                        </div>
+                      </div>
+                      <div
+                        className="totalPresent datewiseReportSummaryMiniBox border border-opacity-70 bg-green-50 dark:bg-green-900
+                    border-green-200 dark:border-green-800"
+                      >
+                        <div className="title text-[var(--text-muted)]">
+                          Total Present
+                        </div>
+                        <div className="value text-[var(--text-primary)]">
+                          {reportData.data.attendance_summary.total_present}
+                        </div>
+                      </div>
+                      <div
+                        className="totalAbsent datewiseReportSummaryMiniBox border border-opacity-70 bg-red-50 dark:bg-red-900
+                    border-red-200 dark:border-red-800"
+                      >
+                        <div className="title text-[var(--text-muted)]">
+                          Total Absent
+                        </div>
+                        <div className="value text-[var(--text-primary)]">
+                          {reportData.data.attendance_summary.total_absent}
+                        </div>
+                      </div>
+                      <div
+                        className="attendance datewiseReportSummaryMiniBox border border-opacity-70 bg-purple-50 dark:bg-purple-900
+                    border-purple-200 dark:border-purple-800"
+                      >
+                        <div className="title text-[var(--text-muted)]">
+                          Attendance
+                        </div>
+                        <div className="value text-[var(--text-primary)]">
+                          {
+                            reportData.data.attendance_summary
+                              .attendance_percentage
+                          }
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </DashboardChildPageCard>
+                </DashboardChildPageCard>
+
+                {/* Datewise Report Table */}
+                <DashboardChildPageCard>
+                  <h3 className="text-[var(--text-primary)] mb-4">
+                    Datewise Attendance
+                  </h3>
+
+                  <div
+                    className="rounded-xl border overflow-hidden"
+                    style={{
+                      backgroundColor: "var(--bg-primary)",
+                      borderColor: "var(--border-light)",
+                    }}
+                  >
+                    {/* Scroll container */}
+                    <div className="table-wrapper overflow-x-auto max-h-[600px] overflow-y-auto">
+                      <table className="w-full border-collapse">
+                        {/* Table Head */}
+                        <thead
+                          className="sticky top-0 z-10"
+                          style={{
+                            backgroundColor: "var(--bg-secondary)",
+                          }}
+                        >
+                          <tr>
+                            <th
+                              className="text-left px-4 py-3 border-b"
+                              style={{
+                                color: "var(--text-primary)",
+                                borderColor: "var(--border-light)",
+                              }}
+                            >
+                              Day / Date
+                            </th>
+                            <th
+                              className="text-left px-4 py-3 border-b"
+                              style={{
+                                color: "var(--text-primary)",
+                                borderColor: "var(--border-light)",
+                              }}
+                            >
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+
+                        {/* Table Body */}
+                        <tbody>
+                          {reportData?.data?.detailed_records?.map(
+                            (record, index) => (
+                              <tr
+                                key={index}
+                                className="transition-colors"
+                                style={{
+                                  borderBottom:
+                                    "1px solid var(--border-light)",
+                                }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.backgroundColor =
+                                    "var(--bg-hover)")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.backgroundColor =
+                                    "transparent")
+                                }
+                              >
+                                <td
+                                  className="px-4 py-3"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  {record.date} ({record.day})
+                                  <br />
+                                  <span
+                                    className="text-sm"
+                                    style={{ color: "var(--text-muted)" }}
+                                  >
+                                    Lecture {record.lecture_no}
+                                  </span>
+                                </td>
+
+                                <td className="px-4 py-3">
+                                  <span
+                                    className="inline-block px-3 py-1 rounded-full text-sm font-medium"
+                                    style={{
+                                      backgroundColor:
+                                        record.status === "Present"
+                                          ? "rgba(34,197,94,0.15)"
+                                          : "rgba(239,68,68,0.15)",
+                                      color:
+                                        record.status === "Present"
+                                          ? "#16a34a"
+                                          : "#dc2626",
+                                    }}
+                                  >
+                                    {record.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </DashboardChildPageCard>
+              </div>
             </div>
           )}
         </div>
