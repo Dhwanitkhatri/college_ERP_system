@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FileText } from "lucide-react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import api from "../../api/axios";
 
 export default function GenerateResult() {
-  {
-    /* this is the react hook form part */
-  }
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [studentsList, setStudentsList] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -22,65 +26,126 @@ export default function GenerateResult() {
     },
   });
 
-  {
-    /* watching the student field to show the dynamic helper text */
-  }
+  const selectedSemester = watch("semester");
+  const selectedAcademicYear = watch("academicYear");
   const selectedStudent = watch("student");
 
-  {
-    /* this is the submit function part which triggers the native alert */
-  }
-  const onSubmit = (data) => {
-    // This console log will prove the button works in your browser's Developer Tools (F12)
-    console.log("Form Submitted Successfully with data:", data);
+  // Fetch students when semester and academic year are selected
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!selectedSemester || !selectedAcademicYear) {
+        setStudentsList([]);
+        return;
+      }
 
-    let alertMessage = "";
+      setLoadingStudents(true);
+      try {
+        // Extract semester number from string (e.g., "Semester 6" -> 6)
+        const semesterNum = parseInt(selectedSemester.match(/\d+/)[0]);
+        const response = await api.get("/api/students", {
+          params: {
+            semester: semesterNum,
+            academic_year: selectedAcademicYear,
+          },
+        });
+        if (response.data.success) {
+          setStudentsList(response.data.data);
+        } else {
+          setStudentsList([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch students:", err);
+        setStudentsList([]);
+      } finally {
+        setLoadingStudents(false);
+      }
+    };
 
-    if (data.student) {
-      // Individual Generation Message
-      alertMessage = `Result generated successfully for ${data.student} - ${data.semester} - ${data.academicYear} - ${data.examType}`;
-    } else {
-      // Bulk Generation Message
-      alertMessage = `Result generated successfully for entire ${data.semester} - ${data.academicYear} - ${data.examType}`;
+    fetchStudents();
+  }, [selectedSemester, selectedAcademicYear]);
+
+  // Helper to convert semester string to number
+  const getSemesterNumber = (semesterStr) => {
+    const match = semesterStr.match(/\d+/);
+    return match ? parseInt(match[0]) : null;
+  };
+
+  // Fetch exam_id based on filters
+  const fetchExamId = async (academicYear, semesterNum, examType) => {
+    const response = await api.get("/api/exams", {
+      params: {
+        academic_year: academicYear,
+        semester: semesterNum,
+        exam_type: examType,
+      },
+    });
+    console.log("Exam fetch response:", response.data);
+    if (!response.data.success || response.data.data.length === 0) {
+      throw new Error(`No exam found for ${examType} in ${academicYear} Semester ${semesterNum}`);
     }
-
-    // Triggering the standard browser alert
-    alert(alertMessage);
+    // Return the first matching exam (assume one exam per type per semester)
+    return response.data.data[0].exam_id;
   };
 
-  {
-    /* this catches any hidden errors blocking the form from submitting */
-  }
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setMessage(null);
+    setError(null);
+
+    try {
+      const semesterNum = getSemesterNumber(data.semester);
+      if (!semesterNum) throw new Error("Invalid semester selected");
+
+      // Step 1: Get exam_id
+      const exam_id = await fetchExamId(data.academicYear, semesterNum, data.examType);
+
+      // Step 2: Call result generation API
+      let response;
+      if (data.student) {
+        // Extract student_id from the selected value (format: "student_id - name")
+        const studentId = data.student.split(" - ")[0];
+        response = await api.post("/api/results", {
+          student_id: studentId,
+          exam_id: exam_id,
+        });
+      } else {
+        // Bulk generation
+        response = await api.post("/api/results/all", {
+          exam_id: exam_id,
+          semester: semesterNum,
+        });
+      }
+
+      const resData = response.data;
+      if (resData.success) {
+        if (data.student) {
+          setMessage(` Result generated successfully for ${data.student}`);
+        } else {
+          setMessage(
+            `✅ Bulk results generated: ${resData.summary.generated} generated, ${resData.summary.skipped} skipped, ${resData.summary.failed} failed`
+          );
+        }
+      } else {
+        throw new Error(resData.message || "Result generation failed");
+      }
+    } catch (err) {
+      console.error("Result generation error:", err);
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onError = (errors) => {
-    console.error("Form Validation Failed! Check these errors:", errors);
+    console.error("Form Validation Failed!", errors);
   };
 
-  // this is the dummy data for the dropdowns
-  const academicYears = ["2023-24", "2024-25", "2025-26", "2026-27"];
-
-  const semesters = [
-    "Semester 1",
-    "Semester 2",
-    "Semester 3",
-    "Semester 4",
-    "Semester 5",
-    "Semester 6",
-    "Semester 7",
-    "Semester 8",
-  ];
-
-  // Updated exam types strictly per your instruction
+  // Static options
+  const academicYears = ["2023-24", "2024-25", "2025-26", "2026-27", "2027-28"];
+  const semesters = Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`);
   const examTypes = ["REGULAR", "RE-EXAM", "BACKLOG"];
 
-  const students = [
-    "23CI2010001 - Emily Carter",
-    "23CI2010002 - John Doe",
-    "23CI2010003 - Sarah Smith",
-  ];
-
-  {
-    /* the main designing part start from here */
-  }
+ 
   return (
     <DashboardChildPageTemplate
       title="Generate Result"
@@ -88,21 +153,15 @@ export default function GenerateResult() {
       width="max-w-7xl"
     >
       <DashboardChildPageCard>
-        <form
-          onSubmit={handleSubmit(onSubmit, onError)}
-          noValidate
-          className="flex flex-col gap-6"
-        >
-          {/* this is the semester part */}
+        <form onSubmit={handleSubmit(onSubmit, onError)} noValidate className="flex flex-col gap-6">
+          {/* Semester */}
           <div className="form-field !my-0">
             <label className="custom-label">
               Semester <span className="text-red-500">*</span>
             </label>
             <select
               className={`custom-input bg-[var(--bg-primary)] theme-transition ${
-                errors.semester
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                  : ""
+                errors.semester ? "border-red-500" : ""
               }`}
               {...register("semester", { required: "Semester is required" })}
             >
@@ -113,25 +172,19 @@ export default function GenerateResult() {
                 </option>
               ))}
             </select>
-            {errors.semester && (
-              <p className="custom-error">{errors.semester.message}</p>
-            )}
+            {errors.semester && <p className="custom-error">{errors.semester.message}</p>}
           </div>
 
-          {/* this is the newly added academic year part */}
+          {/* Academic Year */}
           <div className="form-field !my-0">
             <label className="custom-label">
               Academic Year <span className="text-red-500">*</span>
             </label>
             <select
               className={`custom-input bg-[var(--bg-primary)] theme-transition ${
-                errors.academicYear
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                  : ""
+                errors.academicYear ? "border-red-500" : ""
               }`}
-              {...register("academicYear", {
-                required: "Academic Year is required",
-              })}
+              {...register("academicYear", { required: "Academic Year is required" })}
             >
               <option value="">Select academic year</option>
               {academicYears.map((year, idx) => (
@@ -140,21 +193,17 @@ export default function GenerateResult() {
                 </option>
               ))}
             </select>
-            {errors.academicYear && (
-              <p className="custom-error">{errors.academicYear.message}</p>
-            )}
+            {errors.academicYear && <p className="custom-error">{errors.academicYear.message}</p>}
           </div>
 
-          {/* this is the exam type part */}
+          {/* Exam Type */}
           <div className="form-field !my-0">
             <label className="custom-label">
               Exam Type <span className="text-red-500">*</span>
             </label>
             <select
               className={`custom-input bg-[var(--bg-primary)] theme-transition ${
-                errors.examType
-                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                  : ""
+                errors.examType ? "border-red-500" : ""
               }`}
               {...register("examType", { required: "Exam Type is required" })}
             >
@@ -165,49 +214,58 @@ export default function GenerateResult() {
                 </option>
               ))}
             </select>
-            {errors.examType && (
-              <p className="custom-error">{errors.examType.message}</p>
-            )}
+            {errors.examType && <p className="custom-error">{errors.examType.message}</p>}
           </div>
 
-          {/* this is the select student part */}
+          {/* Student (Optional) */}
           <div className="form-field !my-0">
             <label className="custom-label flex items-center gap-1.5">
               Select Student{" "}
-              <span className="text-gray-400 dark:text-gray-500 font-normal">
-                (Optional)
-              </span>
+              <span className="text-gray-400 dark:text-gray-500 font-normal">(Optional)</span>
             </label>
             <select
               className="custom-input bg-[var(--bg-primary)] theme-transition"
               {...register("student")}
+              disabled={loadingStudents}
             >
-              <option value="">
-                Select student (leave empty for all students)
-              </option>
-              {students.map((student, idx) => (
-                <option key={idx} value={student}>
-                  {student}
+              <option value="">Select student (leave empty for all students)</option>
+              {studentsList.map((student) => (
+                <option key={student.student_id} value={`${student.student_id} - ${student.name}`}>
+                  {student.name} ({student.student_id})
                 </option>
               ))}
             </select>
-
-            {/* dynamic helper text only shows when a student is selected */}
+            {loadingStudents && (
+              <p className="text-sm text-gray-500 mt-1">Loading students...</p>
+            )}
             {selectedStudent && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 animate-in fade-in">
-                Result will be generated only for the selected student
+              <p className="text-sm text-green-600 dark:text-green-400 mt-1.5 animate-in fade-in">
+                ✅ Result will be generated only for the selected student
               </p>
             )}
           </div>
 
-          {/* below is the action button of the generate result */}
+          {/* Message and Error */}
+          {message && (
+            <div className="p-3 rounded bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+              {message}
+            </div>
+          )}
+          {error && (
+            <div className="p-3 rounded bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+              {error}
+            </div>
+          )}
+
+          {/* Submit Button */}
           <div className="form-actions">
             <button
               type="submit"
-              className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium hover:opacity-90 transition-opacity"
+              disabled={loading}
+              className="flex items-center gap-2 px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               <FileText className="w-4 h-4" />
-              Generate Result
+              {loading ? "Generating..." : "Generate Result"}
             </button>
           </div>
         </form>

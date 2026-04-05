@@ -297,7 +297,7 @@ const EnterExamMarksFaculty = () => {
 
             <select
               className="custom-input"
-              {...register("exam_id", { required: "Exam is required" })}
+              {...register("exam_id", {  })}
             >
               <option value="">Select Exam</option>
 
