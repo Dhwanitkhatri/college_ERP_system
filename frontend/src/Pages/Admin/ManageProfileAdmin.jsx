@@ -5,15 +5,36 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import api from "../../api/axios";
 
+{
+  /* importing the new custom buttons */
+}
+import CancelButton from "../../ui/Buttons/CancelButton";
+import SaveButton from "../../ui/Buttons/SaveButton";
+
 export default function ManageProfile() {
   {
     /* this is the react hook form part with validation errors */
   }
   const {
     register,
+    handleSubmit,
     formState: { errors },
   } = useForm();
 
+  {
+    /* this is the edit mode state part */
+  }
+  const [isEditing, setIsEditing] = useState(false);
+
+  {
+    /* ========================================================= */
+  }
+  {
+    /* STRICTLY PRESERVING YOUR FRIEND'S BACKEND LOGIC EXACTLY   */
+  }
+  {
+    /* ========================================================= */
+  }
   const [profile, setProfile] = useState({});
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(true);
@@ -61,6 +82,15 @@ export default function ManageProfile() {
   }
 
   {
+    /* this is the submit function part */
+  }
+  const onSubmit = (data) => {
+    console.log("Profile updated with data:", data);
+    // Disable edit mode after saving
+    setIsEditing(false);
+  };
+
+  {
     /* the main designing part start from here */
   }
   return (
@@ -77,6 +107,7 @@ export default function ManageProfile() {
               <div className="h-24 w-24 rounded-full bg-black dark:bg-white flex items-center justify-center text-white dark:text-black shadow-md">
                 <User size={44} strokeWidth={1.5} />
               </div>
+
               <div className="text-black dark:text-white">
                 <h2 className="text-2xl font-bold uppercase tracking-wide">
                   {profile.name || "-"}
@@ -88,7 +119,11 @@ export default function ManageProfile() {
             </div>
 
             {/* this is the edit button part */}
-            <button className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black hover:opacity-90 px-6 py-2.5 rounded-md text-sm font-medium transition-opacity">
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 bg-black dark:bg-white text-white dark:text-black hover:opacity-90 px-6 py-2.5 rounded-md text-sm font-medium transition-opacity"
+            >
               <Edit2 size={16} />
               Edit Profile
             </button>
@@ -96,7 +131,10 @@ export default function ManageProfile() {
         </div>
 
         {/* this is the form part */}
-        <form className="flex flex-col gap-10">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-10"
+        >
           {/* this is the basic and personal details part */}
           <div>
             <h3 className="text-lg font-bold text-black dark:text-white border-b border-gray-300 dark:border-gray-700 pb-2 mb-6 uppercase tracking-wide">
@@ -113,6 +151,7 @@ export default function ManageProfile() {
                 })}
                 error={errors.fullName}
                 defaultValue={profile.name}
+                disabled={!isEditing}
               />
               <InputField
                 label="Email Address"
@@ -124,6 +163,7 @@ export default function ManageProfile() {
                 })}
                 error={errors.email}
                 defaultValue={profile.email}
+                disabled={!isEditing}
               />
               <InputField
                 label="Phone Number"
@@ -135,35 +175,54 @@ export default function ManageProfile() {
                 })}
                 error={errors.phoneNumber}
                 defaultValue={profile.contact_number}
+                disabled={!isEditing}
               />
               <InputField
                 label="Date of Birth"
                 register={register("dob")}
                 defaultValue={formatDate(profile.DOB)}
+                disabled={!isEditing}
               />
+
+              {/* These two fields are STRICTLY ALWAYS DISABLED */}
               <InputField
                 label={`${formatRole()} ID`}
                 register={register("roleId")}
                 defaultValue={profile.role_id}
-                disabled
+                disabled={true}
               />
               <InputField
                 label="Department / Course"
                 register={register("department")}
                 defaultValue={profile.course_id}
-                disabled
+                disabled={true}
               />
-              <InputField label="Gender" register={register("gender")} />
+
+              <InputField
+                label="Gender"
+                register={register("gender")}
+                disabled={!isEditing}
+              />
               <InputField
                 label="Blood Group"
                 register={register("bloodGroup")}
+                disabled={!isEditing}
               />
               <InputField
                 label="Birth Place"
                 register={register("birthPlace")}
+                disabled={!isEditing}
               />
-              <InputField label="Caste" register={register("caste")} />
-              <InputField label="Category" register={register("category")} />
+              <InputField
+                label="Caste"
+                register={register("caste")}
+                disabled={!isEditing}
+              />
+              <InputField
+                label="Category"
+                register={register("category")}
+                disabled={!isEditing}
+              />
               <InputField
                 label="Aadhar Card"
                 register={register("aadharCard", {
@@ -173,6 +232,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.aadharCard}
+                disabled={!isEditing}
               />
             </div>
           </div>
@@ -188,7 +248,12 @@ export default function ManageProfile() {
                 <textarea
                   {...register("currentAddress")}
                   defaultValue={profile.address || ""}
-                  className="custom-input bg-[var(--bg-primary)] theme-transition resize-none h-24"
+                  disabled={!isEditing}
+                  className={`custom-input bg-[var(--bg-primary)] theme-transition resize-none h-24 ${
+                    !isEditing
+                      ? "opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800"
+                      : ""
+                  }`}
                   placeholder="Enter current address..."
                 />
               </div>
@@ -196,7 +261,12 @@ export default function ManageProfile() {
                 <label className="custom-label">Permanent Address</label>
                 <textarea
                   {...register("permanentAddress")}
-                  className="custom-input bg-[var(--bg-primary)] theme-transition resize-none h-24"
+                  disabled={!isEditing}
+                  className={`custom-input bg-[var(--bg-primary)] theme-transition resize-none h-24 ${
+                    !isEditing
+                      ? "opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800"
+                      : ""
+                  }`}
                   placeholder="Enter permanent address..."
                 />
               </div>
@@ -218,6 +288,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.motherName}
+                disabled={!isEditing}
               />
               <InputField
                 label="Mother Contact No."
@@ -228,6 +299,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.motherContact}
+                disabled={!isEditing}
               />
               <InputField
                 label="Father Name"
@@ -238,6 +310,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.fatherName}
+                disabled={!isEditing}
               />
               <InputField
                 label="Father Contact No."
@@ -248,6 +321,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.fatherContact}
+                disabled={!isEditing}
               />
             </div>
           </div>
@@ -267,6 +341,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.parentName}
+                disabled={!isEditing}
               />
               <InputField
                 label="Parent Email"
@@ -277,6 +352,7 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.parentEmail}
+                disabled={!isEditing}
               />
               <InputField
                 label="Parent Contact"
@@ -287,10 +363,12 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.parentContact}
+                disabled={!isEditing}
               />
               <InputField
                 label="Occupation"
                 register={register("occupation")}
+                disabled={!isEditing}
               />
               <InputField
                 label="Annual Income"
@@ -301,19 +379,23 @@ export default function ManageProfile() {
                   },
                 })}
                 error={errors.annualIncome}
+                disabled={!isEditing}
               />
               <InputField
                 label="Designation"
                 register={register("designation")}
+                disabled={!isEditing}
               />
               <InputField
                 label="Organization"
                 register={register("organization")}
+                disabled={!isEditing}
               />
               <div className="md:col-span-2">
                 <InputField
                   label="Parent Address"
                   register={register("parentAddress")}
+                  disabled={!isEditing}
                 />
               </div>
               <div className="md:col-span-3">
@@ -321,7 +403,12 @@ export default function ManageProfile() {
                   <label className="custom-label">Guardian Details</label>
                   <textarea
                     {...register("guardianDetails")}
-                    className="custom-input bg-[var(--bg-primary)] theme-transition resize-none h-20"
+                    disabled={!isEditing}
+                    className={`custom-input bg-[var(--bg-primary)] theme-transition resize-none h-20 ${
+                      !isEditing
+                        ? "opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800"
+                        : ""
+                    }`}
                     placeholder="Enter guardian details if applicable..."
                   />
                 </div>
@@ -338,24 +425,36 @@ export default function ManageProfile() {
               <InputField
                 label="School Details (SSC)"
                 register={register("schoolSSC")}
+                disabled={!isEditing}
               />
               <InputField
                 label="School Details (HSC)"
                 register={register("schoolHSC")}
+                disabled={!isEditing}
               />
               <InputField
                 label="School Details (Other)"
                 register={register("schoolOther")}
+                disabled={!isEditing}
               />
               <InputField
                 label="Hostel Details (If Any)"
                 register={register("hostelDetails")}
+                disabled={!isEditing}
               />
               <InputField
                 label="Bank Details (Optional)"
                 register={register("bankDetails")}
+                disabled={!isEditing}
               />
             </div>
+          </div>
+
+          {/* this is the action buttons part */}
+          {/* They are always visible but hitting cancel reloads the page to discard changes */}
+          <div className="flex justify-end gap-4 mt-2">
+            <CancelButton onClick={() => window.location.reload()} />
+            <SaveButton type="submit" />
           </div>
         </form>
       </DashboardChildPageCard>
