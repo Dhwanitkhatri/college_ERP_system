@@ -22,8 +22,12 @@ const AdminPanelDashboard = () => {
           <Link to="SessionPlanningFaculty">
             <ActionButtonDashboard title="Session Planning" />
           </Link>
-          <Link to="UpdateSessionPlanningFaculty"><ActionButtonDashboard title="Update Session Planning" /></Link>
-          <Link to="ViewSessionPlanFaculty"><ActionButtonDashboard title="View Session Planning" /></Link>
+          <Link to="UpdateSessionPlanningFaculty">
+            <ActionButtonDashboard title="Update Session Planning" />
+          </Link>
+          <Link to="ViewSessionPlanFaculty">
+            <ActionButtonDashboard title="View Session Planning" />
+          </Link>
           <Link to="ViewTimeTable">
             <ActionButtonDashboard title="View Time Table" />
           </Link>
@@ -32,7 +36,9 @@ const AdminPanelDashboard = () => {
           <Link to="DatewiseReportAdmin">
             <ActionButtonDashboard title="Datewise Report" />
           </Link>
-          <ActionButtonDashboard title="Studentwise Report" />
+          <Link to="NotAvailablePage">
+            <ActionButtonDashboard title="Studentwise Report" />
+          </Link>
           <Link to="ClasswiseReportAdmin">
             <ActionButtonDashboard title="Classwise Report" />
           </Link>
@@ -48,7 +54,9 @@ const AdminPanelDashboard = () => {
       {/* ROW 2 */}
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Profile & Resources">
-          <ActionButtonDashboard title="Manage Profile" />
+          <Link to="ManageProfileAdmin">
+            <ActionButtonDashboard title="Manage Profile" />
+          </Link>
           <Link to="UploadLearningMaterialFaculty">
             <ActionButtonDashboard title="Upload Learning Material" />
           </Link>
@@ -58,7 +66,9 @@ const AdminPanelDashboard = () => {
           <Link to="ChangeCredentials">
             <ActionButtonDashboard title="Change Credentials" />
           </Link>
-          <ActionButtonDashboard title="Live Classes" />
+          <Link to="NotAvailablePage">
+            <ActionButtonDashboard title="Live Classes" />
+          </Link>
           <Link to="ManageNotificationsAdmin">
             <ActionButtonDashboard title="Manage Notifications" />
           </Link>

@@ -15,7 +15,9 @@ const AdminPanelDashboard = () => {
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Account & Credentials">
           <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
-          <ActionButtonDashboard title="Manage Profile" />
+          <Link to="ManageProfileAdmin">
+            <ActionButtonDashboard title="Manage Profile" />
+          </Link>
           <Link to="PrintFeeReceiptStudent"><ActionButtonDashboard title="Print Fee Chalan" /></Link>
           {/* <ActionButtonDashboard title="View Notices" /> */}
         </ActionContainerDashboard>
@@ -31,17 +33,17 @@ const AdminPanelDashboard = () => {
 
       {/* ROW 2 */}
       <DashContentPanelDashboard>
-        <ActionContainerDashboard title="Applications & Feedback">
+        <ActionContainerDashboard title="Payment & Feedback">
           {/* <ActionButtonDashboard title="Make Application" /> */}
           <Link to="FacultyFeedBackStudent"><ActionButtonDashboard title="Feedback" /></Link>
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Online Fee Payment" /></Link>
           {/* <ActionButtonDashboard title="Complaint Box" /> */}
-          <ActionButtonDashboard title="Examination Form" />
+          {/* <ActionButtonDashboard title="Examination Form" /> */}
         </ActionContainerDashboard>
 
         <ActionContainerDashboard title="Learning & Resources">
           <Link to="LearningMaterialStudent"><ActionButtonDashboard title="Learning Material" /></Link>
           {/* <ActionButtonDashboard title="Homework" /> */}
-          <Link to="NotAvailablePage"><ActionButtonDashboard title="Online Fee Payment" /></Link>
           <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
           <Link to="ViewSessionPlanFaculty"><ActionButtonDashboard title="View Session Planning" /></Link>
           <Link to="ViewTimeTable"><ActionButtonDashboard title="View Time Table" /></Link>
