@@ -4,7 +4,7 @@ import { Course } from "../model/Course.js";
 //create events
 export const createEvent = async (req, res) => {
   try {
-    const {
+    let {
       category,
       title,
       description,
@@ -13,8 +13,25 @@ export const createEvent = async (req, res) => {
       location,
       attendees,
     } = req.body;
-    console.log(req.body)
+
+    console.log("BODY:", req.body);
+
     const course_id = req.user.course_id;
+    console.log("COURSE:", course_id);
+
+    // 🔥 Convert attendees to number
+    attendees = attendees ? parseInt(attendees) : 0;
+
+    if (attendees && isNaN(attendees)) {
+      return res.status(400).json({
+        success: false,
+        message: "Attendees must be a number"
+      });
+    }
+
+    // 🔥 Normalize category (optional but smart)
+    if (category === "cultural") category = "culture";
+
     // Validate required fields
     if (
       !course_id ||
@@ -24,13 +41,21 @@ export const createEvent = async (req, res) => {
       !event_time ||
       !location
     ) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+        received: req.body
+      });
     }
 
     // Validate category
     const validCategories = ["culture", "academic", "sports"];
     if (!validCategories.includes(category)) {
-      return res.status(400).json({ message: "Invalid category" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category",
+        allowed: validCategories
+      });
     }
 
     const event = await Event.create({
@@ -44,9 +69,19 @@ export const createEvent = async (req, res) => {
       attendees,
     });
 
-    res.status(201).json(event);
+    return res.status(201).json({
+      success: true,
+      message: "Event created successfully",
+      data: event
+    });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Create Event Error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message
+    });
   }
 };
 

@@ -194,116 +194,177 @@ export const deleteProfilePicture = async (req, res) => {
 
 export const profileInfoAdmin = async (req, res) => {
   try {
-    const { uid: user_id, role, course_id } = req.user;
+    const { role, uid } = req.user;
 
-    if (!user_id || !role) {
+    if (!role || !uid) {
       return res.status(400).json({
         success: false,
-        message: "Invalid token data",
+        message: "Invalid token"
       });
-    }
-
-    let query = "";
-    let replacements = { user_id, course_id };
-
-    // ================= ADMIN =================
-    if (role === "Admin") {
-      query = `
-        SELECT 
-          a.user_id,
-          a.email,
-          a.name,
-          a.contact_number,
-          a.course_id,
-          a.admin_id AS role_id,
-          e.address,
-          e.DOB
-        FROM admins a
-        LEFT JOIN employeepersonaldetails e
-          ON a.user_id = e.user_id
-        WHERE a.user_id = :user_id
-          AND a.course_id = :course_id
-      `;
-    }
-
-    // ================= FACULTY =================
-    else if (role === "Faculty") {
-      query = `
-        SELECT 
-          f.user_id,
-          f.email,
-          f.name,
-          f.phone AS contact_number,
-          f.course_id,
-          f.faculty_id AS role_id,
-          e.address,
-          e.DOB
-        FROM faculties f
-        LEFT JOIN employeepersonaldetails e
-          ON f.user_id = e.user_id
-        WHERE f.user_id = :user_id
-          AND f.course_id = :course_id
-      `;
     }
 
     // ================= STUDENT =================
-    else if (role === "Student") {
-      query = `
-        SELECT 
-          s.user_id,
-          s.email,
-          s.name,
-          NULL AS contact_number,
-          s.course_id,
-          s.student_id AS role_id,
-          sp.address,
-          s.dob AS DOB
-        FROM students s
-        LEFT JOIN studentpersonaldetails sp
-          ON s.student_id = sp.student_id
-        WHERE s.user_id = :user_id
-          AND s.course_id = :course_id
-      `;
-    }
+    if (role === "Student") {
+      const student = await Student.findOne({
+        where: { user_id: uid },
+        include: [
+          { model: Course, attributes: ["course_name"] },
+          { model: Department, attributes: ["department_name"] },
+          { model: Class, attributes: ["class_id", "semester", "academic_year"] }
+        ]
+      });
 
-    else {
-      return res.status(403).json({
-        success: false,
-        message: "Invalid role",
+      if (!student) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found"
+        });
+      }
+
+      const personal = await StudentPersonalDetails.findOne({
+        where: { student_id: student.student_id }
+      });
+
+      return res.json({
+        success: true,
+        role: "Student",
+        data: {
+          profile: {
+            student_id: student.student_id,
+            name: student.name,
+            email: student.email,
+            gender: student.gender,
+            dob: student.dob
+          },
+          academic: {
+            course: student.Course?.course_name || null,
+            department: student.Department?.department_name || null,
+            class: student.Class?.class_id || null,
+            semester: student.Class?.semester || null,
+            academic_year: student.Class?.academic_year || null,
+            admission_year: student.admission_year,
+            year_of_study: student.year_of_study
+          },
+          personal: personal
+            ? {
+                parent_name: personal.parent_name,
+                parent_contact: personal.parent_contact,
+                address: personal.address,
+                emergency_contact: personal.emergency_contact,
+                adharCard_number: personal.adharCard_number
+              }
+            : null
+        }
       });
     }
 
-    const profile = await sequelize.query(query, {
-      replacements,
-      type: Sequelize.QueryTypes.SELECT,
-      plain: true,
-    });
+    // ================= ADMIN =================
+    if (role === "Admin") {
+      const admin = await Admin.findOne({
+        where: { user_id: uid },
+        include: [
+          { model: Course, attributes: ["course_name"] }
+        ]
+      });
 
-    if (!profile) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found",
+      if (!admin) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found"
+        });
+      }
+
+      const personal = await EmployeePersonalDetails.findOne({
+        where: { employeePersonal_id: admin.admin_id }
+      });
+
+      return res.json({
+        success: true,
+        role: "Admin",
+        data: {
+          profile: {
+            admin_id: admin.admin_id,
+            name: admin.name,
+            email: admin.email,
+            contact_number: admin.contact_number
+          },
+          work: {
+            course: admin.Course?.course_name || null
+          },
+          personal: personal
+            ? {
+                address: personal.address,
+                qualification: personal.qualification,
+                experience: personal.experience,
+                adherCard_number: personal.adherCard_number,
+                emergency_contact: personal.emergency_contact,
+                alternate_email: personal.alternate_email,
+                dob: personal.DOB
+              }
+            : null
+        }
       });
     }
-    const formattedProfile = {
-  ...profile,
-  DOB: profile.DOB
-    ? new Date(profile.DOB).toISOString().split("T")[0]
-    : null
-};
 
+    // ================= FACULTY =================
+    if (role === "Faculty") {
+      const faculty = await Faculty.findOne({
+        where: { user_id: uid },
+        include: [
+          { model: Course, attributes: ["course_name"] }
+        ]
+      });
 
-    return res.status(200).json({
-      success: true,
-      role,
-      profile:formattedProfile,
+      if (!faculty) {
+        return res.status(404).json({
+          success: false,
+          message: "Faculty not found"
+        });
+      }
+
+      const personal = await EmployeePersonalDetails.findOne({
+        where: { employeePersonal_id: faculty.faculty_id }
+      });
+
+      return res.json({
+        success: true,
+        role: "Faculty",
+        data: {
+          profile: {
+            faculty_id: faculty.faculty_id,
+            name: faculty.name,
+            email: faculty.email,
+            phone: faculty.phone
+          },
+          work: {
+            course: faculty.Course?.course_name || null
+          },
+          personal: personal
+            ? {
+                address: personal.address,
+                qualification: personal.qualification,
+                experience: personal.experience,
+                adherCard_number: personal.adherCard_number,
+                emergency_contact: personal.emergency_contact,
+                alternate_email: personal.alternate_email,
+                dob: personal.DOB
+              }
+            : null
+        }
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Invalid role"
     });
 
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    console.error("Profile error:", error);
     return res.status(500).json({
       success: false,
-      error: error.message,
+      message: "Internal server error",
+      error: error.message
     });
   }
 };
@@ -369,6 +430,195 @@ export const changePassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: error.message,
+    });
+  }
+};
+export const updateMyProfile = async (req, res) => {
+  try {
+    const { role, uid } = req.user;
+    const { profile, academic, personal } = req.body;
+
+    if (!role || !uid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid token"
+      });
+    }
+
+    // ================= STUDENT =================
+    if (role === "Student") {
+      const student = await Student.findOne({
+        where: { user_id: uid }
+      });
+
+      if (!student) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found"
+        });
+      }
+
+      // 🔹 Update main profile
+      await student.update({
+        name: profile?.name ?? student.name,
+        email: profile?.email ?? student.email,
+        gender: profile?.gender ?? student.gender,
+        dob: profile?.dob ?? student.dob,
+        year_of_study: academic?.year_of_study ?? student.year_of_study
+      });
+
+      // 🔹 Update / Create personal details
+      let personalData = await StudentPersonalDetails.findOne({
+        where: { student_id: student.student_id }
+      });
+
+      if (personalData) {
+        await personalData.update({
+          parent_name: personal?.parent_name ?? personalData.parent_name,
+          parent_contact: personal?.parent_contact ?? personalData.parent_contact,
+          address: personal?.address ?? personalData.address,
+          emergency_contact: personal?.emergency_contact ?? personalData.emergency_contact,
+          adharCard_number: personal?.adharCard_number ?? personalData.adharCard_number
+        });
+      } else {
+        personalData = await StudentPersonalDetails.create({
+          studentPersonal_id: student.student_id,
+          student_id: student.student_id,
+          parent_name: personal?.parent_name,
+          parent_contact: personal?.parent_contact,
+          address: personal?.address,
+          emergency_contact: personal?.emergency_contact,
+          adharCard_number: personal?.adharCard_number
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Student profile updated successfully"
+      });
+    }
+
+    // ================= ADMIN =================
+    if (role === "Admin") {
+      const admin = await Admin.findOne({
+        where: { user_id: uid }
+      });
+
+      if (!admin) {
+        return res.status(404).json({
+          success: false,
+          message: "Admin not found"
+        });
+      }
+
+      // 🔹 Update main
+      await admin.update({
+        name: profile?.name ?? admin.name,
+        email: profile?.email ?? admin.email,
+        contact_number: profile?.contact_number ?? admin.contact_number
+      });
+
+      // 🔹 Personal
+      let personalData = await EmployeePersonalDetails.findOne({
+        where: { employeePersonal_id: admin.admin_id }
+      });
+
+      if (personalData) {
+        await personalData.update({
+          address: personal?.address ?? personalData.address,
+          qualification: personal?.qualification ?? personalData.qualification,
+          experience: personal?.experience ?? personalData.experience,
+          adherCard_number: personal?.adherCard_number ?? personalData.adherCard_number,
+          emergency_contact: personal?.emergency_contact ?? personalData.emergency_contact,
+          alternate_email: personal?.alternate_email ?? personalData.alternate_email,
+          DOB: personal?.dob ?? personalData.DOB
+        });
+      } else {
+        personalData = await EmployeePersonalDetails.create({
+          employeePersonal_id: admin.admin_id,
+          user_id: uid,
+          address: personal?.address,
+          qualification: personal?.qualification,
+          experience: personal?.experience,
+          adherCard_number: personal?.adherCard_number,
+          emergency_contact: personal?.emergency_contact,
+          alternate_email: personal?.alternate_email,
+          DOB: personal?.dob
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Admin profile updated successfully"
+      });
+    }
+
+    // ================= FACULTY =================
+    if (role === "Faculty") {
+      const faculty = await Faculty.findOne({
+        where: { user_id: uid }
+      });
+
+      if (!faculty) {
+        return res.status(404).json({
+          success: false,
+          message: "Faculty not found"
+        });
+      }
+
+      // 🔹 Update main
+      await faculty.update({
+        name: profile?.name ?? faculty.name,
+        email: profile?.email ?? faculty.email,
+        phone: profile?.phone ?? faculty.phone
+      });
+
+      // 🔹 Personal
+      let personalData = await EmployeePersonalDetails.findOne({
+        where: { employeePersonal_id: faculty.faculty_id }
+      });
+
+      if (personalData) {
+        await personalData.update({
+          address: personal?.address ?? personalData.address,
+          qualification: personal?.qualification ?? personalData.qualification,
+          experience: personal?.experience ?? personalData.experience,
+          adherCard_number: personal?.adherCard_number ?? personalData.adherCard_number,
+          emergency_contact: personal?.emergency_contact ?? personalData.emergency_contact,
+          alternate_email: personal?.alternate_email ?? personalData.alternate_email,
+          DOB: personal?.dob ?? personalData.DOB
+        });
+      } else {
+        personalData = await EmployeePersonalDetails.create({
+          employeePersonal_id: faculty.faculty_id,
+          user_id: uid,
+          address: personal?.address,
+          qualification: personal?.qualification,
+          experience: personal?.experience,
+          adherCard_number: personal?.adherCard_number,
+          emergency_contact: personal?.emergency_contact,
+          alternate_email: personal?.alternate_email,
+          DOB: personal?.dob
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Faculty profile updated successfully"
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Invalid role"
+    });
+
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
     });
   }
 };

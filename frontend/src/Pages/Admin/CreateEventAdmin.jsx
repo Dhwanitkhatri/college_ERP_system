@@ -32,7 +32,7 @@ export default function CreateEventAdmin() {
       alert("event created");
     }).catch((errors)=>{
       console.log(errors);
-      alert("not created");
+      alert(errors);
     })
   };
  

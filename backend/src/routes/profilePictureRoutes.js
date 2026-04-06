@@ -7,7 +7,8 @@ import {
     getProfilePicture,
     deleteProfilePicture,
     profileInfoAdmin,
-    changePassword
+    changePassword,
+    updateMyProfile
 } from "../controllers/profilePictureController.js";
 
 const router = express.Router();
@@ -29,4 +30,5 @@ router.get("/adminInfo",authMiddleware,profileInfoAdmin);
 
 router.put("/change-password",authMiddleware,changePassword);
 
+router.put("/update-my-profile",authMiddleware,updateMyProfile)
 export default router;
