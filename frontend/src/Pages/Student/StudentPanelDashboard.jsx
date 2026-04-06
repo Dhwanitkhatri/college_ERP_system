@@ -15,7 +15,7 @@ const AdminPanelDashboard = () => {
       <DashContentPanelDashboard>
         <ActionContainerDashboard title="Account & Credentials">
           <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
-          <Link to="ManageProfileAdmin">
+          <Link to="ManageProfileStudent">
             <ActionButtonDashboard title="Manage Profile" />
           </Link>
           <Link to="PrintFeeReceiptStudent"><ActionButtonDashboard title="Print Fee Chalan" /></Link>

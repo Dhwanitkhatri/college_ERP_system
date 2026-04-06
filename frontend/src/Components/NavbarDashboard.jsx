@@ -3,9 +3,19 @@ import { X, Bell, CircleUserRound, Menu } from "lucide-react";
 import ThemeButton from "../ui/Buttons/ThemeButton";
 import { useSidebar } from "../context/SidebarContext";
 import { Link } from "react-router-dom";
+import { getUserRole } from "../utils/auth";
 
 const NavbarDashboard = ({ userRole, userName }) => {
   const { sidebarOpen, toggleSidebar } = useSidebar();
+  const role = getUserRole();
+
+  // decide profile route based on role
+  const profileRoute =
+  role === "Admin"
+    ? "/admin/Dashboard/ManageProfileAdmin"
+    : role === "Faculty"
+    ? "/faculty/dashboard/ManageProfileAdmin"
+    : "/student/dashboard/ManageProfileStudent";
   return (
     <div
       className="navMainDiv theme-transition bg-[var(--navbar-bg)] dark:bg-[var(--navbar-bg)] 
@@ -42,7 +52,7 @@ const NavbarDashboard = ({ userRole, userName }) => {
         <ThemeButton />
 
         {/* User Info */}
-        <Link to="ManageProfileAdmin">
+        <Link to={profileRoute}>
           <div className="navUserInfoDiv border-l-[0.8px] dark:border-gray-700 flex items-center gap-4 pl-4 hover:bg-[var(--bg-hover)] rounded-md">
             <div>
               <p className="text-right font-medium text-black dark:text-white">

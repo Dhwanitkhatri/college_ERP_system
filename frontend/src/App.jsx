@@ -163,6 +163,9 @@ const ViewExamResultStudent = lazy(
 const PrintFeeReceiptStudent = lazy(
   () => import("./Pages/Student/PrintFeeReceiptStudent"),
 );
+const ManageProfileStudent = lazy(
+  () => import("./Pages/Student/ManageProfileStudent"),
+);
 
 const router = createBrowserRouter([
   {
@@ -462,10 +465,6 @@ const router = createBrowserRouter([
         element: <Classroom />,
       },
       {
-        path: "ManageProfileAdmin",
-        element: <ManageProfileAdmin />,
-      },
-      {
         path: "Events",
         element: <Events />,
       },
@@ -509,6 +508,10 @@ const router = createBrowserRouter([
         path: "ViewSessionPlanFaculty",
         element: <ViewSessionPlanFaculty />,
       },
+      {
+        path: "ManageProfileStudent",
+        element: <ManageProfileStudent />,
+      }
     ],
   },
   {
