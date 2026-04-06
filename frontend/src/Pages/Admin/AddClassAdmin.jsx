@@ -6,9 +6,12 @@ import { set, useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import api from "../../api/axios.js";
+import { useToast } from "../../context/ToastContext";
 
 const AddClassAdmin = () => {
   const [addedClass, setAddedClass] = useState(null);
+  const { showToast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -67,16 +70,14 @@ const AddClassAdmin = () => {
     const token = localStorage.getItem("token");
     console.log(data);
     try {
-      await api.post(
-        "api/classes",
-        {
-          year: data.year,
-          semester: data.semester,
-          sections: data.section,
-          academic_year: data.academicYear,
-          mentor_id: data.classMentor,
-        },
-      );
+      setIsSubmitting(true);
+      await api.post("api/classes", {
+        year: data.year,
+        semester: data.semester,
+        sections: data.section,
+        academic_year: data.academicYear,
+        mentor_id: data.classMentor,
+      });
       setAddedClass({
         year: data.year,
         semester: data.semester,
@@ -84,14 +85,18 @@ const AddClassAdmin = () => {
         academic_year: data.academicYear,
         mentor_id: data.classMentor,
       });
-      alert("Class created successfully");
+      showToast("Class created successfully", "success");
     } catch (error) {
       console.error("Error creating class:", error);
 
-      alert(
+      const message =
         error.response?.data?.message ||
-          "Failed to create class. Please try again.",
-      );
+        error.response?.data?.error ||
+        "Failed to create class ❌";
+
+      showToast(message, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -216,32 +221,42 @@ const AddClassAdmin = () => {
           </div>
           {/* button */}
           <div className="form-actions">
-            <AddButton type="submit" />
+            <AddButton
+              type="submit"
+              disabled={isSubmitting}
+              text={isSubmitting ? "Creating..." : "Add Class"}
+            />
             <CancelButton type="button" onClick={handleCancel} />
           </div>
         </form>
       </DashboardChildPageCard>
       {addedClass && (
         <DashboardChildPageCard className="mt-3">
-          <h2 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">Class Added Successfully!</h2>
+          <h2 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
+            Class Added Successfully!
+          </h2>
           <div className="space-y-1 text-sm text-[var(--text-secondary)]">
             <p>
               <span className="font-medium">Year:</span> {addedClass.year}
             </p>
             <p>
-              <span className="font-medium">Semester:</span> {addedClass.semester}
+              <span className="font-medium">Semester:</span>{" "}
+              {addedClass.semester}
             </p>
             <p>
               <span className="font-medium">Section:</span> {addedClass.section}
             </p>
             <p>
-              <span className="font-medium">Academic Year:</span> {addedClass.academic_year}
+              <span className="font-medium">Academic Year:</span>{" "}
+              {addedClass.academic_year}
             </p>
             <p>
-              <span className="font-medium">Class Mentor ID:</span> {addedClass.mentor_id}
+              <span className="font-medium">Class Mentor ID:</span>{" "}
+              {addedClass.mentor_id}
             </p>
           </div>
-        </DashboardChildPageCard>)}
+        </DashboardChildPageCard>
+      )}
     </DashboardChildPageTemplate>
   );
 };

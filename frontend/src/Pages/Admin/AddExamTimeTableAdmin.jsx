@@ -6,15 +6,16 @@ import AddButton from "../../ui/Buttons/AddButton";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import api from "../../api/axios";
 import { useEffect } from "react";
-
+import { useToast } from "../../context/ToastContext";
 
 const AddExamTimeTableAdmin = () => {
-
   // Store created timetable entry for success card
   const [createdTimetable, setCreatedTimetable] = useState(null);
   const today = new Date().toISOString().split("T")[0];
   const [Subjects, setSubjects] = useState([]);
-  const [exams , setExams] = useState([]);
+  const [exams, setExams] = useState([]);
+  const { showToast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // React Hook Form
   const {
     register,
@@ -27,25 +28,29 @@ const AddExamTimeTableAdmin = () => {
   // Watch start_time for validation
   const startTime = watch("start_time");
 
-  // fetch the subejcts for the timetable 
-  useEffect(()=>{
-    api.get("/api/components/subjects")
-    .then((res)=>{
-      setSubjects(res.data);
-    }).catch((error)=>{
-      console.log(error)
-    })
-  },[])
+  // fetch the subejcts for the timetable
+  useEffect(() => {
+    api
+      .get("/api/components/subjects")
+      .then((res) => {
+        setSubjects(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
-  useEffect(()=>{
-    api.get("/api/exams/current-year-exam")
-    .then((res)=>{
-      console.log(res);
-      setExams(res.data);
-    }).catch((error)=>{
-      console.log(error);
-    })
-  },[])
+  useEffect(() => {
+    api
+      .get("/api/exams/current-year-exam")
+      .then((res) => {
+        console.log(res);
+        setExams(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
   // Cancel handler
   const handleCancel = () => {
     reset();
@@ -55,27 +60,31 @@ const AddExamTimeTableAdmin = () => {
   // Submit handler
   async function onSubmit(data) {
     try {
+      setIsSubmitting(true);
       const token = localStorage.getItem("token");
 
-      const res = await api.post(
-        "/api/exam-timetable/",
-        {
-          exam_id: data.exam_id,
-          subject_id: data.subject_id,
-          exam_date: data.exam_date,
-          start_time: data.start_time || null,
-          end_time: data.end_time || null,
-        }
-      );
+      const res = await api.post("/api/exam-timetable/", {
+        exam_id: data.exam_id,
+        subject_id: data.subject_id,
+        exam_date: data.exam_date,
+        start_time: data.start_time || null,
+        end_time: data.end_time || null,
+      });
 
-      alert("Timetable Added Successfully");
-
+      showToast("Timetable added successfully 🎉", "success");
       setCreatedTimetable(res.data.data);
-
       reset();
-
     } catch (error) {
-      alert(error?.response?.data?.message || "Error Adding Timetable");
+      console.error(error);
+
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Error adding timetable ❌";
+
+      showToast(message, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -85,9 +94,7 @@ const AddExamTimeTableAdmin = () => {
       desc="Assign subjects to an exam with date and time"
     >
       <DashboardChildPageCard>
-
         <form onSubmit={handleSubmit(onSubmit)}>
-
           {/* EXAM ID */}
           <div className="form-field">
             <label className="custom-label">Exam ID</label>
@@ -100,8 +107,10 @@ const AddExamTimeTableAdmin = () => {
             >
               <option value="">Select Exam ID</option>
               {/* In a real app, this would be populated dynamically from the backend */}
-              {exams.map((exam)=>(
-                <option value={exam.exam_id}>{exam.name} - {exam.exam_id}</option>
+              {exams.map((exam) => (
+                <option value={exam.exam_id}>
+                  {exam.name} - {exam.exam_id}
+                </option>
               ))}
             </select>
             {errors.exam_id && (
@@ -121,10 +130,12 @@ const AddExamTimeTableAdmin = () => {
             >
               <option value="">Select Subject ID</option>
               {/* In a real app, this would be populated dynamically from the backend */}
-            
-               {Subjects.map((subject)=>(
-              <option value={subject.subject_id}>{subject.subject_name} - {subject.subject_id}</option>
-             ))}
+
+              {Subjects.map((subject) => (
+                <option value={subject.subject_id}>
+                  {subject.subject_name} - {subject.subject_id}
+                </option>
+              ))}
             </select>
             {errors.subject_id && (
               <p className="custom-error">{errors.subject_id.message}</p>
@@ -178,10 +189,13 @@ const AddExamTimeTableAdmin = () => {
 
           {/* ACTION BUTTONS */}
           <div className="form-actions">
-            <AddButton />
+            <AddButton
+              disabled={isSubmitting}
+              text="Add Timetable"
+              loadingText="Adding..."
+            />
             <CancelButton onClick={handleCancel} />
           </div>
-
         </form>
       </DashboardChildPageCard>
 
@@ -194,19 +208,24 @@ const AddExamTimeTableAdmin = () => {
 
           <div className="space-y-1 text-sm text-[var(--text-secondary)]">
             <p>
-              <span className="font-medium">Exam ID:</span> {createdTimetable.exam_id}
+              <span className="font-medium">Exam ID:</span>{" "}
+              {createdTimetable.exam_id}
             </p>
             <p>
-              <span className="font-medium">Subject ID:</span> {createdTimetable.subject_id}
+              <span className="font-medium">Subject ID:</span>{" "}
+              {createdTimetable.subject_id}
             </p>
             <p>
-              <span className="font-medium">Exam Date:</span> {createdTimetable.exam_date}
+              <span className="font-medium">Exam Date:</span>{" "}
+              {createdTimetable.exam_date}
             </p>
             <p>
-              <span className="font-medium">Start Time:</span> {createdTimetable.start_time || "Not Set"}
+              <span className="font-medium">Start Time:</span>{" "}
+              {createdTimetable.start_time || "Not Set"}
             </p>
             <p>
-              <span className="font-medium">End Time:</span> {createdTimetable.end_time || "Not Set"}
+              <span className="font-medium">End Time:</span>{" "}
+              {createdTimetable.end_time || "Not Set"}
             </p>
           </div>
         </DashboardChildPageCard>
