@@ -4,6 +4,7 @@ import { Calendar, Clock, MapPin, Users, Pencil, Trash2 } from "lucide-react";
 const EventCard = ({ 
   event_id,
   title, 
+  category,
   description, 
   date, 
   time, 
@@ -21,7 +22,7 @@ const EventCard = ({
         bg-gray-100 text-gray-900 border-gray-200 
         dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
       >
-        Cultural
+        {category}
       </span>
 
       <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">

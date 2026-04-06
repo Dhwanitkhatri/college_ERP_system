@@ -82,6 +82,7 @@ export default function Events() {
               <EventCard
                 key={event.event_id}
                 event_id={event.event_id}
+                category={event.category}
                 title={event.title}
                 description={event.description}
                 date={event.event_date}
