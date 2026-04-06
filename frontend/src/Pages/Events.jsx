@@ -14,12 +14,11 @@ export default function Events() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    
-
     /* ===== Get role from token ===== */
     const role = getUserRole();
 
-    if (role === "Admin") {   // ✅ case fixed
+    if (role === "Admin") {
+      // ✅ case fixed
       setIsAdmin(true);
     }
 
@@ -43,8 +42,6 @@ export default function Events() {
     );
     if (!confirmDelete) return;
 
-   
-
     api
       .delete(`/api/event/${id}`)
       .then(() => {
@@ -57,30 +54,47 @@ export default function Events() {
       });
   };
 
-
-
   return (
     <DashboardChildPageTemplate
       title="Event Schedule"
       desc="Stay updated with all upcoming college events and activities"
       width="max-w-7xl"
     >
-      <div className="gridDiv grid grid-cols-1 md:grid-cols-2 gap-6 pb-10">
-        {events.map((event) => (
-          <EventCard
-            key={event.event_id}
-            event_id={event.event_id}
-            title={event.title}
-            description={event.description}
-            date={event.event_date}
-            time={event.event_time}
-            location={event.location}
-            attendees={event.attendees}
-            isAdmin={isAdmin}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
+      <div className="pb-10">
+        {events.length === 0 ? (
+          // ✅ EMPTY STATE UI
+          <div
+            className="flex flex-col items-center justify-center text-center py-16 px-4 rounded-lg border theme-transition
+      bg-[var(--bg-secondary)] border-[var(--border-light)]"
+          >
+            <p className="text-lg font-semibold text-[var(--text-primary)]">
+              No Events Available
+            </p>
+
+            <p className="text-sm mt-2 text-[var(--text-muted)]">
+              There are currently no events scheduled. Please check back later.
+            </p>
+          </div>
+        ) : (
+          // ✅ EVENTS GRID
+          <div className="gridDiv grid grid-cols-1 md:grid-cols-2 gap-6">
+            {events.map((event) => (
+              <EventCard
+                key={event.event_id}
+                event_id={event.event_id}
+                title={event.title}
+                description={event.description}
+                date={event.event_date}
+                time={event.event_time}
+                location={event.location}
+                attendees={event.attendees}
+                isAdmin={isAdmin}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </DashboardChildPageTemplate>
   );
