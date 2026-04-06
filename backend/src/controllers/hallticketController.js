@@ -118,52 +118,84 @@ export const getMyHallTickets = async (req, res) => {
     const user_id = req.user?.uid;
     let { academic_year, semester, exam_type, exam_id } = req.query;
 
+    // =========================
+    // AUTH CHECK
+    // =========================
     if (!user_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-    if (req.user?.role !== 'Student') {
+
+    if (req.user?.role !== "Student") {
       return res.status(403).json({ success: false, message: "Access denied: Students only" });
     }
 
-    // Get student with class details
+    // =========================
+    // GET STUDENT
+    // =========================
     const student = await Student.findOne({
       where: { user_id },
-      include: [{ model: Class, attributes: ["semester", "class_id", "section", "course_id","academic_year"] }]
+      include: [
+        {
+          model: Class,
+          attributes: ["semester", "class_id", "section", "course_id", "academic_year"]
+        }
+      ]
     });
+
     if (!student) {
       return res.status(404).json({ success: false, message: "Student profile not found" });
     }
+
     const course_id = student.Class?.course_id;
-    const studentSemester = student.Class?.semester;
-    const studentAcademicYear = student.Class?.academic_year;
-   
-    if (!course_id || !studentSemester || !studentAcademicYear) {
-      return res.status(400).json({ success: false, message: "Student not fully assigned to a class" });
+
+    if (!course_id) {
+      return res.status(400).json({ success: false, message: "Student not assigned to course" });
     }
 
-    // Default to student's current academic year and semester if not provided
-   
+    // =========================
+    // VALIDATION (Dropdown Required)
+    // =========================
+    if (!exam_id && (!semester || !academic_year || !exam_type)) {
+      return res.status(400).json({
+        success: false,
+        message: "semester, academic_year and exam_type are required"
+      });
+    }
 
-    // Build exam filter
-    const examWhere = { course_id };
+    // =========================
+    // BUILD EXAM FILTER
+    // =========================
+    const examWhere = {
+      course_id,
+      //status: "PUBLISHED"
+    };
+
     if (exam_id) {
       examWhere.exam_id = Number(exam_id);
     } else {
       examWhere.semester = Number(semester);
-      if (exam_type) examWhere.exam_type = exam_type;
+      examWhere.academic_year = academic_year;
+      examWhere.exam_type = exam_type;
     }
-console.log(examWhere);
+
+    // =========================
+    // GET EXAMS
+    // =========================
     const exams = await Exam.findAll({ where: examWhere });
 
     if (!exams.length) {
-      return res.status(404).json({ success: false, message: "No exams found matching the criteria" });
+      return res.status(404).json({
+        success: false,
+        message: "No exams found"
+      });
     }
 
     const hallTickets = [];
 
+    // =========================
+    // LOOP EXAMS
+    // =========================
     for (const exam of exams) {
-      // For each exam, check if it belongs to the student's semester (already filtered) and academic year (implicitly via class)
-      // We'll proceed; academic year is not in exam, but we already set it via student's class.
 
       const timetable = await ExamTimetable.findAll({
         where: { exam_id: exam.exam_id },
@@ -186,13 +218,14 @@ console.log(examWhere);
           enrollment_no: student.enrollment_no,
           class: student.Class?.class_id,
           section: student.Class?.section,
-          academic_year: studentAcademicYear
+          academic_year: academic_year
         },
         exam: {
           exam_id: exam.exam_id,
           name: exam.name,
           exam_type: exam.exam_type,
-          semester: exam.semester
+          semester: exam.semester,
+          academic_year: exam.academic_year
         },
         schedule: timetable.map(entry => ({
           subject_id: entry.Subject.subject_id,
@@ -205,14 +238,28 @@ console.log(examWhere);
       });
     }
 
+    // =========================
+    // FINAL RESPONSE
+    // =========================
     if (!hallTickets.length) {
-      return res.status(404).json({ success: false, message: "No hall tickets found for the given filters" });
+      return res.status(404).json({
+        success: false,
+        message: "No hall tickets found"
+      });
     }
 
-    res.json({ success: true, data: hallTickets });
+    return res.status(200).json({
+      success: true,
+      count: hallTickets.length,
+      data: hallTickets
+    });
+
   } catch (error) {
     console.error("Error fetching hall tickets:", error);
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 
@@ -234,7 +281,7 @@ export const getExamsBySemesterAndAcademic = async (req, res) => {
         semester: semester,
         academic_year: academic_year,
         course_id,
-        status : "PUBLISHED",
+       
         exam_type:exam_type
       },
       attributes: [

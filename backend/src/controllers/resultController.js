@@ -329,7 +329,7 @@ export const generateBulkResults = async (req, res) => {
 
     const exam = await Exam.findOne({ where: { exam_id, course_id } });
     if (!exam) throw new Error("Exam not found or not in your course");
-    if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
+    // if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
 
     const students = await Student.findAll({
       include: [{

@@ -325,6 +325,16 @@ SessionPlanning.belongsTo(Class, {
      
 });
 
+Student.hasMany(StudentMarks, {
+  foreignKey: "student_id",
+  sourceKey: "student_id"
+});
+
+Student.hasMany(SubjectResult, {
+  foreignKey: "student_id",
+  sourceKey: "student_id"
+});
+
 
 
 
