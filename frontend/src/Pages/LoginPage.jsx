@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../api/axios.js";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import ThemeButton from "../ui/Buttons/ThemeButton.jsx";
 import { saveUser } from "../utils/auth.js";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import { getUserRole } from "../utils/auth";
 
 function LoginPage() {
   const navigate = useNavigate(); //for navigation
 
+  useEffect(() => {
+  const role = getUserRole();
+
+  if (role) {
+    const pathMap = {
+      Admin: "/admin/dashboard",
+      Faculty: "/faculty/dashboard",
+      Student: "/student/dashboard",
+    };
+
+    navigate(pathMap[role]);
+  }
+}, []);
   const {
     //react hook form
     register,
