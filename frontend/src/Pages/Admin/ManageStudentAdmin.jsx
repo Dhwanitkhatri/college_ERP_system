@@ -8,12 +8,26 @@ import { useNavigate } from "react-router-dom";
 import api from "../../api/axios.js";
 
 const ManageStudentAdmin = () => {
-
   const navigate = useNavigate(); //for navigating
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null); // Row action loading state
+  const [searchTerm, setSearchTerm] = useState(""); // Search term state
+  const filteredStudents = students.filter((student) => {
+    const term = searchTerm.toLowerCase();
+
+    return (
+      student.name?.toLowerCase().includes(term) ||
+      student.email?.toLowerCase().includes(term) ||
+      String(student.student_id || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(student.year_of_study || "")
+        .toLowerCase()
+        .includes(term)
+    );
+  });
 
   // Fetch all students when component loads
   useEffect(() => {
@@ -28,7 +42,7 @@ const ManageStudentAdmin = () => {
         setLoading(false);
         console.error(
           "Error fetching students:",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       });
   }, []);
@@ -40,7 +54,7 @@ const ManageStudentAdmin = () => {
   const deleteStudent = async (id) => {
     if (
       !window.confirm(
-        "Are you sure you want to permanently delete this student?"
+        "Are you sure you want to permanently delete this student?",
       )
     )
       return;
@@ -57,7 +71,7 @@ const ManageStudentAdmin = () => {
     } catch (err) {
       console.error(
         "Error deleting student:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
     } finally {
       setActionLoading(null); // Stop row loading
@@ -74,11 +88,7 @@ const ManageStudentAdmin = () => {
     try {
       setActionLoading(userId); // Start row loading
 
-      const res = await api.put(
-        `api/students/active-inactive/${userId}`,
-        {},
-  
-      );
+      const res = await api.put(`api/students/active-inactive/${userId}`, {});
 
       console.log("Status updated:", res.data);
 
@@ -93,13 +103,13 @@ const ManageStudentAdmin = () => {
                   status: res.data.status,
                 },
               }
-            : student
-        )
+            : student,
+        ),
       );
     } catch (err) {
       console.error(
         "Error updating status:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
     } finally {
       setActionLoading(null); // Stop row loading
@@ -113,6 +123,8 @@ const ManageStudentAdmin = () => {
         desc="View, edit, and manage student records"
         searchDesc="Search by name or roll no.."
         addLink="/admin/dashboard/AddStudentAdmin"
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
       >
         <table className="w-full border table-wrapper border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead className="bg-gray-100 dark:bg-gray-800">
@@ -140,14 +152,14 @@ const ManageStudentAdmin = () => {
                   </div>
                 </td>
               </tr>
-            ) : students.length === 0 ? (
+            ) : filteredStudents.length === 0 ? (
               <tr>
                 <td colSpan="6" className="table-row-style text-center">
-                  No students found.
+                  No results found for "{searchTerm}"
                 </td>
               </tr>
             ) : (
-              students.map((student) => (
+              filteredStudents.map((student) => (
                 <tr
                   key={student.id}
                   className="hover:bg-[var(--bg-hover)] transition"
@@ -157,13 +169,9 @@ const ManageStudentAdmin = () => {
                     {student.student_id}
                   </td>
 
-                  <td className="table-row-style">
-                    {student.name}
-                  </td>
+                  <td className="table-row-style">{student.name}</td>
 
-                  <td className="table-row-style">
-                    {student.year_of_study}
-                  </td>
+                  <td className="table-row-style">{student.year_of_study}</td>
 
                   <td className="table-row-style break-words">
                     {student.email}
@@ -189,7 +197,7 @@ const ManageStudentAdmin = () => {
                         disabled={actionLoading === student.id}
                         onClick={() =>
                           navigate(
-                            `/admin/Dashboard/EditStudentAdmin/${student.id}`
+                            `/admin/Dashboard/EditStudentAdmin/${student.id}`,
                           )
                         }
                       />
@@ -197,9 +205,7 @@ const ManageStudentAdmin = () => {
                       <ActivateDeactivateButton
                         status={student.User?.status}
                         disabled={actionLoading === student.user_id}
-                        onClick={() =>
-                          toggleStudentStatus(student.user_id)
-                        }
+                        onClick={() => toggleStudentStatus(student.user_id)}
                       />
 
                       <DeleteButton

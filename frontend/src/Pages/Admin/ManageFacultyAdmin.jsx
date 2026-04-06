@@ -7,12 +7,23 @@ import { useNavigate } from "react-router-dom";
 import ActivateDeactivateButton from "../../ui/Buttons/ActivateDeactivateButton.jsx";
 
 const ManageFacultyAdmin = () => {
-
   const navigate = useNavigate(); // this is for navigating
 
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true); // Page loading state
   const [actionLoading, setActionLoading] = useState(null); // Row action loading state
+  const [searchTerm, setSearchTerm] = useState(""); // Search term state
+  const filteredFaculties = faculties.filter((faculty) => {
+    // Filter faculties based on search term
+    const term = searchTerm.toLowerCase();
+
+    return (
+      faculty.name?.toLowerCase().includes(term) ||
+      faculty.email?.toLowerCase().includes(term) ||
+      faculty.faculty_id?.toLowerCase().includes(term) ||
+      faculty.phone?.toLowerCase().includes(term)
+    );
+  });
 
   // Fetch all faculties when component loads
   useEffect(() => {
@@ -25,7 +36,7 @@ const ManageFacultyAdmin = () => {
       } catch (err) {
         console.error(
           "Error fetching faculties:",
-          err.response?.data || err.message
+          err.response?.data || err.message,
         );
       } finally {
         setLoading(false); // Stop loading after API completes
@@ -45,10 +56,7 @@ const ManageFacultyAdmin = () => {
     try {
       setActionLoading(userId); // Start row loading
 
-      const res = await api.put(
-        `api/faculties/active-inactive/${userId}`,
-        {},
-      );
+      const res = await api.put(`api/faculties/active-inactive/${userId}`, {});
 
       console.log("Status updated:", res.data);
 
@@ -63,13 +71,13 @@ const ManageFacultyAdmin = () => {
                   status: res.data.status,
                 },
               }
-            : faculty
-        )
+            : faculty,
+        ),
       );
     } catch (err) {
       console.error(
         "Error updating status:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
     } finally {
       setActionLoading(null); // Stop row loading
@@ -83,7 +91,7 @@ const ManageFacultyAdmin = () => {
   const deleteFaculty = async (facultyId) => {
     if (
       !window.confirm(
-        "Are you sure you want to permanently delete this faculty?"
+        "Are you sure you want to permanently delete this faculty?",
       )
     )
       return;
@@ -91,20 +99,18 @@ const ManageFacultyAdmin = () => {
     try {
       setActionLoading(facultyId); // Start row loading
 
-      await api.delete(`api/faculties/${facultyId}`, {
-       
-      });
+      await api.delete(`api/faculties/${facultyId}`, {});
 
       console.log("Faculty deleted successfully");
 
       // Remove from UI instantly (no reload)
       setFaculties((prev) =>
-        prev.filter((faculty) => faculty.id !== facultyId)
+        prev.filter((faculty) => faculty.id !== facultyId),
       );
     } catch (err) {
       console.error(
         "Error deleting faculty:",
-        err.response?.data || err.message
+        err.response?.data || err.message,
       );
     } finally {
       setActionLoading(null); // Stop row loading
@@ -118,6 +124,8 @@ const ManageFacultyAdmin = () => {
         desc="View, edit, and manage faculty members"
         searchDesc="Search by name or department.."
         addLink="/admin/dashboard/AddFacultyAdmin"
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
       >
         <table className="w-full border table-wrapper border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden">
           <thead className="bg-gray-100 dark:bg-gray-800">
@@ -144,15 +152,15 @@ const ManageFacultyAdmin = () => {
                   </div>
                 </td>
               </tr>
-            ) : faculties.length === 0 ? (
+            ) : filteredFaculties.length === 0 ? (
               /* Empty State */
               <tr>
                 <td colSpan="6" className="table-row-style text-center">
-                  No faculties found.
+                  No results found for "{searchTerm}"
                 </td>
               </tr>
             ) : (
-              faculties.map((faculty) => (
+              filteredFaculties.map((faculty) => (
                 <tr
                   key={faculty.id}
                   className="hover:bg-[var(--bg-hover)] transition"
@@ -164,9 +172,7 @@ const ManageFacultyAdmin = () => {
                     {faculty.faculty_id}
                   </td>
 
-                  <td className="table-row-style">
-                    {faculty.email}
-                  </td>
+                  <td className="table-row-style">{faculty.email}</td>
 
                   {/* Phone Column (wraps naturally) */}
                   <td className="table-row-style break-words">
@@ -186,13 +192,12 @@ const ManageFacultyAdmin = () => {
                     )}
                   </td>
 
-                  
                   <td className="table-row-style">
                     <div className="flex flex-wrap gap-2 items-center h-full">
                       <EditButton
                         onClick={() =>
                           navigate(
-                            `/admin/Dashboard/EditFacultyAdmin/${faculty.id}`
+                            `/admin/Dashboard/EditFacultyAdmin/${faculty.id}`,
                           )
                         }
                         disabled={actionLoading === faculty.id}
@@ -201,9 +206,7 @@ const ManageFacultyAdmin = () => {
                       <ActivateDeactivateButton
                         status={faculty.User?.status}
                         disabled={actionLoading === faculty.user_id}
-                        onClick={() =>
-                          toggleFacultyStatus(faculty.user_id)
-                        }
+                        onClick={() => toggleFacultyStatus(faculty.user_id)}
                       />
 
                       <DeleteButton
