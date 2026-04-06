@@ -7,6 +7,7 @@ import { Subject } from "../model/Subject.js";
 import { Op } from "sequelize";
 import { User } from "../model/User.js"
 import { sequelize } from "../config/db.js";
+import { Student } from "../model/Student.js";
 
 
 const generatePlanId = () => {
@@ -930,28 +931,107 @@ export const getSessionPlanBySubject = async (req, res) => {
     const user_id = req.user.uid;
     const { subjectId } = req.params;
 
-    if (role !== "Faculty") {
+    let sessions = [];
+
+    // =========================
+    // 👨‍🏫 FACULTY
+    // =========================
+    if (role === "Faculty") {
+      const facultyUser = await User.findOne({
+        where: { user_id },
+        attributes: ["username"]
+      });
+
+      if (!facultyUser) {
+        return res.status(404).json({
+          success: false,
+          message: "Faculty not found"
+        });
+      }
+
+      const faculty_id = facultyUser.username;
+
+      // Check subject assigned
+      const timetable = await Timetable.findOne({
+        where: {
+          faculty_id,
+          subject_id: subjectId
+        }
+      });
+
+      if (!timetable) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not assigned to this subject"
+        });
+      }
+
+      // Fetch session plans
+      sessions = await SessionPlanning.findAll({
+        where: {
+          faculty_id,
+          subject_id: subjectId
+        },
+        order: [["date", "ASC"], ["lecture_no", "ASC"]]
+      });
+    }
+
+    // =========================
+    // 👨‍🎓 STUDENT
+    // =========================
+    else if (role === "Student") {
+      const student = await Student.findOne({
+        where: { user_id },
+        attributes: ["student_id", "class_pk"]
+      });
+
+      if (!student) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found"
+        });
+      }
+
+      const class_pk = student.class_pk;
+
+      // Check subject exists in student's timetable
+      const timetable = await Timetable.findOne({
+        where: {
+          class_pk,
+          subject_id: subjectId
+        }
+      });
+
+      if (!timetable) {
+        return res.status(403).json({
+          success: false,
+          message: "Subject not assigned to your class"
+        });
+      }
+
+      // Fetch session plans (by class)
+      sessions = await SessionPlanning.findAll({
+        where: {
+          class_pk,
+          subject_id: subjectId
+        },
+        order: [["date", "ASC"], ["lecture_no", "ASC"]]
+      });
+    }
+
+    // =========================
+    // ❌ INVALID ROLE
+    // =========================
+    else {
       return res.status(403).json({
         success: false,
         message: "Access denied"
       });
     }
 
-    const facultyUser = await User.findOne({
-      where: { user_id },
-      attributes: ["username"]
-    });
-
-    if (!facultyUser) {
-      return res.status(404).json({
-        success: false,
-        message: "Faculty not found"
-      });
-    }
-
-    const faculty_id = facultyUser.username;
-
-    // Get subject name
+    // =========================
+    // 📚 SUBJECT NAME
+    // =========================
     const subject = await Subject.findOne({
       where: { subject_id: subjectId },
       attributes: ["subject_name"]
@@ -964,40 +1044,23 @@ export const getSessionPlanBySubject = async (req, res) => {
       });
     }
 
-    // Get timetable (to ensure subject is assigned to faculty)
-    const timetable = await Timetable.findOne({
-      where: {
-        faculty_id,
-        subject_id: subjectId
-      }
-    });
-
-    if (!timetable) {
-      return res.status(404).json({
-        success: false,
-        message: "No timetable found for this subject"
-      });
-    }
-
-    // Fetch session plans
-    const sessions = await SessionPlanning.findAll({
-      where: {
-        faculty_id,
-        subject_id: subjectId
-      },
-      order: [["date", "ASC"], ["lecture_no", "ASC"]]
-    });
-
+    // =========================
+    // 📦 FORMAT RESPONSE
+    // =========================
     const formatted = sessions.map((s) => ({
-      id: s.id,
       session_no: s.lecture_no,
       topic: s.topics,
       planned_date: s.date,
       status: s.status
     }));
 
-    return res.json({
+    return res.status(200).json({
       success: true,
+      subject: {
+        subject_id: subjectId,
+        subject_name: subject.subject_name
+      },
+      total_sessions: formatted.length,
       data: formatted
     });
 
@@ -1010,6 +1073,7 @@ export const getSessionPlanBySubject = async (req, res) => {
     });
   }
 };
+
 export const updateSessionPlanStatus = async (req, res) => {
   try {
     const role = req.user.role;
@@ -1059,60 +1123,105 @@ export const getFacultySubjectsFromTimetable = async (req, res) => {
     const role = req.user.role;
     const user_id = req.user.uid;
 
-    // Only faculty allowed
-    if (role !== "Faculty") {
+    let subjects = [];
+
+    // =========================
+    // 🎓 FACULTY LOGIC
+    // =========================
+    if (role === "Faculty") {
+      const facultyUser = await User.findOne({
+        where: { user_id },
+        attributes: ["username"]
+      });
+
+      if (!facultyUser) {
+        return res.status(404).json({
+          success: false,
+          message: "Faculty not found"
+        });
+      }
+
+      const faculty_id = facultyUser.username;
+
+      const query = `
+        SELECT DISTINCT 
+          t.subject_id,
+          s.subject_name
+        FROM timetables t
+        LEFT JOIN subjects s ON t.subject_id = s.subject_id
+        WHERE t.faculty_id = ?
+        ORDER BY s.subject_name ASC
+      `;
+
+      subjects = await sequelize.query(query, {
+        replacements: [faculty_id],
+        type: sequelize.QueryTypes.SELECT
+      });
+    }
+
+    // =========================
+    // 👨‍🎓 STUDENT LOGIC
+    // =========================
+    else if (role === "Student") {
+      const student = await Student.findOne({
+        where: { user_id },
+        attributes: ["student_id", "class_pk"]
+      });
+
+      if (!student) {
+        return res.status(404).json({
+          success: false,
+          message: "Student not found"
+        });
+      }
+
+      const class_pk = student.class_pk;
+
+      const query = `
+        SELECT DISTINCT 
+          t.subject_id,
+          s.subject_name
+        FROM timetables t
+        LEFT JOIN subjects s ON t.subject_id = s.subject_id
+        WHERE t.class_pk = ?
+        ORDER BY s.subject_name ASC
+      `;
+
+      subjects = await sequelize.query(query, {
+        replacements: [class_pk],
+        type: sequelize.QueryTypes.SELECT
+      });
+    }
+
+    // =========================
+    // ❌ INVALID ROLE
+    // =========================
+    else {
       return res.status(403).json({
         success: false,
-        message: "Access denied. Only faculty can access this data."
+        message: "Access denied"
       });
     }
 
-    // Get faculty_id from user table
-    const facultyUser = await User.findOne({
-      where: { user_id },
-      attributes: ["username"]
-    });
-
-    if (!facultyUser) {
-      return res.status(404).json({
-        success: false,
-        message: "Faculty not found"
-      });
-    }
-
-    const faculty_id = facultyUser.username;
-
-    // 🔥 RAW QUERY for better performance & DISTINCT subjects
-    const query = `
-      SELECT DISTINCT 
-        t.subject_id,
-        s.subject_name
-      FROM timetables t
-      LEFT JOIN subjects s ON t.subject_id = s.subject_id
-      WHERE t.faculty_id = ?
-      ORDER BY s.subject_name ASC
-    `;
-
-    const subjects = await sequelize.query(query, {
-      replacements: [faculty_id],
-      type: sequelize.QueryTypes.SELECT
-    });
-
+    // =========================
+    // 📦 RESPONSE
+    // =========================
     if (!subjects || subjects.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No subjects found for this faculty"
+        message: "No subjects found"
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Subjects fetched successfully",
+      count: subjects.length,
       data: subjects
     });
 
   } catch (error) {
-    console.error("Get faculty subjects error:", error);
+    console.error("Get subjects error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
