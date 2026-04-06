@@ -34,7 +34,7 @@ import rankingRoutes from "./src/routes/rankingRoutes.js";
 import {apiLimiter} from "./src/middleware/rateLimiter.js";
 import printFeeRoutes from "./src/routes/printFeeRoutes.js";
 import passwordResetRoutes from "./src/routes/passwordResetRoutes.js"
-
+import featureFlagRoutes from "./src/routes/featureFlagRoutes.js"
 dotenv.config();
 const app = express();
 app.use(
@@ -89,6 +89,7 @@ app.use("/api/hall-tickets", hallticketRoutes);
 app.use("/api/rankings", rankingRoutes);
 app.use("/api/fee-receipts", printFeeRoutes);
 app.use("/reset-password",passwordResetRoutes);
+app.use("/api/feature", featureFlagRoutes);
 
 
 app.get("/", (req, res) => {

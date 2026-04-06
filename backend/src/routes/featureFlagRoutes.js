@@ -5,8 +5,8 @@ import {
   toggleFeature,
 } from "../controllers/featureFlagController.js";
 
-import { authMiddleware } from "../middleware/authMiddleware.js";
-import { isAdmin } from "../middleware/isAdmin.js";
+import { authMiddleware , adminMiddleware} from "../middleware/authMiddleware.js";
+
 
 const router = express.Router();
 
@@ -14,15 +14,15 @@ const router = express.Router();
 router.get(
   "/",
   authMiddleware,
-  isAdmin,
+  adminMiddleware,
   getAllFeatures
 );
 
 // Admin: toggle feature
-router.patch(
+router.put(
   "/toggle/:feature_key",
   authMiddleware,
-  isAdmin,
+  adminMiddleware,
   toggleFeature
 );
 

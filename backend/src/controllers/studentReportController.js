@@ -549,7 +549,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(400).json({ message: "class_id is required" });
     }
 
-    /* ================= CLASS WITH MENTOR ================= */
+    /* ================= CLASS ================= */
 
     const classRecord = await Class.findOne({
       where: { id: class_id },
@@ -566,20 +566,17 @@ export const getOverallClassAttendancereport = async (req, res) => {
       return res.status(404).json({ message: "Class not found" });
     }
 
-    /* ================= FACULTY ACCESS CONTROL ================= */
+    /* ================= AUTH CHECK ================= */
 
     if (role === "Faculty") {
-      if (
-        !classRecord.Faculty ||
-        classRecord.Faculty.user_id !== uid
-      ) {
+      if (!classRecord.Faculty || classRecord.Faculty.user_id !== uid) {
         return res.status(403).json({
           message: "Access denied. Only mentor can access this report."
         });
       }
     }
 
-    /* ================= GET STUDENTS ================= */
+    /* ================= STUDENTS ================= */
 
     const students = await Student.findAll({
       where: { class_pk: classRecord.id },
@@ -594,7 +591,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
 
     const studentIds = students.map(s => s.student_id);
 
-    /* ================= MONTH FILTER ================= */
+    /* ================= DATE FILTER ================= */
 
     let dateFilter = {};
 
@@ -607,7 +604,6 @@ export const getOverallClassAttendancereport = async (req, res) => {
         });
       }
 
-      // ✅ Fix academic year parsing (2025-26 → 2025 & 2026)
       const [startStr, endShortStr] =
         classRecord.academic_year.split("-");
 
@@ -621,7 +617,6 @@ export const getOverallClassAttendancereport = async (req, res) => {
       const selectedYear =
         monthNum >= 7 ? startYear : endYear;
 
-      // ✅ Safe date formatting (NO ISO timezone issue)
       const formatDate = (date) => {
         const y = date.getFullYear();
         const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -640,7 +635,7 @@ export const getOverallClassAttendancereport = async (req, res) => {
       };
     }
 
-    /* ================= FETCH ATTENDANCE ================= */
+    /* ================= ATTENDANCE ================= */
 
     const attendanceRecords = await Attendance.findAll({
       where: {
@@ -652,81 +647,108 @@ export const getOverallClassAttendancereport = async (req, res) => {
         model: Subject,
         attributes: ["subject_id", "subject_name"]
       }],
-      order: [["date", "ASC"], ["student_id", "ASC"]]
+      order: [["date", "ASC"]]
     });
 
-    /* ================= PROCESS DATA ================= */
+    /* ================= DATA STRUCTURES ================= */
 
     const studentMap = {};
-    const subjectSummary = {};
-    const uniqueDates = new Set();
+    const subjectTotalMap = {};
+    const subjectMeta = {};
+
+    /* ================= INIT STUDENTS ================= */
 
     students.forEach(s => {
       studentMap[s.student_id] = {
         student_id: s.student_id,
         name: s.name,
-        total_classes: 0,
         present: 0,
         absent: 0,
+        total_classes: 0,
         attendance_percentage: "0.00%",
         subject_wise: {}
       };
     });
 
+    /* ================= PROCESS RECORDS ================= */
+
     attendanceRecords.forEach(r => {
       const student = studentMap[r.student_id];
-      if (!student) return;
-
-      const dateStr = r.date; // already YYYY-MM-DD
-      uniqueDates.add(dateStr);
-
-      student.total_classes++;
-
-      if (r.status === "Present") {
-        student.present++;
-      } else {
-        student.absent++;
-      }
+      if (!student || !r.Subject) return;
 
       const subjectId = r.Subject.subject_id;
 
+      
+      const lectureKey = `${r.date}_${subjectId}`;
+
+      subjectTotalMap[subjectId] ??= new Set();
+      subjectTotalMap[subjectId].add(lectureKey);
+
+      subjectMeta[subjectId] = {
+        subject_id: subjectId,
+        subject_name: r.Subject.subject_name
+      };
+
+      // INIT SUBJECT
       if (!student.subject_wise[subjectId]) {
         student.subject_wise[subjectId] = {
           subject_id: subjectId,
           subject_name: r.Subject.subject_name,
-          total_classes: 0,
           present: 0,
-          absent: 0
+          absent: 0,
+          total_classes: 0
         };
       }
 
-      student.subject_wise[subjectId].total_classes++;
-
+      // COUNT PRESENT
       if (r.status === "Present") {
+        student.present++;
         student.subject_wise[subjectId].present++;
-      } else {
-        student.subject_wise[subjectId].absent++;
       }
 
-      subjectSummary[subjectId] ??= {
-        subject_id: subjectId,
-        subject_name: r.Subject.subject_name
-      };
+      student.subject_wise[subjectId].total_classes++;
     });
 
-    /* ================= CALCULATE PERCENTAGE ================= */
+    /* ================= FIX TOTALS ================= */
+
+    const subjectTotals = {};
+    Object.keys(subjectTotalMap).forEach(sub => {
+      subjectTotals[sub] = subjectTotalMap[sub].size;
+    });
+
+    const totalLectures = Object.values(subjectTotals)
+      .reduce((a, b) => a + b, 0);
 
     Object.values(studentMap).forEach(s => {
-      if (s.total_classes > 0) {
-        s.attendance_percentage =
-          ((s.present / s.total_classes) * 100).toFixed(2) + "%";
-      }
-    });
 
-    const formattedStudents = Object.values(studentMap).map(s => ({
-      ...s,
-      subject_wise: Object.values(s.subject_wise)
-    }));
+      Object.keys(subjectTotals).forEach(subId => {
+
+        if (!s.subject_wise[subId]) {
+          s.subject_wise[subId] = {
+            subject_id: subId,
+            subject_name: subjectMeta[subId]?.subject_name || "",
+            present: 0,
+            absent: subjectTotals[subId],
+            total_classes: subjectTotals[subId]
+          };
+        } else {
+          const total = subjectTotals[subId];
+          s.subject_wise[subId].total_classes = total;
+          s.subject_wise[subId].absent =
+            total - s.subject_wise[subId].present;
+        }
+      });
+
+      s.total_classes = totalLectures;
+      s.absent = totalLectures - s.present;
+
+      if (totalLectures > 0) {
+        s.attendance_percentage =
+          ((s.present / totalLectures) * 100).toFixed(2) + "%";
+      }
+
+      s.subject_wise = Object.values(s.subject_wise);
+    });
 
     /* ================= RESPONSE ================= */
 
@@ -738,14 +760,14 @@ export const getOverallClassAttendancereport = async (req, res) => {
       },
       summary: {
         total_students: students.length,
-        working_days: uniqueDates.size
+        total_lectures: totalLectures
       },
-      students: formattedStudents,
-      subjects: Object.values(subjectSummary)
+      students: Object.values(studentMap),
+      subjects: Object.values(subjectMeta)
     });
 
   } catch (error) {
-    console.error("Overall Attendance Error:", error);
+    console.error("Attendance Error:", error);
     return res.status(500).json({
       message: "Internal server error"
     });

@@ -1,9 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import CancelButton from "../../ui/Buttons/CancelButton";
 import { Save } from "lucide-react";
+import api from "../../api/axios.js";
+
+/* ================= API CALLS ================= */
+const getAllFeaturesApi = () => {
+  return api.get("/api/feature/");
+};
+
+const toggleFeatureApi = (feature_key) => {
+  return api.put(`/api/feature/toggle/${feature_key}`);
+};
+
+/* ================= FEATURE MAPPING ================= */
+const mapFeatureKeyToField = {
+  add_settings: "addSettings",
+  update_profile: "updateProfile",
+  send_notifications: "sendNotifications",
+  maintenance_mode: "maintenanceMode",
+};
 
 export default function ManageSettingsAdmin() {
   {
@@ -27,10 +45,49 @@ export default function ManageSettingsAdmin() {
   const maintenanceMode = watch("maintenanceMode");
 
   {
+    /* FETCH INITIAL DATA FROM BACKEND */
+  }
+  useEffect(() => {
+    const fetchFeatures = async () => {
+      try {
+        const res = await getAllFeaturesApi();
+
+        res.data.forEach((feature) => {
+          const field = mapFeatureKeyToField[feature.feature_key];
+          if (field) {
+            setValue(field, feature.is_active === true);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching features:", error);
+      }
+    };
+
+    fetchFeatures();
+  }, [setValue]);
+
+  {
+    /* HANDLE TOGGLE WITH API CALL */
+  }
+  const handleToggle = async (fieldName, featureKey) => {
+    const currentValue = watch(fieldName);
+
+    // optimistic UI update
+    setValue(fieldName, !currentValue);
+
+    try {
+      await toggleFeatureApi(featureKey);
+    } catch (error) {
+      // revert on failure
+      setValue(fieldName, currentValue);
+      console.error("Toggle failed:", error);
+    }
+  };
+
+  {
     /* this is the submit function part */
   }
   const onSubmit = (data) => {
-    // This proves react-hook-form is capturing the toggle states!
     console.log("Settings Saved Successfully:", data);
   };
 
@@ -59,7 +116,9 @@ export default function ManageSettingsAdmin() {
                   ? "bg-black dark:bg-white"
                   : "bg-gray-300 dark:bg-gray-600"
               }`}
-              onClick={() => setValue("addSettings", !addSettings)}
+              onClick={() =>
+                handleToggle("addSettings", "add_settings")
+              }
             >
               <div
                 className={`w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
@@ -84,7 +143,9 @@ export default function ManageSettingsAdmin() {
                   ? "bg-black dark:bg-white"
                   : "bg-gray-300 dark:bg-gray-600"
               }`}
-              onClick={() => setValue("updateProfile", !updateProfile)}
+              onClick={() =>
+                handleToggle("updateProfile", "update_profile")
+              }
             >
               <div
                 className={`w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
@@ -109,7 +170,9 @@ export default function ManageSettingsAdmin() {
                   ? "bg-black dark:bg-white"
                   : "bg-gray-300 dark:bg-gray-600"
               }`}
-              onClick={() => setValue("sendNotifications", !sendNotifications)}
+              onClick={() =>
+                handleToggle("sendNotifications", "send_notifications")
+              }
             >
               <div
                 className={`w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
@@ -134,7 +197,9 @@ export default function ManageSettingsAdmin() {
                   ? "bg-black dark:bg-white"
                   : "bg-gray-300 dark:bg-gray-600"
               }`}
-              onClick={() => setValue("maintenanceMode", !maintenanceMode)}
+              onClick={() =>
+                handleToggle("maintenanceMode", "maintenance_mode")
+              }
             >
               <div
                 className={`w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
