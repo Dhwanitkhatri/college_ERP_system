@@ -8,6 +8,7 @@ import { Op } from "sequelize";
 import { User } from "../model/User.js"
 import { sequelize } from "../config/db.js";
 
+
 const generatePlanId = () => {
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 1000);
@@ -347,16 +348,19 @@ export const getAllSessionPlans = async (req, res) => {
         const role = req.user.role;
         const user_id = req.user.uid;
 
+        console.log(role, user_id);
+
+        // ✅ Only Faculty Allowed
         if (role !== "Faculty") {
-            return res.status(400).json({
+            return res.status(403).json({
                 success: false,
                 message: "Access denied. Only faculty can access this information."
             });
         }
 
-        // Get faculty ID from user
+        // ✅ Get faculty identifier (username used as faculty_id)
         const facultyUser = await User.findOne({
-            where: { user_id: user_id },
+            where: { user_id },
             attributes: ['username']
         });
 
@@ -369,7 +373,22 @@ export const getAllSessionPlans = async (req, res) => {
 
         const faculty_id = facultyUser.username;
 
-        // Get all session plans for this faculty
+        /* =========================================================
+           STEP 1: FETCH SUBJECTS FROM TIMETABLE (PRIMARY SOURCE)
+        ========================================================= */
+        const timetableEntries = await Timetable.findAll({
+            where: { faculty_id },
+            attributes: ['subject_id'],
+            group: ['subject_id']
+        });
+
+        const timetableSubjectIds = timetableEntries.map(
+            (t) => t.subject_id
+        );
+
+        /* =========================================================
+           STEP 2: FETCH SESSION PLANS
+        ========================================================= */
         const sessionPlans = await SessionPlanning.findAll({
             where: {
                 faculty_id
@@ -377,16 +396,15 @@ export const getAllSessionPlans = async (req, res) => {
             include: [
                 {
                     model: Subject,
-                    attributes: ['subject_name']
+                    attributes: ['subject_id', 'subject_name'],
+                    required: false
                 },
                 {
                     model: Class,
                     attributes: ['class_id']
                 }
             ],
-            order: [
-                ['date', 'DESC']
-            ]
+            order: [['date', 'DESC']]
         });
 
         if (!sessionPlans.length) {
@@ -396,23 +414,61 @@ export const getAllSessionPlans = async (req, res) => {
             });
         }
 
-        // Simple response format
-        const formattedPlans = sessionPlans.map(plan => ({
-            plan_id: plan.plan_id,
-            class_id: plan.Class?.class_id || 'Unknown',
-            subject_name: plan.Subject?.subject_name || 'Unknown',
-            date: plan.date,
-            lecture_no: plan.lecture_no,
-            topics: plan.topics,
-            status: plan.status,
-            created_at: plan.createdAt
-        }));
+        /* =========================================================
+           STEP 3: FORMAT RESPONSE (SMART SUBJECT RESOLUTION)
+        ========================================================= */
+        const formattedPlans = await Promise.all(
+            sessionPlans.map(async (plan) => {
+                
+                // ✅ Try from timetable first
+                let subject = null;
+                console.log(plan.subject_id)
+                if (timetableSubjectIds.includes(plan.subject_id)) {
+                    subject = await Subject.findOne({where:{subject_id:plan.subject_id}}, {
+                        attributes: ['subject_name']
+                    });
+                }
 
-        // Count plans by status
-        const plannedCount = sessionPlans.filter(p => p.status === "Planned").length;
-        const completedCount = sessionPlans.filter(p => p.status === "Completed").length;
-        const pendingCount = sessionPlans.filter(p => p.status === "Pending").length;
+                // ✅ Fallback to included Subject
+                if (!subject && plan.Subject) {
+                    subject = plan.Subject;
+                }
 
+                return {
+                    plan_id: plan.plan_id,
+                    class_id: plan.Class?.class_id || 'Unknown',
+                    subject_id: plan.subject_id,
+                    subject_name: subject
+                        ? subject.subject_name
+                        : 'Unknown',
+
+                    date: plan.date,
+                    lecture_no: plan.lecture_no,
+                    topics: plan.topics,
+                    status: plan.status,
+                    created_at: plan.createdAt
+                };
+            })
+        );
+
+        /* =========================================================
+           STEP 4: SUMMARY COUNT
+        ========================================================= */
+        const plannedCount = sessionPlans.filter(
+            p => p.status === "Planned"
+        ).length;
+
+        const completedCount = sessionPlans.filter(
+            p => p.status === "Completed"
+        ).length;
+
+        const pendingCount = sessionPlans.filter(
+            p => p.status === "Pending"
+        ).length;
+
+        /* =========================================================
+           FINAL RESPONSE
+        ========================================================= */
         return res.status(200).json({
             success: true,
             message: `Found ${sessionPlans.length} session plans`,
@@ -429,6 +485,7 @@ export const getAllSessionPlans = async (req, res) => {
 
     } catch (error) {
         console.error("Get all session plans error:", error);
+
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -436,6 +493,7 @@ export const getAllSessionPlans = async (req, res) => {
         });
     }
 };
+
 export const getFacultyScheduleForDate = async (req, res) => {
     try {
         const role = req.user.role;
@@ -675,9 +733,9 @@ export const getFacultyScheduleForDate = async (req, res) => {
 export const updateSessionPlan = async (req, res) => {
     try {
         const role = req.user.role;
-        const { plan_id } = req.params;
+        const plan_id  = req.params.plan_id;
         const user_id = req.user.uid;
-
+        console.log(plan_id);
         if (role !== "Faculty") {
             return res.status(400).json({
                 success: false,
@@ -861,4 +919,204 @@ export const deleteSessionPlan = async (req, res) => {
             error: error.message
         });
     }
+};
+
+
+
+
+export const getSessionPlanBySubject = async (req, res) => {
+  try {
+    const role = req.user.role;
+    const user_id = req.user.uid;
+    const { subjectId } = req.params;
+
+    if (role !== "Faculty") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied"
+      });
+    }
+
+    const facultyUser = await User.findOne({
+      where: { user_id },
+      attributes: ["username"]
+    });
+
+    if (!facultyUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty not found"
+      });
+    }
+
+    const faculty_id = facultyUser.username;
+
+    // Get subject name
+    const subject = await Subject.findOne({
+      where: { subject_id: subjectId },
+      attributes: ["subject_name"]
+    });
+
+    if (!subject) {
+      return res.status(404).json({
+        success: false,
+        message: "Subject not found"
+      });
+    }
+
+    // Get timetable (to ensure subject is assigned to faculty)
+    const timetable = await Timetable.findOne({
+      where: {
+        faculty_id,
+        subject_id: subjectId
+      }
+    });
+
+    if (!timetable) {
+      return res.status(404).json({
+        success: false,
+        message: "No timetable found for this subject"
+      });
+    }
+
+    // Fetch session plans
+    const sessions = await SessionPlanning.findAll({
+      where: {
+        faculty_id,
+        subject_id: subjectId
+      },
+      order: [["date", "ASC"], ["lecture_no", "ASC"]]
+    });
+
+    const formatted = sessions.map((s) => ({
+      id: s.id,
+      session_no: s.lecture_no,
+      topic: s.topics,
+      planned_date: s.date,
+      status: s.status
+    }));
+
+    return res.json({
+      success: true,
+      data: formatted
+    });
+
+  } catch (error) {
+    console.error("Get session plan error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
+};
+export const updateSessionPlanStatus = async (req, res) => {
+  try {
+    const role = req.user.role;
+    const user_id = req.user.uid;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (role !== "Faculty") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const facultyUser = await User.findOne({
+      where: { user_id },
+      attributes: ["username"]
+    });
+
+    const faculty_id = facultyUser.username;
+
+    const session = await SessionPlanning.findOne({
+      where: { id, faculty_id }
+    });
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    session.status = status;
+    await session.save();
+
+    return res.json({
+      success: true,
+      message: "Status updated successfully"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
+
+export const getFacultySubjectsFromTimetable = async (req, res) => {
+  try {
+    const role = req.user.role;
+    const user_id = req.user.uid;
+
+    // Only faculty allowed
+    if (role !== "Faculty") {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied. Only faculty can access this data."
+      });
+    }
+
+    // Get faculty_id from user table
+    const facultyUser = await User.findOne({
+      where: { user_id },
+      attributes: ["username"]
+    });
+
+    if (!facultyUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Faculty not found"
+      });
+    }
+
+    const faculty_id = facultyUser.username;
+
+    // 🔥 RAW QUERY for better performance & DISTINCT subjects
+    const query = `
+      SELECT DISTINCT 
+        t.subject_id,
+        s.subject_name
+      FROM timetables t
+      LEFT JOIN subjects s ON t.subject_id = s.subject_id
+      WHERE t.faculty_id = ?
+      ORDER BY s.subject_name ASC
+    `;
+
+    const subjects = await sequelize.query(query, {
+      replacements: [faculty_id],
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    if (!subjects || subjects.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No subjects found for this faculty"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Subjects fetched successfully",
+      data: subjects
+    });
+
+  } catch (error) {
+    console.error("Get faculty subjects error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message
+    });
+  }
 };

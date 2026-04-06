@@ -2,140 +2,81 @@ import React, { useEffect, useState } from "react";
 import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { getUserRole } from "../../utils/auth";
-// import api from "../../api/axios.js"; // 🔹 Uncomment when backend is ready
+import api from "../../api/axios";
 
 const ViewSessionPlanFaculty = () => {
-  // ---------------- STATE ----------------
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [sessionPlan, setSessionPlan] = useState([]);
   const [loading, setLoading] = useState(false);
+
   const userRole = getUserRole();
-  console.log("User Role This msg is from view sessionplan:", userRole);
 
-  // ---------------- DUMMY DATA ----------------
-  const dummySubjects = [
-    { subject_id: 1, subject_name: "DBMS" },
-    { subject_id: 2, subject_name: "Operating System" },
-    { subject_id: 3, subject_name: "Computer Networks" },
-  ];
-
-  const dummySessionPlans = {
-    1: [
-      {
-        id: 1,
-        session_no: 1,
-        topic: "Introduction to DBMS",
-        planned_date: "2026-04-01",
-        status: "Completed",
-      },
-      {
-        id: 2,
-        session_no: 2,
-        topic: "ER Model",
-        planned_date: "2026-04-03",
-        status: "Completed",
-      },
-      {
-        id: 3,
-        session_no: 3,
-        topic: "Normalization",
-        planned_date: "2026-04-05",
-        status: "Pending",
-      },
-    ],
-    2: [
-      {
-        id: 4,
-        session_no: 1,
-        topic: "Introduction to OS",
-        planned_date: "2026-04-02",
-        status: "Completed",
-      },
-      {
-        id: 5,
-        session_no: 2,
-        topic: "Process Scheduling",
-        planned_date: "2026-04-04",
-        status: "Pending",
-      },
-    ],
-    3: [
-      {
-        id: 6,
-        session_no: 1,
-        topic: "Basics of Networking",
-        planned_date: "2026-04-01",
-        status: "Completed",
-      },
-      {
-        id: 7,
-        session_no: 2,
-        topic: "OSI Model",
-        planned_date: "2026-04-03",
-        status: "Pending",
-      },
-    ],
-  };
-
-  // ---------------- LOAD SUBJECTS ----------------
+  // ---------------- FETCH SUBJECTS ----------------
   useEffect(() => {
-    // 🔹 Using Dummy Data
-    setSubjects(dummySubjects);
+    const fetchSubjects = async () => {
+      try {
+        const res = await api.get(
+          "/api/session/get-facultysubject"
+        );
 
-    // 🔹 BACKEND VERSION (Future)
-    /*
-    async function fetchSubjects() {
-      const res = await api.get("/api/subjects");
-      setSubjects(res.data);
-    }
+        setSubjects(res.data.data || []);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+        setSubjects([]);
+      }
+    };
+
     fetchSubjects();
-    */
   }, []);
 
-  // ---------------- HANDLE SUBJECT CHANGE ----------------
+  // ---------------- SUBJECT CHANGE ----------------
   const handleSubjectChange = async (e) => {
     const subjectId = e.target.value;
     setSelectedSubject(subjectId);
 
-    if (!subjectId) return;
+    if (!subjectId) {
+      setSessionPlan([]);
+      return;
+    }
 
-    // 🔹 USING DUMMY DATA
-    setLoading(true);
-    setTimeout(() => {
-      setSessionPlan(dummySessionPlans[subjectId] || []);
-      setLoading(false);
-    }, 500); // small delay to simulate API
-
-    // 🔹 BACKEND VERSION (Future)
-    /*
     try {
       setLoading(true);
-      const res = await api.get(`/api/session-plan/${subjectId}`);
-      setSessionPlan(res.data);
+
+      const res = await api.get(
+        `/api/session/session-plan/${subjectId}`
+      );
+
+      setSessionPlan(res.data.data || res.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching session plan:", error);
+      setSessionPlan([]);
     } finally {
       setLoading(false);
     }
-    */
   };
 
+  // ---------------- TOGGLE STATUS ----------------
   const handleMarkComplete = async (index) => {
     const updatedPlan = [...sessionPlan];
+    const session = updatedPlan[index];
 
-    // Toggle status
-    updatedPlan[index].status =
-      updatedPlan[index].status === "Completed" ? "Pending" : "Completed";
+    const newStatus =
+      session.status === "Completed" ? "Pending" : "Completed";
 
-    setSessionPlan(updatedPlan);
+    try {
+      await api.put(
+        `/api/session/session-plan/status/${session.id}`,
+        {
+          status: newStatus,
+        }
+      );
 
-    // 🔹 BACKEND CALL (Future)
-    /*
-  await api.put(`/api/session-plan/update/${updatedPlan[index].id}`, {
-    status: updatedPlan[index].status,
-  });
-  */
+      updatedPlan[index].status = newStatus;
+      setSessionPlan(updatedPlan);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   return (
@@ -143,7 +84,7 @@ const ViewSessionPlanFaculty = () => {
       title="View Session Plan"
       desc="Select a subject to view its session plan"
     >
-      {/* ---------------- SUBJECT SELECTION ---------------- */}
+      {/* ---------------- SUBJECT SELECT ---------------- */}
       <DashboardChildPageCard>
         <div className="form-field">
           <label className="custom-label">Select Subject</label>
@@ -164,7 +105,7 @@ const ViewSessionPlanFaculty = () => {
         </div>
       </DashboardChildPageCard>
 
-      {/* ---------------- SESSION PLAN DISPLAY ---------------- */}
+      {/* ---------------- SESSION PLAN ---------------- */}
       <DashboardChildPageCard className="mt-3">
         {/* LOADING */}
         {loading && (
@@ -197,7 +138,8 @@ const ViewSessionPlanFaculty = () => {
                   <th className="table-row-style">Topic</th>
                   <th className="table-row-style">Planned Date</th>
                   <th className="table-row-style">Status</th>
-                  {userRole === "faculty" && (
+
+                  {userRole === "Faculty" && (
                     <th className="table-row-style">Action</th>
                   )}
                 </tr>
@@ -206,14 +148,17 @@ const ViewSessionPlanFaculty = () => {
               <tbody>
                 {sessionPlan.map((session, index) => (
                   <tr
-                    key={index}
+                    key={session.id}
                     className="hover:bg-[var(--bg-hover)] transition"
                   >
-                    <td className="table-row-style">{session.session_no}</td>
-                    <td className="table-row-style">{session.topic}</td>
-                    <td className="table-row-style">{session.planned_date}</td>
                     <td className="table-row-style">
-                      {/* BONUS: Status Styling */}
+                      {session.session_no}
+                    </td>
+                    <td className="table-row-style">{session.topic}</td>
+                    <td className="table-row-style">
+                      {session.planned_date}
+                    </td>
+                    <td className="table-row-style">
                       <span
                         className={`px-2 py-1 rounded text-xs ${
                           session.status === "Completed"
@@ -224,6 +169,7 @@ const ViewSessionPlanFaculty = () => {
                         {session.status}
                       </span>
                     </td>
+
                     {userRole === "Faculty" && (
                       <td className="table-row-style">
                         <input

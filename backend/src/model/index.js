@@ -314,6 +314,17 @@ Subject.hasMany(ExamTimetable, {
 SubjectResult.belongsTo(Subject, { foreignKey: 'subject_id', targetKey: 'subject_id' });
 Subject.hasMany(SubjectResult, { foreignKey: 'subject_id', sourceKey: 'subject_id' });
 
+//subject to class
+SessionPlanning.belongsTo(Subject, {
+    foreignKey: "subject_id",   // IMPORTANT
+    
+});
+
+SessionPlanning.belongsTo(Class, {
+    foreignKey: "class_pk",     // OR "class_id" if that's your column
+     
+});
+
 
 
 
