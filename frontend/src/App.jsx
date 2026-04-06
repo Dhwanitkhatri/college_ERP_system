@@ -1,75 +1,87 @@
-import LoginPage from "./Pages/LoginPage";
-import HomePage from "./Pages/HomePage";
-import KnowMore from "./Pages/KnowMore";
-import AboutUs from "./Pages/AboutUs";
+import { lazy, Suspense } from "react";
+
 import NavbarDashboard from "./Components/NavbarDashboard";
 import SideBarDashboard from "./Components/SideBarDashboard";
-import Dashboard from "./Pages/Dashboard";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import AddFacultyAdmin from "./Pages/Admin/AddFacultyAdmin";
-import AddStudentAdmin from "./Pages/Admin/AddStudentAdmin";
-import AddSubjectAdmin from "./Pages/Admin/AddSubjectAdmin";
-import AddCourseAdmin from "./Pages/Admin/AddCourseAdmin";
-import "./App.css";
-import AdminPanelDashboard from "./Pages/Admin/AdminPanelDashboard";
-import FacultyPanelDashboard from "./Pages/Faculty/FacultyPanelDashboard";
-import StudentPanelDashboard from "./Pages/Student/StudentPanelDashboard";
 import { SidebarProvider } from "./context/SidebarContext";
-import ManageFacultyAdmin from "./Pages/Admin/ManageFacultyAdmin";
-import ManageStudentAdmin from "./Pages/Admin/ManageStudentAdmin";
-import AddClassAdmin from "./Pages/Admin/AddClassAdmin";
-import AddTimeTableAdmin from "./Pages/Admin/AddTimeTableAdmin";
-import SendNotificationAdmin from "./Pages/Admin/SendNotificationAdmin";
-import ManageProfileAdmin from "./Pages/Admin/ManageProfileAdmin";
-import StudentReportAdmin from "./Pages/Admin/StudentReportAdmin";
-import DatewiseReportAdmin from "./Pages/Admin/DatewiseReportAdmin";
-import ClasswiseReportAdmin from "./Pages/Admin/ClasswiseReportAdmin";
-import CheckFeeStatusAdmin from "./Pages/Admin/CheckFeeStatusAdmin";
-import EditFacultyAdmin from "./Pages/Admin/EditFacultyAdmin";
-import NotAvailablePage from "./Pages/NotAvailablePage";
-import Classroom from "./Pages/Classroom";
-import NotificationPage from "./Pages/NotificationPage";
-import ManageSettingsAdmin from "./Pages/Admin/ManageSettingsAdmin";
-import Events from "./Pages/Events";
-import OverallClassReportAdmin from "./Pages/Admin/OverallClassReportAdmin";
-import PageNotFound from "./Pages/PageNotFound";
-import CreateFeeStructureAdmin from "./Pages/Admin/CreateFeeStructureAdmin";
-import TakeAttendanceFaculty from "./Pages/Faculty/TakeAttendanceFaculty";
-import CreateEventAdmin from "./Pages/Admin/CreateEventAdmin";
-import SessionPlanningFaculty from "./Pages/Faculty/SessionPlanningFaculty";
-import PayFeeAdmin from "./Pages/Admin/PayFeeAdmin";
-import EditClassroomAdmin from "./Pages/Admin/EditClassroomAdmin";
-import EditStudentAdmin from "./Pages/Admin/EditStudentAdmin";
-import ViewTimetable from "./Pages/ViewTimeTable";
-import EditEventAdmin from "./Pages/Admin/EditEventAdmin";
-import ChangeCredentials from "./Pages/Faculty/ChangeCredentials";
-import UpdateAttendanceFaculty from "./Pages/Faculty/UpdateAttendanceFaculty";
-import ManageNotificationsAdmin from "./Pages/Admin/ManageNotificationsAdmin";
-import EditNotificationAdmin from "./Pages/Admin/EditNotificationAdmin";
-import FacultyFeedbackStudent from "./Pages/Student/FacultyFeedbackStudent";
-import FeedbackEvaluationAdmin from "./Pages/Admin/FeedbackEvaluationAdmin";
-import ViewFeedbackFaculty from "./Pages/Faculty/ViewFeedbackFaculty";
-import ManageSubjectsAdmin from "./Pages/Admin/ManageSubjectsAdmin";
-import EditSubjectAdmin from "./Pages/Admin/EditSubjectAdmin";
-import ViewTimeTableStudent from "./Pages/Student/ViewTimeTableStudent";
-import CreateSubjectComponentAdmin from "./Pages/Admin/CreateSubjectComponentAdmin";
-import CreateExamAdmin from "./Pages/Admin/CreateExamAdmin";
-import AddExamTimeTableAdmin from "./Pages/Admin/AddExamTimeTableAdmin";
-import EnterExamMarksFaculty from "./Pages/Faculty/EnterExamMarksFaculty";
-import ViewAttendanceReportStudent from "./Pages/Student/ViewAttendanceReportStudent";
-import UploadLearningMaterialFaculty from "./Pages/Faculty/UploadLearningMaterialFaculty";
-import LearningMaterialStudent from "./Pages/Student/LearningMaterialStudent";
-import GenerateHallTicketStudent from "./Pages/Student/GenerateHallTicketStudent";
-import GenerateExamResultAdmin from "./Pages/Admin/GenerateExamResultAdmin";
-import UpdateSessionPlanningFaculty from "./Pages/Faculty/UpdateSessionPlanningFaculty";
-import ForgotPassword from "./Pages/ForgotPassword";
-import ViewExamResultStudent from "./Pages/Student/ViewExamResultStudent";
-import PrintFeeReceiptStudent from "./Pages/Student/PrintFeeReceiptStudent";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import Unauthorized from "./Pages/Unauthorized";
-import ViewSessionPlanFaculty from "./Pages/Faculty/ViewSessionPlanFaculty";
-import ViewFeeStructureAdmin from "./Pages/Admin/ViewFeeStructureAdmin";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import "./App.css";
+
+// Public Pages
+const LoginPage = lazy(() => import("./Pages/LoginPage"));
+const HomePage = lazy(() => import("./Pages/HomePage"));
+const KnowMore = lazy(() => import("./Pages/KnowMore"));
+const AboutUs = lazy(() => import("./Pages/AboutUs"));
+const ForgotPassword = lazy(() => import("./Pages/ForgotPassword"));
+const Unauthorized = lazy(() => import("./Pages/Unauthorized"));
+const PageNotFound = lazy(() => import("./Pages/PageNotFound"));
+
+// Dashboard & Common Pages
+const Dashboard = lazy(() => import("./Pages/Dashboard"));
+const Classroom = lazy(() => import("./Pages/Classroom"));
+const NotificationPage = lazy(() => import("./Pages/NotificationPage"));
+const Events = lazy(() => import("./Pages/Events"));
+const NotAvailablePage = lazy(() => import("./Pages/NotAvailablePage"));
+
+// Admin Pages
+const AdminPanelDashboard = lazy(() => import("./Pages/Admin/AdminPanelDashboard"));
+const AddFacultyAdmin = lazy(() => import("./Pages/Admin/AddFacultyAdmin"));
+const AddStudentAdmin = lazy(() => import("./Pages/Admin/AddStudentAdmin"));
+const AddSubjectAdmin = lazy(() => import("./Pages/Admin/AddSubjectAdmin"));
+const AddCourseAdmin = lazy(() => import("./Pages/Admin/AddCourseAdmin"));
+const AddClassAdmin = lazy(() => import("./Pages/Admin/AddClassAdmin"));
+const AddTimeTableAdmin = lazy(() => import("./Pages/Admin/AddTimeTableAdmin"));
+const ManageFacultyAdmin = lazy(() => import("./Pages/Admin/ManageFacultyAdmin"));
+const ManageStudentAdmin = lazy(() => import("./Pages/Admin/ManageStudentAdmin"));
+const SendNotificationAdmin = lazy(() => import("./Pages/Admin/SendNotificationAdmin"));
+const ManageProfileAdmin = lazy(() => import("./Pages/Admin/ManageProfileAdmin"));
+const ManageSettingsAdmin = lazy(() => import("./Pages/Admin/ManageSettingsAdmin"));
+const StudentReportAdmin = lazy(() => import("./Pages/Admin/StudentReportAdmin"));
+const DatewiseReportAdmin = lazy(() => import("./Pages/Admin/DatewiseReportAdmin"));
+const ClasswiseReportAdmin = lazy(() => import("./Pages/Admin/ClasswiseReportAdmin"));
+const CheckFeeStatusAdmin = lazy(() => import("./Pages/Admin/CheckFeeStatusAdmin"));
+const OverallClassReportAdmin = lazy(() => import("./Pages/Admin/OverallClassReportAdmin"));
+const EditFacultyAdmin = lazy(() => import("./Pages/Admin/EditFacultyAdmin"));
+const CreateFeeStructureAdmin = lazy(() => import("./Pages/Admin/CreateFeeStructureAdmin"));
+const CreateEventAdmin = lazy(() => import("./Pages/Admin/CreateEventAdmin"));
+const PayFeeAdmin = lazy(() => import("./Pages/Admin/PayFeeAdmin"));
+const EditClassroomAdmin = lazy(() => import("./Pages/Admin/EditClassroomAdmin"));
+const EditStudentAdmin = lazy(() => import("./Pages/Admin/EditStudentAdmin"));
+const ViewTimetable = lazy(() => import("./Pages/ViewTimeTable"));
+const EditEventAdmin = lazy(() => import("./Pages/Admin/EditEventAdmin"));
+const ManageNotificationsAdmin = lazy(() => import("./Pages/Admin/ManageNotificationsAdmin"));
+const EditNotificationAdmin = lazy(() => import("./Pages/Admin/EditNotificationAdmin"));
+const FeedbackEvaluationAdmin = lazy(() => import("./Pages/Admin/FeedbackEvaluationAdmin"));
+const ManageSubjectsAdmin = lazy(() => import("./Pages/Admin/ManageSubjectsAdmin"));
+const EditSubjectAdmin = lazy(() => import("./Pages/Admin/EditSubjectAdmin"));
+const CreateSubjectComponentAdmin = lazy(() => import("./Pages/Admin/CreateSubjectComponentAdmin"));
+const CreateExamAdmin = lazy(() => import("./Pages/Admin/CreateExamAdmin"));
+const AddExamTimeTableAdmin = lazy(() => import("./Pages/Admin/AddExamTimeTableAdmin"));
+const GenerateExamResultAdmin = lazy(() => import("./Pages/Admin/GenerateExamResultAdmin"));
+const ViewFeeStructureAdmin = lazy(() => import("./Pages/Admin/ViewFeeStructureAdmin"));
+
+// Faculty Pages
+const FacultyPanelDashboard = lazy(() => import("./Pages/Faculty/FacultyPanelDashboard"));
+const TakeAttendanceFaculty = lazy(() => import("./Pages/Faculty/TakeAttendanceFaculty"));
+const SessionPlanningFaculty = lazy(() => import("./Pages/Faculty/SessionPlanningFaculty"));
+const ChangeCredentials = lazy(() => import("./Pages/Faculty/ChangeCredentials"));
+const UpdateAttendanceFaculty = lazy(() => import("./Pages/Faculty/UpdateAttendanceFaculty"));
+const ViewFeedbackFaculty = lazy(() => import("./Pages/Faculty/ViewFeedbackFaculty"));
+const EnterExamMarksFaculty = lazy(() => import("./Pages/Faculty/EnterExamMarksFaculty"));
+const UploadLearningMaterialFaculty = lazy(() => import("./Pages/Faculty/UploadLearningMaterialFaculty"));
+const UpdateSessionPlanningFaculty = lazy(() => import("./Pages/Faculty/UpdateSessionPlanningFaculty"));
+const ViewSessionPlanFaculty = lazy(() => import("./Pages/Faculty/ViewSessionPlanFaculty"));
+
+// Student Pages
+const StudentPanelDashboard = lazy(() => import("./Pages/Student/StudentPanelDashboard"));
+const FacultyFeedbackStudent = lazy(() => import("./Pages/Student/FacultyFeedbackStudent"));
+const ViewTimeTableStudent = lazy(() => import("./Pages/Student/ViewTimeTableStudent"));
+const ViewAttendanceReportStudent = lazy(() => import("./Pages/Student/ViewAttendanceReportStudent"));
+const LearningMaterialStudent = lazy(() => import("./Pages/Student/LearningMaterialStudent"));
+const GenerateHallTicketStudent = lazy(() => import("./Pages/Student/GenerateHallTicketStudent"));
+const ViewExamResultStudent = lazy(() => import("./Pages/Student/ViewExamResultStudent"));
+const PrintFeeReceiptStudent = lazy(() => import("./Pages/Student/PrintFeeReceiptStudent"));
 
 const router = createBrowserRouter([
   {
@@ -455,15 +467,16 @@ const router = createBrowserRouter([
     element: <Unauthorized />,
   },
 ]);
+
 function App() {
   return (
-    <>
-      <ThemeProvider>
-        <SidebarProvider>
+    <ThemeProvider>
+      <SidebarProvider>
+        <Suspense fallback={<h2>Loading ERP...</h2>}>
           <RouterProvider router={router} />
-        </SidebarProvider>
-      </ThemeProvider>
-    </>
+        </Suspense>
+      </SidebarProvider>
+    </ThemeProvider>
   );
 }
 
