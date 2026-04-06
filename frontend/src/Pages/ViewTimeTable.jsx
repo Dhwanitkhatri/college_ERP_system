@@ -1,93 +1,154 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import DashboardChildPageTemplate from "../ui/Templates/DashboardChildPageTemplate";
 import DashboardChildPageCard from "../ui/Cards/DashboardChildPageCard";
-import { Calendar, FileText, ArrowLeft, SofaIcon } from "lucide-react";
+import { Calendar, FileText, ArrowLeft } from "lucide-react";
 import api from "../api/axios.js";
-import { useEffect } from "react";
+import SaveButton from "../ui/Buttons/SaveButton";
+import CancelButton from "../ui/Buttons/CancelButton";
+import { getUserRole } from "../utils/auth";
+import { useToast } from "../context/ToastContext"; // 🔥 toast
+
 const formatTimetable = (data) => {
   const days = Object.keys(data);
+
   const timeSlots = [
-  { start: "09:00:00", end: "09:55:00" },
-  { start: "10:00:00", end: "10:55:00" },
-  { start: "11:00:00", end: "11:55:00" },
-  { start: "12:00:00", end: "12:55:00" },
-  { start: "13:00:00", end: "13:55:00" },
-  { start: "14:00:00", end: "14:55:00" }
-];
+    { start: "09:00:00", end: "09:55:00" },
+    { start: "10:00:00", end: "10:55:00" },
+    { start: "11:00:00", end: "11:55:00" },
+    { start: "12:00:00", end: "12:55:00" },
+    { start: "13:00:00", end: "13:55:00" },
+    { start: "14:00:00", end: "14:55:00" },
+  ];
 
-
-  return days.map(day => ({
+  return days.map((day) => ({
     day,
-    slots: timeSlots.map(slot => {
+    slots: timeSlots.map((slot) => {
       const lecture = (data[day] || []).find(
-        lec =>
-          lec.start_time === slot.start &&
-          lec.end_time === slot.end
+        (lec) => lec.start_time === slot.start && lec.end_time === slot.end,
       );
 
       return {
+        id: lecture?.id || null,
         start: slot.start,
         end: slot.end,
+        subject_id: lecture?.subject_id || "",
+        faculty_id: lecture?.faculty_id || "",
         subject: lecture?.Subject?.subject_name || "",
-        faculty: lecture?.Faculty?.name || ""
+        faculty: lecture?.Faculty?.name || "",
       };
-    })
+    }),
   }));
 };
 
-
-
 export default function ViewTimetable() {
-  {
-    /* this is the state and form part of the code */
-  }
+  /* ================= STATE ================= */
   const [activeTab, setActiveTab] = useState("menu");
-  const [classes , setClasses]=useState([]);
-  const [lectureData  ,setLectureDate]=useState([]);
+  const [classes, setClasses] = useState([]);
+  const [lectureData, setLectureData] = useState([]);
+  const [originalData, setOriginalData] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [faculties, setFaculties] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const role = getUserRole();
+  const { showToast } = useToast(); // 🔥 toast
+
   const { register, watch, setValue } = useForm();
   const selectedClass = watch("selectedClass");
-  
+
+  /* ================= FETCH CLASSES ================= */
   useEffect(() => {
     api
       .get("api/timetables/current-year-classes")
-      .then((response) => {
-        setClasses(response.data.data);
-        console.log(response.data.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching classes:", error);
-      });
+      .then((res) => setClasses(res.data.data))
+      .catch(() => showToast("Error fetching classes", "error"));
   }, []);
+
+  /* ================= FETCH TIMETABLE ================= */
   useEffect(() => {
-  if (!selectedClass) return;
+    if (!selectedClass) return;
 
-  api
-    .get(`api/timetables/class/${selectedClass}`)
-    .then((response) => {
-      console.log(response.data);
-      const formatted = formatTimetable(response.data);
-      setLectureDate(formatted);
-      
-      console.log(formatted);
-    })
-    .catch((error) => {
-      console.error("Error fetching timetable:", error);
-    });
-}, [selectedClass]);
+    api
+      .get(`api/timetables/class/${selectedClass}`)
+      .then((res) => {
+        const formatted = formatTimetable(res.data);
+        setLectureData(formatted);
+        setOriginalData(formatted);
+      })
+      .catch(() => showToast("Error fetching timetable", "error"));
+  }, [selectedClass]);
 
-  
-  {
-    /* this is the handler for the reset button */
-  }
+  /* ================= FETCH SUBJECTS & FACULTY ================= */
+  useEffect(() => {
+    if (!selectedClass) return;
+
+    const selected = classes.find((c) => c.id == selectedClass);
+
+    api
+      .get(`api/timetables/subjects?semester=${selected?.semester}`)
+      .then((res) => setSubjects(res.data))
+      .catch(() => showToast("Error fetching subjects", "error"));
+
+    api
+      .get(`api/timetables/faculties`)
+      .then((res) => setFaculties(res.data))
+      .catch(() => showToast("Error fetching faculties", "error"));
+  }, [selectedClass]);
+
+  /* ================= HANDLE EDIT ================= */
+  const handleChange = (dayIndex, slotIndex, field, value) => {
+    const updated = [...lectureData];
+    updated[dayIndex].slots[slotIndex][field] = value;
+    setLectureData(updated);
+  };
+
+  /* ================= SAVE ================= */
+  const handleSave = async () => {
+    try {
+      for (const day of lectureData) {
+        for (const slot of day.slots) {
+          if (!slot.subject_id || !slot.faculty_id) continue;
+
+          if (slot.id) {
+            await api.put(`api/timetables/${slot.id}`, {
+              subject_id: slot.subject_id,
+              faculty_id: slot.faculty_id,
+            });
+          } else {
+            await api.post(`api/timetables`, {
+              class_id: selectedClass,
+              subject_id: slot.subject_id,
+              faculty_id: slot.faculty_id,
+              day_of_week: day.day,
+              start_time: slot.start,
+              end_time: slot.end,
+            });
+          }
+        }
+      }
+
+      showToast("Timetable Updated Successfully", "success");
+      setIsEditMode(false);
+    } catch (error) {
+      console.error(error);
+      showToast("Error updating timetable", "error");
+    }
+  };
+
+  /* ================= CANCEL ================= */
+  const handleCancel = () => {
+    setLectureData(originalData);
+    setIsEditMode(false);
+  };
+
+  /* ================= RESET ================= */
   const handleReset = () => {
     setActiveTab("menu");
     setValue("selectedClass", "");
   };
-  {
-    /* main designing start from here */
-  }
 
+  /* ================= UI ================= */
   return (
     <DashboardChildPageTemplate
       title="View Timetable"
@@ -95,135 +156,168 @@ export default function ViewTimetable() {
       width="max-w-6xl"
     >
       <div className="pb-20 space-y-6">
-        {/* this is the main menu card */}
+        {/* MENU */}
         {activeTab === "menu" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* this is the lecture card */}
             <div
               onClick={() => setActiveTab("lecture")}
-              className="bg-white dark:bg-gray-800 p-8 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer"
+              className="bg-[var(--card-bg)] p-8 rounded-xl border border-[var(--border-light)] cursor-pointer hover:bg-[var(--bg-hover)] transition"
             >
               <div className="flex flex-col items-center gap-4 text-center">
-                <div className="h-16 w-16 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-                  <Calendar className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Lecture Timetable
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    View regular class schedule
-                  </p>
-                </div>
+                <Calendar className="h-8 w-8 text-blue-600" />
+                <h3 className="text-xl font-semibold text-[var(--text-primary)]">
+                  Lecture Timetable
+                </h3>
               </div>
             </div>
 
-            {/* this is the exam card but it is just visual  */}
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-xl border border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-60">
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div className="h-16 w-16 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Exam Timetable
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    Coming Soon
-                  </p>
-                </div>
-              </div>
+            <div className="opacity-60 cursor-not-allowed bg-[var(--card-bg)] p-8 rounded-xl border border-[var(--border-light)]">
+              <FileText className="h-8 w-8 text-purple-600" />
+              <h3 className="text-[var(--text-primary)]">Exam Timetable</h3>
             </div>
           </div>
         )}
 
-        {/* this is the lecture table part  */}
+        {/* TABLE */}
         {activeTab === "lecture" && (
           <DashboardChildPageCard>
-            {/* this is the header part of the lecture table*/}
-            <div className="flex items-center gap-3 mb-6">
-              <button
-                onClick={handleReset}
-                className="p-2 -ml-2 rounded-full text-gray-600 dark:text-gray-400"
-              >
-                <ArrowLeft size={24} />
-              </button>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Lecture Schedule
-              </h3>
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <button onClick={handleReset}>
+                  <ArrowLeft size={24} className="text-[var(--icon-color)]" />
+                </button>
+                <h3 className="text-xl font-semibold text-[var(--text-primary)]">
+                  Lecture Schedule
+                </h3>
+              </div>
+
+              {role === "Admin" && selectedClass && !isEditMode && (
+                <button
+                  onClick={() => setIsEditMode(true)}
+                  className="bg-[var(--btn-blue-bg)] text-white px-4 py-2 rounded-lg hover:bg-[var(--btn-blue-hover)]"
+                >
+                  Edit
+                </button>
+              )}
             </div>
 
-            {/* this is the dropdown logic for the table*/}
+            {/* DROPDOWN */}
             <div className="mb-6 max-w-xs">
-              <label className="custom-label mb-2">Select Class</label>
-              <select
-                className="custom-input bg-[var(--bg-primary)]"
-                {...register("selectedClass")}
-              >
+              <label className="custom-label">Select Class</label>
+              <select className="custom-input" {...register("selectedClass")}>
                 <option value="">Choose a class</option>
                 {classes.map((cls) => (
                   <option key={cls.id} value={cls.id}>
-                    {cls.class_id} semester {cls.semester}
+                    {cls.class_id}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* the table coding start from here */}
+            {/* TABLE */}
             {selectedClass && (
-              <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-                <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
-                    {/* below is the main logic of the table */}
-                    <tr>
-                      <th className="px-6 py-4 border-b dark:border-gray-700">
-                        Day
-                      </th>
-                      {lectureData.length > 0 &&lectureData[0].slots.map((slot, i) => (
-                        <th
-                          key={i}
-                          className="px-6 py-4 border-b dark:border-gray-700 whitespace-nowrap"
-                        >
-                          {slot.start}
+              <>
+                <div className="table-wrapper border border-[var(--border-light)] rounded-lg">
+                  <table className="w-full text-sm">
+                    <thead className="sticky-header">
+                      <tr>
+                        <th className="sticky-col px-4 py-3 border-r border-[var(--border-light)]">
+                          Day
                         </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lectureData.map((dayRow, i) => (
-                      <tr
-                        key={i}
-                        className="bg-white border-b dark:bg-gray-900 dark:border-gray-700"
-                      >
-                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white border-r dark:border-gray-700">
-                          {dayRow.day}
-                        </td>
-                        {dayRow.slots.map((slot, j) => (
-                          <td
-                            key={j}
-                            className={`px-6 py-4 border-r dark:border-gray-700 min-w-[150px] ${
-                              slot.subject === "Lunch Break"
-                                ? "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/10 font-medium text-center"
-                                : "text-gray-600 dark:text-gray-300"
-                            }`}
-                          >
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {slot.subject}
-                              </span>
-                              {slot.faculty !== "-" && (
-                                <span className="text-xs opacity-70 mt-1">
-                                  {slot.faculty}
-                                </span>
-                              )}
-                            </div>
-                          </td>
+                        {lectureData[0]?.slots.map((s, i) => (
+                          <th key={i} className="px-4 py-3 whitespace-nowrap">
+                            {s.start}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+
+                    <tbody>
+                      {lectureData.map((day, i) => (
+                        <tr key={i} className="hover:bg-[var(--bg-hover)]">
+                          <td className="sticky-col px-4 py-3 font-semibold border-r border-[var(--border-light)]">
+                            {day.day}
+                          </td>
+
+                          {day.slots.map((slot, j) => (
+                            <td
+                              key={j}
+                              className="px-3 py-3 border-r border-[var(--border-light)] min-w-[160px]"
+                            >
+                              {isEditMode ? (
+                                <>
+                                  <select
+                                    className="custom-input mb-1"
+                                    value={slot.subject_id}
+                                    onChange={(e) =>
+                                      handleChange(
+                                        i,
+                                        j,
+                                        "subject_id",
+                                        e.target.value,
+                                      )
+                                    }
+                                  >
+                                    <option value="">Subject</option>
+                                    {subjects.map((s) => (
+                                      <option
+                                        key={s.subject_id}
+                                        value={s.subject_id}
+                                      >
+                                        {s.subject_name}
+                                      </option>
+                                    ))}
+                                  </select>
+
+                                  <select
+                                    className="custom-input"
+                                    value={slot.faculty_id}
+                                    onChange={(e) =>
+                                      handleChange(
+                                        i,
+                                        j,
+                                        "faculty_id",
+                                        e.target.value,
+                                      )
+                                    }
+                                  >
+                                    <option value="">Faculty</option>
+                                    {faculties.map((f) => (
+                                      <option
+                                        key={f.faculty_id}
+                                        value={f.faculty_id}
+                                      >
+                                        {f.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="text-[var(--text-primary)] font-medium">
+                                    {slot.subject || "-"}
+                                  </div>
+                                  <div className="text-xs text-[var(--text-muted)] mt-1">
+                                    {slot.faculty || ""}
+                                  </div>
+                                </>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                {isEditMode && (
+                  <div className="form-actions">
+                    <SaveButton onClick={handleSave} />
+                    <CancelButton onClick={handleCancel} />
+                  </div>
+                )}
+              </>
             )}
           </DashboardChildPageCard>
         )}

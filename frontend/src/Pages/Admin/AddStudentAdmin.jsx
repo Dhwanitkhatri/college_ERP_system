@@ -6,9 +6,12 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import api from "../../api/axios.js";
 import { useState } from "react";
+import { useToast } from "../../context/ToastContext";
 
 const AddStudentAdmin = () => {
   const [addedStudent, setAddedStudent] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -31,21 +34,18 @@ const AddStudentAdmin = () => {
     .split("T")[0];
 
   async function onSubmit(data) {
-    alert("done");
     try {
+      setIsSubmitting(true);
       const token = localStorage.getItem("token");
-      const res = await api.post(
-        "/api/students/",
-        {
-          name: data.fullName,
-          //phone: data.phoneNo,
-          email: data.email,
-          dob: data.dob,
-          gender: data.gender,
-          admission_year: data.admissionYear,
-          year_of_study: data.yearOfStudying,
-        }
-      );
+      const res = await api.post("/api/students/", {
+        name: data.fullName,
+        //phone: data.phoneNo,
+        email: data.email,
+        dob: data.dob,
+        gender: data.gender,
+        admission_year: data.admissionYear,
+        year_of_study: data.yearOfStudying,
+      });
       setAddedStudent({
         name: data.fullName,
         phone: data.phoneNo,
@@ -57,15 +57,23 @@ const AddStudentAdmin = () => {
         student_id: res.data.student.student_id,
       });
       console.log(res.data.student);
-      alert("Student Added Successfully");
+      showToast("Student added successfully", "success");
     } catch (error) {
-      console.log(error);
-      alert("Error Adding Student");
+      console.error(error);
+
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Student already exists or invalid data";
+
+      showToast(message, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <DashboardChildPageTemplate 
+    <DashboardChildPageTemplate
       title="Add New Student"
       desc="Enter student details to add them to the system"
     >
@@ -186,7 +194,7 @@ const AddStudentAdmin = () => {
               Year of Studying
             </label>
             <select
-              className="yearOfStudyingInput custom-input"
+              className="yearOfStudying Input custom-input"
               {...register("yearOfStudying", {
                 required: "Please Fill This Field",
               })}
@@ -199,49 +207,52 @@ const AddStudentAdmin = () => {
               <option value="TY">Third Year</option>
               <option value="LY">Last Year</option>
             </select>
-            {errors.gender && (
-              <p className="custom-error">{errors.gender.message}</p>
+            {errors.yearOfStudying && (
+              <p className="custom-error">{errors.yearOfStudying.message}</p>
             )}
           </div>
           <div className="form-actions">
-            <AddButton />
+            <AddButton disabled={isSubmitting} />
             <CancelButton onClick={handleCancel} />
           </div>
         </form>
       </DashboardChildPageCard>
       {addedStudent && (
         <DashboardChildPageCard className="mt-3">
-          
-            <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
-              Student Added Successfully
-            </h3>
+          <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
+            Student Added Successfully
+          </h3>
 
-            <div className="space-y-1 text-sm text-[var(--text-secondary)]">
-              <p>
-                <span className="font-medium">Name:</span> {addedStudent.name}
-              </p>
-              <p>
-                <span className="font-medium">Phone:</span> {addedStudent.phone}
-              </p>
-              <p>
-                <span className="font-medium">Email:</span> {addedStudent.email}
-              </p>
-              <p>
-                <span className="font-medium">Student ID:</span> {addedStudent.student_id}
-              </p>
-              <p>
-                <span className="font-medium">Date of Birth:</span> {addedStudent.dob}
-              </p>
-              <p>
-                <span className="font-medium">Gender:</span> {addedStudent.gender}
-              </p>
-              <p>
-                <span className="font-medium">Admission Year:</span> {addedStudent.admission_year}
-              </p>
-              <p>
-                <span className="font-medium">Year of Studying:</span> {addedStudent.year_of_study}
-              </p>
-            </div>
+          <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+            <p>
+              <span className="font-medium">Name:</span> {addedStudent.name}
+            </p>
+            <p>
+              <span className="font-medium">Phone:</span> {addedStudent.phone}
+            </p>
+            <p>
+              <span className="font-medium">Email:</span> {addedStudent.email}
+            </p>
+            <p>
+              <span className="font-medium">Student ID:</span>{" "}
+              {addedStudent.student_id}
+            </p>
+            <p>
+              <span className="font-medium">Date of Birth:</span>{" "}
+              {addedStudent.dob}
+            </p>
+            <p>
+              <span className="font-medium">Gender:</span> {addedStudent.gender}
+            </p>
+            <p>
+              <span className="font-medium">Admission Year:</span>{" "}
+              {addedStudent.admission_year}
+            </p>
+            <p>
+              <span className="font-medium">Year of Studying:</span>{" "}
+              {addedStudent.year_of_study}
+            </p>
+          </div>
         </DashboardChildPageCard>
       )}
     </DashboardChildPageTemplate>

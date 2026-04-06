@@ -8,6 +8,8 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 import "./index.css";
+import { ConfirmProvider } from "./context/ConfirmContext";
+import { ToastProvider } from "./context/ToastContext";
 
 // Public Pages
 const LoginPage = lazy(() => import("./Pages/LoginPage"));
@@ -539,28 +541,32 @@ function App() {
   return (
     <ThemeProvider>
       <SidebarProvider>
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center h-screen bg-[var(--bg-secondary)]">
-              <div className="flex flex-col items-center gap-4">
-                {/* Spinner */}
-                <div className="w-12 h-12 border-4 border-[var(--border-medium)] border-t-[var(--text-primary)] rounded-full animate-spin"></div>
+        <ConfirmProvider>
+          <ToastProvider>
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-screen bg-[var(--bg-secondary)]">
+                  <div className="flex flex-col items-center gap-4">
+                    {/* Spinner */}
+                    <div className="w-12 h-12 border-4 border-[var(--border-medium)] border-t-[var(--text-primary)] rounded-full animate-spin"></div>
 
-                {/* Text */}
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">
-                  Loading ERP...
-                </h2>
+                    {/* Text */}
+                    <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                      Loading ERP...
+                    </h2>
 
-                {/* Subtext */}
-                <p className="text-sm text-[var(--text-muted)]">
-                  Getting things ready for you...
-                </p>
-              </div>
-            </div>
-          }
-        >
-          <RouterProvider router={router} />
-        </Suspense>
+                    {/* Subtext */}
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Getting things ready for you...
+                    </p>
+                  </div>
+                </div>
+              }
+            >
+              <RouterProvider router={router} />
+            </Suspense>
+          </ToastProvider>
+        </ConfirmProvider>
       </SidebarProvider>
     </ThemeProvider>
   );

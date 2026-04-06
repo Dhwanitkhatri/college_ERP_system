@@ -7,9 +7,11 @@ import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTem
 import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
 import { useForm } from "react-hook-form";
 import api from "../../api/axios.js";
+import { useToast } from "../../context/ToastContext";
 
 const AddFacultyAdmin = () => {
   const [addedFaculty, setAddedFaculty] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -17,22 +19,20 @@ const AddFacultyAdmin = () => {
     reset,
     formState: { errors },
   } = useForm();
-
+  const { showToast } = useToast();
   const handleCancel = () => {
     reset();
   };
 
   async function onSubmit(data) {
     try {
-     
-      const res = await api.post(
-        "/api/faculties",
-        {
-          name: data.fullName,
-          phone: data.phoneNo,
-          email: data.email,
-        }
-      );
+      setIsSubmitting(true);
+
+      const res = await api.post("/api/faculties", {
+        name: data.fullName,
+        phone: data.phoneNo,
+        email: data.email,
+      });
 
       console.log(res.data);
       setAddedFaculty({
@@ -41,10 +41,18 @@ const AddFacultyAdmin = () => {
         email: data.email,
         faculty_id: res.data.faculty.faculty_id,
       });
-      alert("Faculty Added Successfully");
+      showToast("Faculty added successfully 🎉", "success");
     } catch (error) {
-      console.log(res.data);
-      alert("Error Adding Faculty");
+      console.error(error);
+
+      const message =
+        error.response?.data?.message || // custom backend message
+        error.response?.data?.error || // alternative
+        "Faculty already exists or invalid data ❌";
+
+      showToast(message, "error");
+    } finally{
+      setIsSubmitting(false);
     }
   }
 
@@ -130,25 +138,25 @@ const AddFacultyAdmin = () => {
       </DashboardChildPageCard>
       {addedFaculty && (
         <DashboardChildPageCard className="mt-3">
-          
-            <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
-              Faculty Added Successfully
-            </h3>
+          <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
+            Faculty Added Successfully
+          </h3>
 
-            <div className="space-y-1 text-sm text-[var(--text-secondary)]">
-              <p>
-                <span className="font-medium">Name:</span> {addedFaculty.name}
-              </p>
-              <p>
-                <span className="font-medium">Phone:</span> {addedFaculty.phone}
-              </p>
-              <p>
-                <span className="font-medium">Email:</span> {addedFaculty.email}
-              </p>
-              <p>
-                <span className="font-medium">Faculty ID:</span> {addedFaculty.faculty_id}
-              </p>
-            </div>
+          <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+            <p>
+              <span className="font-medium">Name:</span> {addedFaculty.name}
+            </p>
+            <p>
+              <span className="font-medium">Phone:</span> {addedFaculty.phone}
+            </p>
+            <p>
+              <span className="font-medium">Email:</span> {addedFaculty.email}
+            </p>
+            <p>
+              <span className="font-medium">Faculty ID:</span>{" "}
+              {addedFaculty.faculty_id}
+            </p>
+          </div>
         </DashboardChildPageCard>
       )}
     </DashboardChildPageTemplate>
