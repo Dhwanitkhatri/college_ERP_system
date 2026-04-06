@@ -50,7 +50,7 @@ const DatewiseReportAdmin = () => {
   const [classes, setClasses] = useState([]);
   const [subjectsByClass, setSubjectsByClass] = useState([]);
   const [studentsByClassAndSubject, setStudentsByClassAndSubject] = useState(
-    []
+    [],
   );
   const [reportData, setReportData] = useState([]);
   const [isReportGenerated, setIsReportGenerated] = useState(false);
@@ -168,7 +168,7 @@ const DatewiseReportAdmin = () => {
         imageType: "image/jpeg",
         imageQuality: 0.8,
         singlePage: !isLongReport, // short = 1 page, long = multi-page
-      }
+      },
     );
 
     document.body.removeChild(cloneWrapper);
@@ -492,8 +492,7 @@ const DatewiseReportAdmin = () => {
                                 key={index}
                                 className="transition-colors"
                                 style={{
-                                  borderBottom:
-                                    "1px solid var(--border-light)",
+                                  borderBottom: "1px solid var(--border-light)",
                                 }}
                                 onMouseEnter={(e) =>
                                   (e.currentTarget.style.backgroundColor =
@@ -509,13 +508,6 @@ const DatewiseReportAdmin = () => {
                                   style={{ color: "var(--text-primary)" }}
                                 >
                                   {record.date} ({record.day})
-                                  <br />
-                                  <span
-                                    className="text-sm"
-                                    style={{ color: "var(--text-muted)" }}
-                                  >
-                                    Lecture {record.lecture_no}
-                                  </span>
                                 </td>
 
                                 <td className="px-4 py-3">
@@ -536,7 +528,7 @@ const DatewiseReportAdmin = () => {
                                   </span>
                                 </td>
                               </tr>
-                            )
+                            ),
                           )}
                         </tbody>
                       </table>
