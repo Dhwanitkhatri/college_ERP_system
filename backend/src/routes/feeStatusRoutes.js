@@ -1,15 +1,17 @@
 import express from "express";
 import {
-    createFeeStructure,
-    payFee,
-    adminCheckFeeStatus,
-    assignFeeToStudent,
-  getAllStudents }
-     from "../controllers/feeStatusController.js";
-import { 
-    adminMiddleware ,
-    authMiddleware } 
-    from "../middleware/authMiddleware.js";
+  createFeeStructure,
+  payFee,
+  adminCheckFeeStatus,
+  assignFeeToStudent,
+  getAllStudents
+}
+  from "../controllers/feeStatusController.js";
+import {
+  adminMiddleware,
+  authMiddleware
+}
+  from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 router.post(
@@ -46,5 +48,14 @@ router.get(
   authMiddleware,
   adminMiddleware,
   getAllStudents
+);
+
+import { updateFeeStructure } from "../controllers/feeStatusController.js";
+
+router.put(
+  "/fee-structure/update/:id",
+  authMiddleware,
+  adminMiddleware,
+  updateFeeStructure
 );
 export default router;

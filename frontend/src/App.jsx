@@ -68,6 +68,8 @@ import ViewExamResultStudent from "./Pages/Student/ViewExamResultStudent";
 import PrintFeeReceiptStudent from "./Pages/Student/PrintFeeReceiptStudent";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Unauthorized from "./Pages/Unauthorized";
+import ViewSessionPlanFaculty from "./Pages/Faculty/ViewSessionPlanFaculty";
+import ViewFeeStructureAdmin from "./Pages/Admin/ViewFeeStructureAdmin";
 
 const router = createBrowserRouter([
   {
@@ -254,6 +256,10 @@ const router = createBrowserRouter([
         path: "NotificationPage",
         element: <NotificationPage />,
       },
+      {
+        path: "ViewFeeStructureAdmin",
+        element: <ViewFeeStructureAdmin />,
+      }
     ],
   },
   {
@@ -344,6 +350,10 @@ const router = createBrowserRouter([
         path: "UpdateSessionPlanningFaculty",
         element: <UpdateSessionPlanningFaculty />,
       },
+      {
+        path: "ViewSessionPlanFaculty",
+        element: <ViewSessionPlanFaculty />,
+      },
     ],
   },
   {
@@ -409,6 +419,10 @@ const router = createBrowserRouter([
       {
         path: "PrintFeeReceiptStudent",
         element: <PrintFeeReceiptStudent />,
+      },
+      {
+        path: "ViewSessionPlanFaculty",
+        element: <ViewSessionPlanFaculty />,
       },
     ],
   },

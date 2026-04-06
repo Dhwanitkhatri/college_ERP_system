@@ -65,7 +65,71 @@ export const createFeeStructure = async (req, res) => {
   }
 };
 
+// UPDATE FEE STRUCTURE
+export const updateFeeStructure = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    const {
+      semester,
+      academic_year,
+      tuition_fee,
+      exam_fee = 0,
+      library_fee = 0,
+      lab_fee = 0,
+      misc_fee = 0,
+    } = req.body;
+
+    const course_id = req.user.course_id;
+
+    // Check if exists
+    const feeStructure = await FeeStructure.findOne({
+      where: { id, course_id },
+    });
+
+    if (!feeStructure) {
+      return res.status(404).json({
+        message: "Fee structure not found",
+      });
+    }
+
+    // Calculate new total
+    const total_fee =
+      Number(tuition_fee || 0) +
+      Number(exam_fee || 0) +
+      Number(library_fee || 0) +
+      Number(lab_fee || 0) +
+      Number(misc_fee || 0);
+
+    // Update
+    await feeStructure.update({
+      semester: semester || feeStructure.semester,
+      academic_year: academic_year || feeStructure.academic_year,
+      tuition_fee: tuition_fee || feeStructure.tuition_fee,
+      exam_fee,
+      library_fee,
+      lab_fee,
+      misc_fee,
+      total_fee,
+    });
+
+    res.json({
+      message: "Fee Structure updated successfully",
+      data: feeStructure,
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        message: "Duplicate fee structure",
+      });
+    }
+
+    res.status(500).json({ error: error.message });
+  }
+};
 
 // ASSIGN FEE TO STUDENT
 export const assignFeeToStudent = async (req, res) => {

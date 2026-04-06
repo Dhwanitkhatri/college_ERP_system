@@ -97,6 +97,9 @@ const AdminPanelDashboard = () => {
           <Link to="CreateFeeStructureAdmin">
             <ActionButtonDashboard title="Create Fee Structure" />
           </Link>
+          <Link to="ViewFeeStructureAdmin">
+            <ActionButtonDashboard title="View Fee Structure" />
+          </Link>
           <Link to="ChangeCredentials">
             <ActionButtonDashboard title="Change Credentials" />
           </Link>
