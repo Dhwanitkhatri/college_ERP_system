@@ -19,7 +19,7 @@ const ViewSessionPlanFaculty = () => {
         const res = await api.get(
           "/api/session/get-facultysubject"
         );
-
+        console.log(res.data);
         setSubjects(res.data.data || []);
       } catch (error) {
         console.error("Error fetching subjects:", error);
@@ -46,7 +46,7 @@ const ViewSessionPlanFaculty = () => {
       const res = await api.get(
         `/api/session/session-plan/${subjectId}`
       );
-
+      console.log(res.data);
       setSessionPlan(res.data.data || res.data || []);
     } catch (error) {
       console.error("Error fetching session plan:", error);
@@ -66,7 +66,7 @@ const ViewSessionPlanFaculty = () => {
 
     try {
       await api.put(
-        `/api/session/session-plan/status/${session.id}`,
+        `/api/session/session-plan/status/${session.session_id}`,
         {
           status: newStatus,
         }
@@ -148,7 +148,7 @@ const ViewSessionPlanFaculty = () => {
               <tbody>
                 {sessionPlan.map((session, index) => (
                   <tr
-                    key={session.id}
+                    key={session.session_id}
                     className="hover:bg-[var(--bg-hover)] transition"
                   >
                     <td className="table-row-style">

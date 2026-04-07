@@ -1048,6 +1048,7 @@ export const getSessionPlanBySubject = async (req, res) => {
     // 📦 FORMAT RESPONSE
     // =========================
     const formatted = sessions.map((s) => ({
+    session_id : s.id,
       session_no: s.lecture_no,
       topic: s.topics,
       planned_date: s.date,
@@ -1080,6 +1081,7 @@ export const updateSessionPlanStatus = async (req, res) => {
     const user_id = req.user.uid;
     const { id } = req.params;
     const { status } = req.body;
+    console.log(id);
 
     if (role !== "Faculty") {
       return res.status(403).json({ message: "Access denied" });
