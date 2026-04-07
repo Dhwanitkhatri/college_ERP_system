@@ -30,41 +30,40 @@ export default function ManageProfileAdmin() {
   /* =========================
      Fetch Profile Data
   ========================== */
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/api/profile/adminInfo");
+      console.log(res);
+      const { role, data } = res.data;
+      const { profile, work, personal } = data;
+
+      setProfileData(data);
+      setRole(role);
+
+      reset({
+        name: profile?.name || "",
+        email: profile?.email || "",
+        contact: profile?.contact_number || profile?.phone || "",
+        course: work?.course || "",
+        address: personal?.address || "",
+        qualification: personal?.qualification || "",
+        experience: personal?.experience || "",
+        aadhar: personal?.adherCard_number || "",
+        emergency: personal?.emergency_contact || "",
+        alternateEmail: personal?.alternate_email || "",
+        dob: personal?.dob || "",
+      });
+
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get("api/profile/admininfo");
-
-        const { role, data } = res.data;
-        const { profile, work, personal } = data;
-
-        setProfileData(data);
-        setRole(role);
-
-        // Pre-fill form with backend values
-        reset({
-          name: profile?.name || "",
-          email: profile?.email || "",
-          contact: profile?.contact_number || profile?.phone || "",
-          course: work?.course || "",
-          address: personal?.address || "",
-          qualification: personal?.qualification || "",
-          experience: personal?.experience || "",
-          aadhar: personal?.adherCard_number || "",
-          emergency: personal?.emergency_contact || "",
-          alternateEmail: personal?.alternate_email || "",
-          dob: personal?.dob || "",
-        });
-
-      } catch (err) {
-        console.error("Error fetching profile:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
-  }, [reset]);
+  }, []);
 
   /* =========================
      Loading UI
@@ -104,9 +103,11 @@ export default function ManageProfileAdmin() {
         },
       };
 
-      await api.put("api/profile/update-my-profile", payload);
+      await api.put("/api/profile/update-my-profile", payload);
 
-      console.log("Profile updated successfully");
+      // ✅ Refetch updated data
+      await fetchProfile();
+
       setIsEditing(false);
 
     } catch (err) {

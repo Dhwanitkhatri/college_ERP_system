@@ -1,16 +1,25 @@
 // src/controllers/profilePictureController.js
 import path from 'path';
 import fs from 'fs';
+import "../model/index.js";   // ✅ MUST ADD THIS LINE
+
 
 // Import your models
-import { Student } from "../model/Student.js";
-import { Faculty } from "../model/Faculty.js";
-import { Admin } from "../model/Admin.js";
-import { User } from '../model/User.js';
-import {EmployeePersonalDetails} from '../model/EmployeePersonalDetails.js';
-import Sequelize from 'sequelize';
+import {
+  Admin,
+  Course,
+  Department,
+  Student,
+  Faculty,
+  Class,
+  StudentPersonalDetails,
+  EmployeePersonalDetails
+} from "../model/index.js";
+
+import Sequelize, { Model } from 'sequelize';
 import { sequelize } from '../config/db.js';
 import bcrypt from 'bcrypt';
+import { includes } from 'zod';
 
 const roleModelMap = {
     student: Student,
@@ -203,14 +212,25 @@ export const profileInfoAdmin = async (req, res) => {
       });
     }
 
-    // ================= STUDENT =================
+    /* ================= STUDENT ================= */
     if (role === "Student") {
       const student = await Student.findOne({
         where: { user_id: uid },
         include: [
-          { model: Course, attributes: ["course_name"] },
-          { model: Department, attributes: ["department_name"] },
-          { model: Class, attributes: ["class_id", "semester", "academic_year"] }
+          {
+            model: Course,
+            attributes: ["course_id", "course_name"],
+            include: [
+              {
+                model: Department,
+                attributes: ["department_id", "department_name"]
+              }
+            ]
+          },
+          {
+            model: Class,
+            attributes: ["class_id", "semester", "academic_year"]
+          }
         ]
       });
 
@@ -238,7 +258,7 @@ export const profileInfoAdmin = async (req, res) => {
           },
           academic: {
             course: student.Course?.course_name || null,
-            department: student.Department?.department_name || null,
+            department: student.Course?.Department?.department_name || null,
             class: student.Class?.class_id || null,
             semester: student.Class?.semester || null,
             academic_year: student.Class?.academic_year || null,
@@ -258,15 +278,14 @@ export const profileInfoAdmin = async (req, res) => {
       });
     }
 
-    // ================= ADMIN =================
+    /* ================= ADMIN ================= */
     if (role === "Admin") {
+      console.log("Admin Associations:", Object.keys(Admin.associations));
       const admin = await Admin.findOne({
         where: { user_id: uid },
-        include: [
-          { model: Course, attributes: ["course_name"] }
-        ]
       });
-
+      const adminCourse = await Course.findOne({where:{course_id : req.user.course_id}});
+      const deptName = await Department.findOne({where:{department_id:adminCourse.department_id}})
       if (!admin) {
         return res.status(404).json({
           success: false,
@@ -289,7 +308,8 @@ export const profileInfoAdmin = async (req, res) => {
             contact_number: admin.contact_number
           },
           work: {
-            course: admin.Course?.course_name || null
+            course: adminCourse?.course_name || null,
+            department: deptName?.department_name || null
           },
           personal: personal
             ? {
@@ -306,14 +326,11 @@ export const profileInfoAdmin = async (req, res) => {
       });
     }
 
-    // ================= FACULTY =================
+    /* ================= FACULTY ================= */
     if (role === "Faculty") {
       const faculty = await Faculty.findOne({
         where: { user_id: uid },
-        include: [
-          { model: Course, attributes: ["course_name"] }
-        ]
-      });
+    });
 
       if (!faculty) {
         return res.status(404).json({
@@ -321,7 +338,8 @@ export const profileInfoAdmin = async (req, res) => {
           message: "Faculty not found"
         });
       }
-
+      const facultyCourse = await Course.findOne({where:{course_id:req.user.course_id}});
+      const facultyDept = await Department.findOne({where:{department_id:facultyCourse.department_id}});
       const personal = await EmployeePersonalDetails.findOne({
         where: { employeePersonal_id: faculty.faculty_id }
       });
@@ -337,7 +355,8 @@ export const profileInfoAdmin = async (req, res) => {
             phone: faculty.phone
           },
           work: {
-            course: faculty.Course?.course_name || null
+            course: facultyCourse?.course_name || null,
+            department: facultyDept?.department_name || null
           },
           personal: personal
             ? {
@@ -368,6 +387,7 @@ export const profileInfoAdmin = async (req, res) => {
     });
   }
 };
+
 
 export const changePassword = async (req, res) => {
   try {
@@ -445,7 +465,7 @@ export const updateMyProfile = async (req, res) => {
       });
     }
 
-    // ================= STUDENT =================
+    /* ================= STUDENT ================= */
     if (role === "Student") {
       const student = await Student.findOne({
         where: { user_id: uid }
@@ -458,7 +478,6 @@ export const updateMyProfile = async (req, res) => {
         });
       }
 
-      // 🔹 Update main profile
       await student.update({
         name: profile?.name ?? student.name,
         email: profile?.email ?? student.email,
@@ -467,7 +486,6 @@ export const updateMyProfile = async (req, res) => {
         year_of_study: academic?.year_of_study ?? student.year_of_study
       });
 
-      // 🔹 Update / Create personal details
       let personalData = await StudentPersonalDetails.findOne({
         where: { student_id: student.student_id }
       });
@@ -481,7 +499,7 @@ export const updateMyProfile = async (req, res) => {
           adharCard_number: personal?.adharCard_number ?? personalData.adharCard_number
         });
       } else {
-        personalData = await StudentPersonalDetails.create({
+        await StudentPersonalDetails.create({
           studentPersonal_id: student.student_id,
           student_id: student.student_id,
           parent_name: personal?.parent_name,
@@ -498,7 +516,7 @@ export const updateMyProfile = async (req, res) => {
       });
     }
 
-    // ================= ADMIN =================
+    /* ================= ADMIN ================= */
     if (role === "Admin") {
       const admin = await Admin.findOne({
         where: { user_id: uid }
@@ -511,14 +529,12 @@ export const updateMyProfile = async (req, res) => {
         });
       }
 
-      // 🔹 Update main
       await admin.update({
         name: profile?.name ?? admin.name,
         email: profile?.email ?? admin.email,
         contact_number: profile?.contact_number ?? admin.contact_number
       });
 
-      // 🔹 Personal
       let personalData = await EmployeePersonalDetails.findOne({
         where: { employeePersonal_id: admin.admin_id }
       });
@@ -534,7 +550,7 @@ export const updateMyProfile = async (req, res) => {
           DOB: personal?.dob ?? personalData.DOB
         });
       } else {
-        personalData = await EmployeePersonalDetails.create({
+        await EmployeePersonalDetails.create({
           employeePersonal_id: admin.admin_id,
           user_id: uid,
           address: personal?.address,
@@ -553,7 +569,7 @@ export const updateMyProfile = async (req, res) => {
       });
     }
 
-    // ================= FACULTY =================
+    /* ================= FACULTY ================= */
     if (role === "Faculty") {
       const faculty = await Faculty.findOne({
         where: { user_id: uid }
@@ -566,14 +582,13 @@ export const updateMyProfile = async (req, res) => {
         });
       }
 
-      // 🔹 Update main
+      // ✅ FIXED MAIN BUG HERE
       await faculty.update({
         name: profile?.name ?? faculty.name,
         email: profile?.email ?? faculty.email,
-        phone: profile?.phone ?? faculty.phone
+        phone: profile?.contact_number ?? faculty.phone
       });
 
-      // 🔹 Personal
       let personalData = await EmployeePersonalDetails.findOne({
         where: { employeePersonal_id: faculty.faculty_id }
       });
@@ -589,7 +604,7 @@ export const updateMyProfile = async (req, res) => {
           DOB: personal?.dob ?? personalData.DOB
         });
       } else {
-        personalData = await EmployeePersonalDetails.create({
+        await EmployeePersonalDetails.create({
           employeePersonal_id: faculty.faculty_id,
           user_id: uid,
           address: personal?.address,

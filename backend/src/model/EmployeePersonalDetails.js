@@ -40,10 +40,11 @@ export const EmployeePersonalDetails = sequelize.define("EmployeePersonalDetails
         validate:{
             is: /^(\+91)?\d{10}$/ 
         },
+    },
     DOB:{
         type :DataTypes.DATE
     },
-    },
+    
     alternate_email: {
         type: DataTypes.STRING,
         allowNull: true,

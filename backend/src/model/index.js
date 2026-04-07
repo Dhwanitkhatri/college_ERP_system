@@ -337,7 +337,21 @@ Student.hasMany(SubjectResult, {
 
 
 
+Admin.belongsTo(Course, {
+  foreignKey: "course_id"
+});
 
+Course.hasMany(Admin, {
+  foreignKey: "course_id"
+});
+
+Faculty.belongsTo(Course, {
+  foreignKey: "course_id"
+});
+
+Course.hasMany(Faculty, {
+  foreignKey: "course_id"
+});
 /* =====================================================
    EXPORT
 ===================================================== */

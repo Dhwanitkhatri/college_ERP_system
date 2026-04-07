@@ -28,7 +28,7 @@ export default function ManageProfileStudent() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get("api/profile/adminInfo");
+        const res = await api.get("/api/profile/adminInfo");
 
         const { profile, academic, personal } = res.data.data;
 
@@ -89,7 +89,12 @@ export default function ManageProfileStudent() {
         },
       };
 
-      await api.put("api/profile/update-my-profile", payload);
+      await api.put("/api/profile/update-my-profile", payload);
+
+      // refetch updated data
+      const res = await api.get("/api/profile/adminInfo");
+      setProfileData(res.data.data);
+
       setIsEditing(false);
 
     } catch (err) {
