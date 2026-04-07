@@ -107,7 +107,7 @@ export default function ViewExamResult() {
         imageType: "image/jpeg",
         imageQuality: 0.8,
         singlePage: true,
-      }
+      },
     );
 
     document.body.removeChild(cloneWrapper);
@@ -150,9 +150,7 @@ export default function ViewExamResult() {
                   ))}
                 </select>
                 {errors.academicYear && (
-                  <p className="custom-error">
-                    {errors.academicYear.message}
-                  </p>
+                  <p className="custom-error">{errors.academicYear.message}</p>
                 )}
               </div>
 
@@ -417,6 +415,7 @@ export default function ViewExamResult() {
                         </thead>
                         <tbody>
                           <tr>
+                            {/* CURRENT (NO CHANGE) */}
                             <td className="border border-black py-1.5 px-2">
                               {selectedExam.total_credits}
                             </td>
@@ -426,26 +425,24 @@ export default function ViewExamResult() {
                             <td className="border border-black py-1.5 px-2">
                               {selectedExam.subjects
                                 .reduce(
-                                  (sum, s) =>
-                                    sum + s.grade_point * s.credits,
-                                  0
+                                  (sum, s) => sum + s.grade_point * s.credits,
+                                  0,
                                 )
                                 .toFixed(2)}
                             </td>
                             <td className="border border-black py-1.5 px-2 font-bold">
                               {selectedExam.sgpa.toFixed(2)}
                             </td>
+
+                            {/* 🔥 CUMULATIVE (FIXED ONLY THIS PART) */}
                             <td className="border border-black py-1.5 px-2">
-                              {selectedExam.total_credits}
+                              {selectedExam.cumulative_total_credits}
                             </td>
                             <td className="border border-black py-1.5 px-2">
-                              {selectedExam.earned_credits}
+                              {selectedExam.cumulative_earned_credits}
                             </td>
                             <td className="border border-black py-1.5 px-2">
-                              {(
-                                selectedExam.cgpa *
-                                selectedExam.total_credits
-                              ).toFixed(2)}
+                              {selectedExam.cumulative_grade_points}
                             </td>
                             <td className="border border-black py-1.5 px-2 font-bold">
                               {selectedExam.cgpa.toFixed(2)}
@@ -466,8 +463,8 @@ export default function ViewExamResult() {
                             (Very Good) = 8
                           </p>
                           <p>
-                            B+ (Good) = 7 | B (Above Average) = 6 | C (Average) =
-                            5 | D (Pass) = 4 | F (Fail) = 0
+                            B+ (Good) = 7 | B (Above Average) = 6 | C (Average)
+                            = 5 | D (Pass) = 4 | F (Fail) = 0
                           </p>
                         </div>
                       </div>

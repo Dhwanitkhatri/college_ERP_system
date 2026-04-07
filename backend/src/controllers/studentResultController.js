@@ -14,6 +14,7 @@ import { Subject } from "../model/Subject.js";
 export const getMyResults = async (req, res) => {
   try {
     const user_id = req.user?.uid;
+
     if (!user_id) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -22,28 +23,87 @@ export const getMyResults = async (req, res) => {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
 
-    // fetch student with some basic details
+    // Fetch student
     const student = await Student.findOne({
       where: { user_id },
       attributes: ["student_id", "name", "course_id"]
     });
+
     if (!student) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Student profile not found" });
+      return res.status(404).json({ success: false, message: "Student not found" });
     }
+
     const student_id = student.student_id;
 
-    // Get query parameters for filtering
     const { academic_year, semester, exam_id } = req.query;
 
-    // Build where clause for SemesterResult
     const whereClause = { student_id };
-    if (academic_year) whereClause.academic_year = academic_year;
-    if (semester) whereClause.semester = Number(semester);
-    if (exam_id) whereClause.exam_id = Number(exam_id);
 
-    // Fetch semester results with optional filters
+    // ❌ DO NOT filter by academic_year for cumulative
+
+    let targetSemester = null;
+
+    if (exam_id) {
+      const targetExam = await SemesterResult.findOne({
+        where: { exam_id: Number(exam_id), student_id }
+      });
+
+      if (!targetExam) {
+        return res.status(404).json({
+          success: false,
+          message: "Exam not found"
+        });
+      }
+
+      targetSemester = targetExam.semester;
+    }
+    else if (semester) {
+      targetSemester = Number(semester);
+    }
+
+    // ✅ ONLY semester filter
+    if (targetSemester) {
+      whereClause.semester = {
+        [Op.lte]: targetSemester
+      };
+    }
+    // ==========================================
+    // HANDLE exam_id (MOST IMPORTANT FIX)
+    // ==========================================
+    if (exam_id) {
+      const targetExam = await SemesterResult.findOne({
+        where: { exam_id: Number(exam_id), student_id }
+      });
+
+      if (!targetExam) {
+        return res.status(404).json({
+          success: false,
+          message: "Exam not found"
+        });
+      }
+
+      targetSemester = targetExam.semester;
+
+      // Fetch ALL previous semesters
+      whereClause.semester = {
+        [Op.lte]: targetSemester
+      };
+    }
+
+    // ==========================================
+    // HANDLE semester (if exam_id not present)
+    // ==========================================
+    else if (semester) {
+      targetSemester = Number(semester);
+
+      whereClause.semester = {
+        [Op.lte]: targetSemester
+      };
+    }
+
+    // ==========================================
+    // FETCH SEMESTER RESULTS
+    // ==========================================
     const semesterResults = await SemesterResult.findAll({
       where: whereClause,
       include: [
@@ -53,7 +113,7 @@ export const getMyResults = async (req, res) => {
         }
       ],
       order: [
-        ["semester", "DESC"],
+        ["semester", "ASC"],
         ["exam_id", "ASC"]
       ]
     });
@@ -72,7 +132,9 @@ export const getMyResults = async (req, res) => {
 
     const examIds = semesterResults.map(sr => sr.exam_id);
 
-    // Fetch all subject results for these exams
+    // ==========================================
+    // SUBJECT RESULTS
+    // ==========================================
     const subjectResults = await SubjectResult.findAll({
       where: {
         student_id,
@@ -87,7 +149,9 @@ export const getMyResults = async (req, res) => {
       order: [["subject_id", "ASC"]]
     });
 
-    // Fetch all student marks for these exams, including component details
+    // ==========================================
+    // MARKS
+    // ==========================================
     const marks = await StudentMarks.findAll({
       where: {
         student_id,
@@ -101,7 +165,7 @@ export const getMyResults = async (req, res) => {
       ]
     });
 
-    // Group marks by exam_id and subject_id
+    // Group marks
     const marksByExamSubject = {};
     marks.forEach(m => {
       const key = `${m.exam_id}_${m.subject_id}`;
@@ -109,21 +173,17 @@ export const getMyResults = async (req, res) => {
       marksByExamSubject[key].push(m);
     });
 
-    // Group subject results by exam_id
+    // Group subject results
     const subjectResultsMap = {};
     subjectResults.forEach(sr => {
       if (!subjectResultsMap[sr.exam_id]) subjectResultsMap[sr.exam_id] = [];
-      
-      // For this subject, get its component marks
+
       const key = `${sr.exam_id}_${sr.subject_id}`;
       const compMarks = marksByExamSubject[key] || [];
-      
-      // Build component breakdown
+
       const components = compMarks.map(m => ({
         type: m.SubjectComponent?.type,
         marks_obtained: m.marks_obtained,
-       // max_marks: m.SubjectComponent?.max_marks,
-       // min_marks: m.SubjectComponent?.min_marks,
         is_pass: m.marks_obtained >= (m.SubjectComponent?.min_marks || 0)
       }));
 
@@ -136,32 +196,78 @@ export const getMyResults = async (req, res) => {
         grade: sr.grade,
         grade_point: sr.grade_point,
         is_pass: sr.is_pass,
-        components  // ✅ component-wise breakdown added
+        components
       });
     });
 
-    // Group by semester for easier frontend display
-    const grouped = {};
-    semesterResults.forEach(sr => {
-      const sem = sr.semester;
-      if (!grouped[sem]) grouped[sem] = [];
+    // ==========================================
+    // CUMULATIVE CALCULATION
+    // ==========================================
+    let runningTotalCredits = 0;
+    let runningEarnedCredits = 0;
+    let runningGradePoints = 0;
 
-      grouped[sem].push({
+    const semesterResultsWithCumulative = [];
+
+    for (const sr of semesterResults) {
+      const sgpa = sr.sgpa;
+      const totalCredits = sr.total_credits;
+      const earnedCredits = sr.earned_credits;
+
+      runningTotalCredits += totalCredits;
+      runningEarnedCredits += earnedCredits;
+      runningGradePoints += sgpa * totalCredits;
+
+      const cumulativeCGPA = runningTotalCredits
+        ? (runningGradePoints / runningTotalCredits).toFixed(2)
+        : 0;
+
+      semesterResultsWithCumulative.push({
         exam_id: sr.Exam.exam_id,
         exam_name: sr.Exam.name,
         exam_type: sr.Exam.exam_type,
         semester: sr.Exam.semester,
         academic_year: sr.Exam.academic_year || sr.academic_year,
-        sgpa: sr.sgpa,
-        cgpa: sr.cgpa,
+
+        // Current semester
+        total_credits: totalCredits,
+        earned_credits: earnedCredits,
+        sgpa: sgpa,
+
+        // Cumulative
+        cumulative_total_credits: runningTotalCredits,
+        cumulative_earned_credits: runningEarnedCredits,
+        cumulative_grade_points: parseFloat(runningGradePoints.toFixed(2)),
+        cgpa: parseFloat(cumulativeCGPA),
+
         result_status: sr.result_status,
-        total_credits: sr.total_credits,
-        earned_credits: sr.earned_credits,
         subjects: subjectResultsMap[sr.exam_id] || []
       });
+    }
+
+    // ==========================================
+    // FINAL FILTER (ONLY SHOW REQUESTED)
+    // ==========================================
+    let filteredResults = semesterResultsWithCumulative;
+
+    if (exam_id) {
+      filteredResults = semesterResultsWithCumulative.filter(
+        r => r.exam_id === Number(exam_id)
+      );
+    } else if (semester) {
+      filteredResults = semesterResultsWithCumulative.filter(
+        r => r.semester === Number(semester)
+      );
+    }
+
+    // Group by semester
+    const grouped = {};
+    filteredResults.forEach(item => {
+      const sem = item.semester;
+      if (!grouped[sem]) grouped[sem] = [];
+      grouped[sem].push(item);
     });
 
-    // Convert to array for response
     const result = Object.keys(grouped).map(sem => ({
       semester: parseInt(sem),
       exams: grouped[sem]
@@ -176,10 +282,12 @@ export const getMyResults = async (req, res) => {
       },
       data: result
     });
+
   } catch (error) {
-    console.error("Error fetching student results:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: error.message });
+    console.error("Error fetching results:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
