@@ -218,7 +218,6 @@ export default function ManageProfileAdmin() {
               <InputField label="Aadhar Card" register={register("aadhar")} disabled={!isEditing} />
               <InputField label="Emergency Contact" register={register("emergency")} disabled={!isEditing} />
               <InputField label="Alternate Email" register={register("alternateEmail")} disabled={!isEditing} />
-              <InputField label="Date of Birth" register={register("dob")} disabled={!isEditing} />
 
             </Grid>
           </Section>
