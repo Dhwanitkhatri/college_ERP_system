@@ -88,11 +88,12 @@ export default function UploadLearningMaterialFaculty() {
         "Content-Type": "multipart/form-data",
       },
     });
-
+    alert("Material uploaded successfully!");
     console.log("Upload success:", res.data);
 
     reset();
   } catch (error) {
+    alert("Failed to upload material. Please try again.");
     console.error("Upload failed:", error);
   } finally {
     setLoading(false);
