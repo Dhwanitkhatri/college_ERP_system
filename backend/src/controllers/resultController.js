@@ -36,7 +36,7 @@ const generateResultForStudent = async (
   // ---------- Student + Class ----------
   const student = await Student.findOne({
     where: { student_id },
-    include: [{ model: Class, attributes: ["semester"] }],
+    include: [{ model: Class, attributes: ["semester", "academic_year"] }],
     transaction
   });
   if (!student) throw new Error("Student not found");
@@ -329,12 +329,12 @@ export const generateBulkResults = async (req, res) => {
 
     const exam = await Exam.findOne({ where: { exam_id, course_id } });
     if (!exam) throw new Error("Exam not found or not in your course");
-    // if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
+    if (exam.status !== "PUBLISHED") throw new Error("Exam is not published");
 
     const students = await Student.findAll({
       include: [{
         model: Class,
-        where: { semester, course_id },
+        where: { semester, course_id , academic_year: exam.academic_year },
         required: true,
         attributes: []
       }],
