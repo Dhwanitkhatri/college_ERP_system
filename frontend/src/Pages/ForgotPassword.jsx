@@ -132,7 +132,7 @@ const ForgotPassword = () => {
 
                 <input
                   type="text"
-                  placeholder="Enter 4 digit OTP"
+                  placeholder="Enter 6 digit OTP"
                   maxLength={6}
                   className="custom-input"
                   {...register("otp", {
