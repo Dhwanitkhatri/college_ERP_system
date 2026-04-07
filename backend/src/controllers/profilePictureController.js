@@ -13,7 +13,8 @@ import {
   Faculty,
   Class,
   StudentPersonalDetails,
-  EmployeePersonalDetails
+  EmployeePersonalDetails,
+  User
 } from "../model/index.js";
 
 import Sequelize, { Model } from 'sequelize';
