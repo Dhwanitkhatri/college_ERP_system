@@ -6,6 +6,7 @@ import { saveUser } from "../utils/auth.js";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserRole } from "../utils/auth";
+import { motion } from "framer-motion";
 
 function LoginPage() {
   const navigate = useNavigate(); //for navigation
@@ -97,7 +98,11 @@ function LoginPage() {
     <div className="wrapperDiv bg-[var(--login-bg-color)] dark:bg-gray-900 flex justify-center items-center min-h-screen w-full m-0">
       <form id="loginForm" onSubmit={handleSubmit(onSubmit)}>
         {/*Main login container */}
-        <div className="loginContainer w-full bg-white dark:bg-gray-800 dark:text-white border-gray-200 p-5 rounded-xl shadow-lg justify-center items-center justify-items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="loginContainer w-full bg-white dark:bg-gray-800 dark:text-white border-gray-200 p-5 rounded-xl shadow-lg justify-center items-center justify-items-center"
+        >
           {/* login header*/}
           <div className="loginHeader justify-center items-center justify-items-center w-full m-2 mt-1">
             <div className="loginTitleHeader flex w-full justify-between items-center">
@@ -204,7 +209,7 @@ function LoginPage() {
               </span>
             </Link>
           </div>
-        </div>
+        </motion.div>
       </form>
     </div>
   );
