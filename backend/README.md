@@ -481,8 +481,8 @@ Make sure the following are installed on your system:
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/college_ERP_system-admin.git
-cd college_ERP_system-admin/backend
+git clone https://github.com/your-username/college_ERP_system.git
+cd college_ERP_system/backend
 ```
 
 ### Step 2 — Install Dependencies

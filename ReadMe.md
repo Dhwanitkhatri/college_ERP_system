@@ -36,6 +36,7 @@ college-erp/
 ├── backend/       # Backend APIs & Database
 │
 ├── README.md
+└── .gitignore
 ```
 
 ---
@@ -91,3 +92,5 @@ Detailed setup and documentation are available inside:
 * Jiken Patel
 
 ---
+
+Sardar Vallabhbhai Global University
