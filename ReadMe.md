@@ -1,134 +1,93 @@
-# 🎓 College ERP System (Frontend)
+# College ERP System
 
-A fully modular and scalable **College ERP (Enterprise Resource Planning) System** designed to streamline academic and administrative processes in educational institutions.
+A web-based College ERP (Enterprise Resource Planning) System developed to manage and automate academic and administrative activities of a college.
 
-Built with a **modern React architecture**, this project focuses on clean UI, reusable components, and role-based workflows.
+The system provides separate portals for:
 
----
-
-## 🌟 Key Highlights
-
-- 🔐 Role-Based Authentication System (Admin / Faculty / Student)
-- 🧩 Component-Based Scalable Architecture
-- ⚡ Fast Development using Vite
-- 🎨 Clean UI with reusable design system
-- 🔄 Dynamic data handling with API layer abstraction
-- 📱 Responsive design (desktop-first)
+* Admin
+* Faculty
+* Students
 
 ---
 
-## 🚀 Core Features (Detailed)
+# Tech Stack
 
-### 👨‍💼 Admin Dashboard
-- ➤ Manage Students (Add / Update / Delete)
-- ➤ Manage Faculty Records
-- ➤ Course & Subject Management
-- ➤ Timetable Scheduling System
-- ➤ Assign subjects to faculty
-- ➤ Centralized control over entire ERP
+## Frontend
 
----
+* React.js
+* Vite
+* Tailwind CSS
 
-### 👨‍🏫 Faculty Dashboard
-- ➤ View assigned subjects and classes
-- ➤ Session Planning Module
-- ➤ Attendance Management System
-- ➤ Track class schedules
-- ➤ Manage academic activities efficiently
+## Backend
+
+* Node.js
+* Express.js
+* Sequelize ORM
+* MySQL
 
 ---
 
-### 👨‍🎓 Student Dashboard
-- ➤ View personal profile
-- ➤ Check attendance records
-- ➤ Access academic results
-- ➤ View timetable and subject details
-
----
-
-## 🧠 Advanced Functional Features
-
-- 🔒 **Protected Routing**
-  - Prevents unauthorized access
-  - Role-based route rendering
-
-- 🌐 **API Layer Separation**
-  - All backend calls handled in `/api`
-  - Clean separation of logic & UI
-
-- 🧩 **Reusable UI System**
-  - Buttons, Cards, Templates
-  - Consistent design across application
-
-- 📦 **Context-Based State Management**
-  - Global state handled using React Context API
-  - Separate contexts for theme and sidebar
-
-- ⚡ **Lazy Loading**
-  - Improves performance
-  - Loads components only when needed
-
-- 🧭 **Dynamic Navigation**
-  - Sidebar adapts based on user role
-
----
-
-## 🛠️ Tech Stack
-
-| Category            | Technology Used |
-|--------------------|----------------|
-| Frontend Framework | React (Vite)   |
-| Styling            | Tailwind CSS   |
-| Routing            | React Router DOM |
-| State Management   | Context API    |
-| API Handling       | Axios          |
-| Form Handling      | React Hook Form |
-| Icons              | Lucide React   |
-
----
-
-## 📁 Folder Structure Explained
-
-### 🔹 `/api`
-- Handles all API calls
-- Central place for backend communication
-
-### 🔹 `/Components`
-- Reusable components used across multiple pages
-
-### 🔹 `/Pages`
-- Main application screens divided by roles:
-  - Admin
-  - Faculty
-  - Student
-
-### 🔹 `/context`
-- Global state management
-- Theme & sidebar control
-
-### 🔹 `/routes`
-- Route definitions
-- Protected routes logic
-
-### 🔹 `/ui`
-Reusable UI design system:
-- Buttons → Common button components
-- Cards → Layout cards
-- Templates → Page layouts
-
-### 🔹 `/utils`
-- Helper functions
-- Common logic utilities
-
-### 🔹 `/assets`
-- Images, icons, static files
-
----
-
-## ⚙️ Installation & Setup
+# Project Structure
 
 ```bash
-git clone https://github.com/Dhwanitkhatri/college_ERP_system.git
-cd your-repo-name
+college-erp/
+│
+├── frontend/      # Frontend Application
+├── backend/       # Backend APIs & Database
+│
+├── README.md
+```
+
+---
+
+# Main Features
+
+* Authentication & Role-based Access
+* Student Management
+* Faculty Management
+* Attendance System
+* Timetable Management
+* Result Management
+* Notifications
+* Session Planning
+* Reports & Analytics
+
+---
+
+# Setup
+
+## Frontend
+
+```bash
+cd frontend
 npm install
 npm run dev
+```
+
+## Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+---
+
+# Documentation
+
+Detailed setup and documentation are available inside:
+
+* `frontend/README.md`
+* `backend/README.md`
+
+---
+
+# Team Members
+
+* Dhwanit Khatri
+* Aayush Bhavsar
+* Yug Panchal
+* Jiken Patel
+
+---
