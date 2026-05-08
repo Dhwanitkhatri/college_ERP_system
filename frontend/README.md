@@ -1,16 +1,134 @@
-# React + Vite
+# 🎓 College ERP System (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A fully modular and scalable **College ERP (Enterprise Resource Planning) System** designed to streamline academic and administrative processes in educational institutions.
 
-Currently, two official plugins are available:
+Built with a **modern React architecture**, this project focuses on clean UI, reusable components, and role-based workflows.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🌟 Key Highlights
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🔐 Role-Based Authentication System (Admin / Faculty / Student)
+- 🧩 Component-Based Scalable Architecture
+- ⚡ Fast Development using Vite
+- 🎨 Clean UI with reusable design system
+- 🔄 Dynamic data handling with API layer abstraction
+- 📱 Responsive design (desktop-first)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Core Features (Detailed)
+
+### 👨‍💼 Admin Dashboard
+- ➤ Manage Students (Add / Update / Delete)
+- ➤ Manage Faculty Records
+- ➤ Course & Subject Management
+- ➤ Timetable Scheduling System
+- ➤ Assign subjects to faculty
+- ➤ Centralized control over entire ERP
+
+---
+
+### 👨‍🏫 Faculty Dashboard
+- ➤ View assigned subjects and classes
+- ➤ Session Planning Module
+- ➤ Attendance Management System
+- ➤ Track class schedules
+- ➤ Manage academic activities efficiently
+
+---
+
+### 👨‍🎓 Student Dashboard
+- ➤ View personal profile
+- ➤ Check attendance records
+- ➤ Access academic results
+- ➤ View timetable and subject details
+
+---
+
+## 🧠 Advanced Functional Features
+
+- 🔒 **Protected Routing**
+  - Prevents unauthorized access
+  - Role-based route rendering
+
+- 🌐 **API Layer Separation**
+  - All backend calls handled in `/api`
+  - Clean separation of logic & UI
+
+- 🧩 **Reusable UI System**
+  - Buttons, Cards, Templates
+  - Consistent design across application
+
+- 📦 **Context-Based State Management**
+  - Global state handled using React Context API
+  - Separate contexts for theme and sidebar
+
+- ⚡ **Lazy Loading**
+  - Improves performance
+  - Loads components only when needed
+
+- 🧭 **Dynamic Navigation**
+  - Sidebar adapts based on user role
+
+---
+
+## 🛠️ Tech Stack
+
+| Category            | Technology Used |
+|--------------------|----------------|
+| Frontend Framework | React (Vite)   |
+| Styling            | Tailwind CSS   |
+| Routing            | React Router DOM |
+| State Management   | Context API    |
+| API Handling       | Axios          |
+| Form Handling      | React Hook Form |
+| Icons              | Lucide React   |
+
+---
+
+## 📁 Folder Structure Explained
+
+### 🔹 `/api`
+- Handles all API calls
+- Central place for backend communication
+
+### 🔹 `/Components`
+- Reusable components used across multiple pages
+
+### 🔹 `/Pages`
+- Main application screens divided by roles:
+  - Admin
+  - Faculty
+  - Student
+
+### 🔹 `/context`
+- Global state management
+- Theme & sidebar control
+
+### 🔹 `/routes`
+- Route definitions
+- Protected routes logic
+
+### 🔹 `/ui`
+Reusable UI design system:
+- Buttons → Common button components
+- Cards → Layout cards
+- Templates → Page layouts
+
+### 🔹 `/utils`
+- Helper functions
+- Common logic utilities
+
+### 🔹 `/assets`
+- Images, icons, static files
+
+---
+
+## ⚙️ Installation & Setup
+
+```bash
+git clone https://github.com/Dhwanitkhatri/college_ERP_system.git
+cd your-repo-name
+npm install
+npm run dev
