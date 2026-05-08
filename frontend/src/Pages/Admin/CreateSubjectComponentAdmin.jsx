@@ -1,0 +1,195 @@
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import DashboardChildPageTemplate from "../../ui/Templates/DashboardChildPageTemplate";
+import DashboardChildPageCard from "../../ui/Cards/DashboardChildPageCard";
+import AddButton from "../../ui/Buttons/AddButton";
+import CancelButton from "../../ui/Buttons/CancelButton";
+import api from "../../api/axios";
+
+
+const CreateSubjectComponent = () => {
+
+  // State to show success message after component creation
+  const [createdComponent, setCreatedComponent] = useState(null);
+  const [subjects , setSubjects]=useState([]);
+
+
+  
+  // React Hook Form
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm();
+
+  // Watch values for marks validation
+  const maxMarks = watch("max_marks");
+
+  // Cancel Button Function
+  const handleCancel = () => {
+    reset();
+    setCreatedComponent(null);
+  };
+//to fetch the subject for subject Id 
+  useEffect(()=>{
+    api.get("/api/components/subjects")
+    .then((res)=>{
+   
+      setSubjects(res.data);
+    }).catch((err)=>{
+      console.log(err);
+    })
+  },[])
+  // Form Submit Function
+  async function onSubmit(data) {
+    try {
+     
+console.log(data);  
+      const res = await api.post(
+        "/api/components/", // Make sure route matches backend
+        {
+          subject_id: data.subject_id,
+          type: data.type,
+          max_marks: Number(data.max_marks),
+          min_marks: Number(data.min_marks),
+        });
+
+      alert("Component Created Successfully");
+
+      setCreatedComponent(res.data.data);
+
+      reset();
+
+    } catch (error) {
+      alert(error?.response?.data?.message || "Error Creating Component");
+    }
+  }
+
+  return (
+    <DashboardChildPageTemplate
+      title="Create Subject Component"
+      desc="Add exam components like Midterm, Assignment, Quiz etc for a subject"
+    >
+      <DashboardChildPageCard>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+
+          {/* SUBJECT ID */}
+          <div className="form-field">
+            <label className="custom-label">Subject ID</label>
+            <select
+              placeholder="Enter Subject ID"
+              className="custom-input"
+              {...register("subject_id", {
+                required: "Subject ID is required",
+              })}
+            >
+              <option value="">Select Subject ID</option>
+              {/* In a real app, this would be populated dynamically from the backend */}
+           {Array.isArray(subjects) &&
+  subjects.map((subject) => (
+    <option key={subject.subject_id} value={subject.subject_id}>
+      {subject.subject_name} - {subject.subject_id}
+    </option>
+  ))
+}
+            </select>
+            {errors.subject_id && (
+              <p className="custom-error">{errors.subject_id.message}</p>
+            )}
+          </div>
+
+          {/* COMPONENT NAME */}
+
+          {/* COMPONENT TYPE */}
+          <div className="form-field">
+            <label className="custom-label">Component Type</label>
+            <select
+              className="custom-input"
+              {...register("type", {
+                required: "Please select component type",
+              })}
+            >
+              <option value="">Select Type</option>
+              <option value="INTERNAL">INTERNAL</option>
+              <option value="EXTERNAL">EXTERNAL</option>
+              <option value="ASSIGNMENT">ASSIGNMENT</option>
+              <option value="ATTENDANCE">ATTENDANCE</option>
+            </select>
+            {errors.type && (
+              <p className="custom-error">{errors.type.message}</p>
+            )}
+          </div>
+
+          {/* MAX MARKS */}
+          <div className="form-field">
+            <label className="custom-label">Maximum Marks</label>
+            <input
+              type="number"
+              placeholder="Enter Maximum Marks"
+              className="custom-input"
+              {...register("max_marks", {
+                required: "Maximum marks required",
+                min: {
+                  value: 1,
+                  message: "Must be at least 1",
+                },
+              })}
+            />
+            {errors.max_marks && (
+              <p className="custom-error">{errors.max_marks.message}</p>
+            )}
+          </div>
+
+          {/* MIN MARKS */}
+          <div className="form-field">
+            <label className="custom-label">Minimum Marks</label>
+            <input
+              type="number"
+              placeholder="Enter Minimum Marks"
+              className="custom-input"
+              {...register("min_marks", {
+                required: "Minimum marks required",
+                validate: (value) =>
+                  Number(value) <= Number(maxMarks) ||
+                  "Min marks cannot be greater than max marks",
+              })}
+            />
+            {errors.min_marks && (
+              <p className="custom-error">{errors.min_marks.message}</p>
+            )}
+          </div>
+
+          {/* ACTION BUTTONS */}
+          <div className="form-actions">
+            <AddButton />
+            <CancelButton onClick={handleCancel} />
+          </div>
+
+        </form>
+      </DashboardChildPageCard>
+
+      {/* SUCCESS DISPLAY CARD */}
+      {createdComponent && (
+        <DashboardChildPageCard className="mt-3">
+          <h3 className="text-lg font-semibold mb-3 text-[var(--text-primary)]">
+            Component Created Successfully
+          </h3>
+
+          <div className="space-y-1 text-sm text-[var(--text-secondary)]">
+            <p><span className="font-medium">Component Name:</span> {createdComponent.component_name}</p>
+            <p><span className="font-medium">Type:</span> {createdComponent.type}</p>
+            <p><span className="font-medium">Max Marks:</span> {createdComponent.max_marks}</p>
+            <p><span className="font-medium">Min Marks:</span> {createdComponent.min_marks}</p>
+            <p><span className="font-medium">Subject ID:</span> {createdComponent.subject_id}</p>
+          </div>
+        </DashboardChildPageCard>
+      )}
+
+    </DashboardChildPageTemplate>
+  );
+};
+
+export default CreateSubjectComponent;

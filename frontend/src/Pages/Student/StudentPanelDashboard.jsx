@@ -1,0 +1,56 @@
+import React from "react";
+import DashContentPanelDashboard from "../../ui/Templates/DashContentPanelDashboard";
+import ActionContainerDashboard from "../../ui/Templates/ActionContainerDashboard";
+import ActionButtonDashboard from "../../ui/Buttons/ActionButtonDashboard";
+import PanelTemplateDashboard from "../../ui/Templates/PanelTemplateDashboard";
+import { useOutletContext, Link } from "react-router-dom";
+
+const AdminPanelDashboard = () => {
+  const { username } = useOutletContext();
+  return (
+    <PanelTemplateDashboard
+      username={username}
+    >
+      {/* ROW 1 */}
+      <DashContentPanelDashboard>
+        <ActionContainerDashboard title="Account & Credentials">
+          <Link to="ChangeCredentials"><ActionButtonDashboard title="Change Credentials" /></Link>
+          <Link to="ManageProfileStudent">
+            <ActionButtonDashboard title="Manage Profile" />
+          </Link>
+          <Link to="PrintFeeReceiptStudent"><ActionButtonDashboard title="Print Fee Chalan" /></Link>
+          {/* <ActionButtonDashboard title="View Notices" /> */}
+        </ActionContainerDashboard>
+
+        <ActionContainerDashboard title="Academic Reports">
+          <Link to="ViewAttendanceReportStudent"><ActionButtonDashboard title="Attendance Report" /></Link>
+          {/* <ActionButtonDashboard title="Generate Exam Result" /> */}
+          <Link to="ViewExamResultStudent"><ActionButtonDashboard title="View Exam Result" /></Link>
+          {/* <ActionButtonDashboard title="View Documents" /> */}
+          <Link to="GenerateHallTicketStudent"><ActionButtonDashboard title="Generate Hall Ticket" /></Link>
+        </ActionContainerDashboard>
+      </DashContentPanelDashboard>
+
+      {/* ROW 2 */}
+      <DashContentPanelDashboard>
+        <ActionContainerDashboard title="Payment & Feedback">
+          {/* <ActionButtonDashboard title="Make Application" /> */}
+          <Link to="FacultyFeedBackStudent"><ActionButtonDashboard title="Feedback" /></Link>
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Online Fee Payment" /></Link>
+          {/* <ActionButtonDashboard title="Complaint Box" /> */}
+          {/* <ActionButtonDashboard title="Examination Form" /> */}
+        </ActionContainerDashboard>
+
+        <ActionContainerDashboard title="Learning & Resources">
+          <Link to="LearningMaterialStudent"><ActionButtonDashboard title="Learning Material" /></Link>
+          {/* <ActionButtonDashboard title="Homework" /> */}
+          <Link to="NotAvailablePage"><ActionButtonDashboard title="Live Classes" /></Link>
+          <Link to="ViewSessionPlanFaculty"><ActionButtonDashboard title="View Session Planning" /></Link>
+          <Link to="ViewTimeTable"><ActionButtonDashboard title="View Time Table" /></Link>
+        </ActionContainerDashboard>
+      </DashContentPanelDashboard>
+    </PanelTemplateDashboard>
+  );
+};
+
+export default AdminPanelDashboard;

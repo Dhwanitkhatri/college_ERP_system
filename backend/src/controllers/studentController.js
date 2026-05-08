@@ -1,0 +1,357 @@
+//students controller
+import { Student } from "../model/Student.js";
+import { User } from "../model/User.js";
+import { Role } from "../model/Role.js";
+import { Course } from "../model/Course.js";
+import bcrypt from "bcrypt";
+import { sequelize } from "../config/db.js";
+import { generateEnrollmentId } from "../services/generateEnrollmentId.js";
+
+// Create a new student(admins only)
+export const createStudent = async (req, res) => {
+    const t = await sequelize.transaction(); //start transaction
+    const student_id = await generateEnrollmentId(req.user.course_id);
+    const course_id = req.user.course_id; //assign course_id from admin creating 
+    console.log("Generated student_id:", student_id);
+    console.log("Admin's course_id:", req.user.course_id);
+    console.log("Creating student for course_id:", course_id);
+    try {
+        const {
+            // student_id,
+            
+            //class_id,
+            name,
+            dob,
+            gender,
+            email,
+            admission_year,
+            year_of_study,
+        } = req.body;
+        console.log("Request body:", req.body);
+        const course = await Course.findOne({ where: {course_id} });
+        if (!course) {
+            await t.rollback();
+            return res.status(400).json({ message: "Invalid course_id" });
+        }
+
+        if (req.user.course_id !== course_id) {
+            await t.rollback();
+            return res.status(403).json({
+                message: `You are not allowed to create students for course ${course_id}`
+            });
+        }
+
+        // Get the role_id for 'Student'
+        const studentRole = await Role.findOne({ where: { role_name: "Student" } });
+        if (!studentRole) {
+            await t.rollback();
+            return res.status(400).json({ message: "Student role not found" });
+        }
+
+        //validation to require fields
+        if (
+            !student_id ||
+            !course_id ||
+            //  !class_id ||
+            !name ||
+            !dob ||
+            !gender ||
+            !email ||
+            !admission_year ||
+            !year_of_study
+        ) {
+            await t.rollback();
+            return res.status(400).json({ message: "All fields are required" });
+        }
+        //validation to check if student_id & email already exists
+        const existingStudent = await Student.findOne({ where: { student_id } });
+        if (existingStudent) {
+            return res.status(400).json({ message: "Student ID already exists" });
+        }
+        const existingEmail = await Student.findOne({ where: { email } });
+        if (existingEmail) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+        //validation for study year
+        const validYears = ["FY", "SY", "TY", "LY"];
+        if (!validYears.includes(year_of_study)) {
+            await t.rollback();
+            return res
+                .status(400)
+                .json({ message: "Year of study must be one of FY, SY, TY, LY" });
+        }
+        //validation for admission range
+        if (admission_year < 2000 || admission_year > 2040) {
+            await t.rollback();
+            return res
+                .status(400)
+                .json({ message: "Admission year must be between 2000 and 2040" });
+        }
+
+        // Create a user for the student with a default password
+        const defaultPassword = "password";
+        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+        const newUser = await User.create(
+            {
+                username: student_id,
+                password: hashedPassword,
+                role_id: studentRole.role_id,
+                status: "active",
+            },
+            { transaction: t }
+        );
+        console.log("Created user:", newUser.username);
+
+        // Create the student record
+        const newStudent = await Student.create(
+            {
+                student_id,
+                user_id: newUser.user_id,
+                course_id,
+                //class_id,
+                department_id: course.department_id,
+                name,
+                dob,
+                gender,
+                email,
+                admission_year,
+                year_of_study,
+            },
+            { transaction: t }
+        );
+        await t.commit();
+        res.status(201).json({
+            message: "Student created successfully",
+            student: newStudent,
+            login_info: {
+                username: newUser.username,
+                default_password: defaultPassword,
+            },
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error("Error creating student:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// Get all students
+export const getAllStudents = async (req, res) => {
+    try {
+        const students = await Student.findAll({
+            where: { course_id: req.user.course_id },
+            attributes: { exclude: ["createdAt", "updatedAt"] },
+            include: [
+                {
+                    model: User,
+                    attributes: ["status"]   // only fetch status from User table
+                }
+            ]
+        });
+
+        res.json(students);
+    } catch (error) {
+        console.error("Error fetching students:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// Get a student by ID
+export const getStudentById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const student = await Student.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id
+            },
+            attributes: {
+                exclude: ["createdAt", "updatedAt"]
+            }
+        });
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+        res.json(student);
+    } catch (error) {
+        console.error("Error fetching student:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+// Update a student by ID (admins only)
+
+
+export const updateStudentById = async (req, res) => {
+  let t;
+
+  try {
+    t = await sequelize.transaction();
+
+    const { id } = req.params;
+    const {
+      course_id,
+      class_id,
+      name,
+      dob,
+      gender,
+      email,
+      admission_year,
+      year_of_study,
+      password,
+    } = req.body;
+
+    if (
+      !course_id &&
+      !class_id &&
+      !name &&
+      !dob &&
+      !gender &&
+      !email &&
+      !admission_year &&
+      !year_of_study &&
+      !password
+    ) {
+      await t.rollback();
+      return res.status(400).json({
+        message: "At least one field is required to update",
+      });
+    }
+
+    // 🔎 Find student with User relation
+    const student = await Student.findOne({
+      where: {
+        id: id,
+        course_id: req.user.course_id,
+      },
+      include: {
+        model: User,
+      },
+      transaction: t,
+    });
+
+    if (!student) {
+      await t.rollback();
+      return res.status(404).json({
+        message:
+          "Student not found or you don't have access to update this student",
+      });
+    }
+
+    // =========================
+    // Update Student Table
+    // =========================
+    const updateStudentData = {};
+    const allowedStudentFields = [
+      "course_id",
+      "class_id",
+      "name",
+      "dob",
+      "gender",
+      "admission_year",
+      "year_of_study",
+    ];
+
+    for (const field of allowedStudentFields) {
+      if (req.body[field] !== undefined) {
+        updateStudentData[field] = req.body[field];
+      }
+    }
+
+    if (Object.keys(updateStudentData).length > 0) {
+      await student.update(updateStudentData, { transaction: t });
+    }
+
+    // =========================
+    // Update User Table
+    // =========================
+    const updateUserData = {};
+
+    if (email) {
+      updateUserData.email = email;
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateUserData.password = hashedPassword;
+    }
+
+    if (Object.keys(updateUserData).length > 0) {
+      await student.User.update(updateUserData, { transaction: t });
+    }
+
+    await t.commit();
+
+    res.json({
+      message: "Student updated successfully",
+    });
+
+  } catch (error) {
+    if (t) await t.rollback();
+    console.error("Error updating student:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+// Delete a student by ID (admins only)
+export const deleteStudentById = async (req, res) => {
+    const t = await sequelize.transaction();
+    try {
+        const { id } = req.params;
+        const student = await Student.findOne({
+            where: {
+                id: id,
+                course_id: req.user.course_id   // only delete if same course
+            },
+            transaction: t
+        });
+
+        if (!student) {
+            await t.rollback();
+            return res.status(403).json({
+                success: false,
+                message: "Access denied: You cannot delete students from another course (course filter applied)."
+            });
+        }
+
+        await student.destroy({ transaction: t });
+        const user = await User.findByPk(student.user_id, { transaction: t });
+        if (user) {
+            await user.destroy({ transaction: t });
+        }
+
+        await t.commit();
+        return res.json({
+            success: true,
+            message: "Student and associated user deleted successfully"
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error("Error deleting student:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+export const activeInactiveFaculty = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle status correctly
+    user.status = user.status === "active" ? "inactive" : "active";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      status: user.status,
+      message: `User is now ${user.status}`
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
