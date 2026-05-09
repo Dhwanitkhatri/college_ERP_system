@@ -268,18 +268,6 @@ For in-depth technical documentation of each part of the system, refer to the de
 
 ---
 
-## 🔑 Default Credentials
-
-> Use these to log in after running migrations. **Change passwords immediately in any real deployment.**
-
-| Role | Username | Password | Portal Path |
-|------|----------|----------|-------------|
-| 🛡️ **Admin** | `admin` | `admin@123` | `/admin/Dashboard` |
-| 👨‍🏫 **Faculty** | `FAC001` | `faculty@123` | `/faculty/dashboard` |
-| 🎓 **Student** | `STU001` | `student@123` | `/student/dashboard` |
-
----
-
 ## 👨‍💻 Meet the Team
 
 This project was built as part of academic coursework at **Sardar Vallabhbhai Global University**.
@@ -290,14 +278,12 @@ This project was built as part of academic coursework at **Sardar Vallabhbhai Gl
 
 | 👤 | Name | Role |
 |:--:|------|------|
-| 🧑‍💻 | **Dhwanit Khatri** | Full Stack Developer |
-| 🧑‍💻 | **Aayush Bhavsar** | Full Stack Developer |
-| 🧑‍💻 | **Yug Panchal** | Full Stack Developer |
-| 🧑‍💻 | **Jiken Patel** | Full Stack Developer |
+| 🧑‍💻 | [**Aayush Bhavsar**](https://github.com/Aayush-95) | Frontend Developer |
+| 🧑‍💻 | [**Yug Panchal**](https://github.com/Yug-Panchal-0508) | Frontend Developer |
+| 🧑‍💻 | [**Dhwanit Khatri**](https://github.com/Dhwanitkhatri) | Backend Developer |
+| 🧑‍💻 | [**Jiken Patel**](https://github.com/Jiken-Patel) | Backend Developer |
 
 <br/>
-
-**🏫 Sardar Vallabhbhai Global University, Surat, Gujarat**
 
 </div>
 
