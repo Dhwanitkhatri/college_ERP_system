@@ -36,7 +36,7 @@
 - [Services Layer](#-services-layer)
 - [Installation & Setup](#-installation--setup)
 - [Environment Variables](#-environment-variables)
-- [Database Commands](#-database-commands)
+- [Database Setup](#-database-setup)
 - [Running the Server](#-running-the-server)
 - [API Modules Reference](#-api-modules-reference)
 - [Future Roadmap](#-future-roadmap)
@@ -99,6 +99,9 @@ backend/
 ├── package.json                  # Dependencies & scripts
 ├── .sequelizerc                  # Sequelize CLI path configuration
 ├── .env                          # 🔒 Environment variables (never commit this)
+│
+├── database/
+│   └── College_ERP_System.sql           # 🗃️ Full database dump — import directly into MySQL
 │
 ├── uploads/                      # 📂 Static file storage
 │   └── learning-materials/       # Faculty-uploaded study resources
@@ -494,25 +497,41 @@ npm install
 ### Step 3 — Configure Environment Variables
 
 ```bash
-# Copy the example env file and fill in your values
 cp .env.example .env
+# Fill in your DB credentials, JWT secret, and email settings
 ```
 
 > See the [Environment Variables](#-environment-variables) section below for all required fields.
 
-### Step 4 — Create the MySQL Database
+### Step 4 — Set Up the Database
+
+> 💡 You have **two options** — pick whichever suits you:
+
+**✅ Option A — Import SQL File (Recommended · Fastest)**
+
+No migration steps needed. One command sets up all 32 tables instantly.
 
 ```bash
+# 1. Create the database
 mysql -u root -p -e "CREATE DATABASE college_erp_db;"
+
+# 2. Import the SQL dump
+mysql -u root -p college_erp_db < database/college_erp.sql
 ```
 
-### Step 5 — Run Migrations
+**⚙️ Option B — Run Sequelize Migrations (For Developers)**
+
+Use this if you want version-controlled, incremental schema management.
 
 ```bash
+# 1. Create the database
+mysql -u root -p -e "CREATE DATABASE college_erp_db;"
+
+# 2. Run all migrations
 npx sequelize-cli db:migrate
 ```
 
-### Step 6 — Start the Server
+### Step 5 — Start the Server
 
 ```bash
 # Development (with auto-reload)
@@ -564,7 +583,26 @@ FRONTEND_URL=http://localhost:5173
 
 ---
 
-## 🗄 Database Commands
+## 🗄 Database Setup
+
+### ✅ Option A — SQL Import (Recommended)
+
+The `database/college_erp.sql` file is a **complete database dump** containing all 32 table schemas, constraints, indexes, and foreign keys. Importing it is the fastest way to get the database ready.
+
+```bash
+# Create the database
+mysql -u root -p -e "CREATE DATABASE college_erp_db;"
+
+# Import the full schema
+mysql -u root -p college_erp_db < database/college_erp.sql
+
+# Verify tables were created
+mysql -u root -p -e "USE college_erp_db; SHOW TABLES;"
+```
+
+---
+
+### ⚙️ Option B — Sequelize Migrations
 
 ```bash
 # Run all pending migrations
@@ -666,7 +704,7 @@ All API routes are prefixed with `/api`. Protected routes require a valid JWT in
 
 > 🔴 **Database First** — Always ensure your MySQL server is running before starting the backend. The app will crash on boot if the DB connection fails.
 
-> 🟡 **Migrations Always** — Never manually alter the database schema. Always use `sequelize-cli` migrations to keep the schema versioned and reproducible.
+> 🟡 **SQL File vs Migrations** — If you used Option A (SQL import), do **not** also run `db:migrate`. Pick one method only to avoid schema conflicts.
 
 > 🟠 **Secrets Stay Local** — Never push your `.env` file or any credentials to GitHub. Double-check your `.gitignore` before every commit.
 
